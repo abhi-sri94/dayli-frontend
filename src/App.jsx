@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { auth, googleProvider } from './firebase';
+import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
 // Mock Data (will be replaced by API calls)
 const CATEGORIES = [
@@ -91,11 +93,96 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth }) => (
 
 const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '' });
+  const [authMethod, setAuthMethod] = useState('email'); // 'email', 'phone'
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '', phone_number: '', otp: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verificationId, setVerificationId] = useState(null);
 
   if (!isOpen) return null;
+
+  const setupRecaptcha = () => {
+    if (window.recaptchaVerifier) return;
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-admin', {
+      'size': 'invisible',
+      'callback': (response) => {
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+      }
+    });
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      await firebaseBackendLogin({
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setupRecaptcha();
+    const appVerifier = window.recaptchaVerifier;
+    try {
+      const confirmationResult = await signInWithPhoneNumber(auth, formData.phone_number, appVerifier);
+      setVerificationId(confirmationResult);
+      alert('OTP sent to ' + formData.phone_number);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const result = await verificationId.confirm(formData.otp);
+      const user = result.user;
+      await firebaseBackendLogin({
+        uid: user.uid,
+        phone_number: user.phoneNumber,
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const firebaseBackendLogin = async (payload) => {
+    const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/auth/firebase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        onAuthSuccess(data.data.user, data.data.access_token);
+        onClose();
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Could not sync with backend.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -128,6 +215,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div id="recaptcha-admin"></div>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
@@ -136,46 +224,93 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
       >
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
         <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-          {isLogin ? 'Log in to your account to continue' : 'Join dayli for fresh delivery in minutes'}
+          {authMethod === 'email' ? (isLogin ? 'Log in to your account' : 'Join dayli today') : 'Quick login with Phone'}
         </p>
 
         {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {!isLogin && (
-            <input 
-              type="text" placeholder="Full Name" required 
-              value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-            />
-          )}
-          <input 
-            type="email" placeholder="Email Address" required 
-            value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-          />
-          <input 
-            type="password" placeholder="Password" required 
-            value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-          />
-          {!isLogin && (
-            <input 
-              type="password" placeholder="Confirm Password" required 
-              value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})}
-              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-            />
-          )}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <button 
+                onClick={() => setAuthMethod('email')}
+                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'email' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'email' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Mail size={16} /> Email
+            </button>
+            <button 
+                onClick={() => setAuthMethod('phone')}
+                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'phone' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'phone' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Phone size={16} /> Phone
+            </button>
+        </div>
 
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-            {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
-          </button>
-        </form>
+        {authMethod === 'email' ? (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {!isLogin && (
+                    <input 
+                    type="text" placeholder="Full Name" required 
+                    value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
+                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                    />
+                )}
+                <input 
+                    type="email" placeholder="Email Address" required 
+                    value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                />
+                <input 
+                    type="password" placeholder="Password" required 
+                    value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
+                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                />
+                {!isLogin && (
+                    <input 
+                    type="password" placeholder="Confirm Password" required 
+                    value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})}
+                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                    />
+                )}
+
+                <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
+                    {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
+                </button>
+            </form>
+        ) : (
+            <form onSubmit={verificationId ? handleOtpVerify : handlePhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {!verificationId ? (
+                    <input 
+                        type="tel" placeholder="+91 9876543210" required 
+                        value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})}
+                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                    />
+                ) : (
+                    <input 
+                        type="text" placeholder="6-digit OTP" required 
+                        value={formData.otp} onChange={e => setFormData({...formData, otp: e.target.value})}
+                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+                    />
+                )}
+                <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
+                    {loading ? 'Processing...' : (verificationId ? 'Verify OTP' : 'Send OTP')}
+                </button>
+            </form>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0' }}>
+            <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
+            <span style={{ fontSize: '0.8rem', color: '#999' }}>OR</span>
+            <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
+        </div>
+
+        <button 
+            onClick={handleGoogleLogin}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', background: 'white', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" width="20" alt="Google" />
+            Continue with Google
+        </button>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
-          <span onClick={() => setIsLogin(!isLogin)} style={{ color: 'hsl(var(--primary))', fontWeight: 700, cursor: 'pointer' }}>
-            {isLogin ? 'Sign Up' : 'Login'}
+          {authMethod === 'email' ? (isLogin ? "Don't have an account?" : "Already have an account?") : "Try another method?"}{' '}
+          <span onClick={() => { setIsLogin(!isLogin); setAuthMethod('email'); }} style={{ color: 'hsl(var(--primary))', fontWeight: 700, cursor: 'pointer' }}>
+            {authMethod === 'email' ? (isLogin ? 'Sign Up' : 'Login') : 'Cancel'}
           </span>
         </p>
       </motion.div>
