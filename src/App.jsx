@@ -19,7 +19,7 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart }) => (
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth }) => (
   <nav className="navbar" style={{
     position: 'sticky',
     top: 0,
@@ -64,7 +64,14 @@ const Navbar = ({ cartCount, onOpenCart }) => (
       </div>
 
       <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ fontWeight: 600, fontSize: '1rem' }}>Login</div>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Hi, {user.name.split(' ')[0]}</span>
+            <button onClick={onLogout} style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>Logout</button>
+          </div>
+        ) : (
+          <div onClick={onOpenAuth} style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Login</div>
+        )}
         <button
           onClick={onOpenCart}
           className="btn btn-primary"
@@ -81,6 +88,100 @@ const Navbar = ({ cartCount, onOpenCart }) => (
     </div>
   </nav>
 );
+
+const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const endpoint = isLogin ? '/api/login' : '/api/register';
+    const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+
+    try {
+      const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        onAuthSuccess(data.data.user, data.data.access_token);
+        onClose();
+      } else {
+        setError(data.message || (data.errors ? Object.values(data.errors)[0][0] : 'Authentication failed'));
+      }
+    } catch (err) {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        style={{ position: 'relative', width: '100%', maxWidth: '400px', background: 'white', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}
+      >
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+        <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+          {isLogin ? 'Log in to your account to continue' : 'Join dayli for fresh delivery in minutes'}
+        </p>
+
+        {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {!isLogin && (
+            <input 
+              type="text" placeholder="Full Name" required 
+              value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
+              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+            />
+          )}
+          <input 
+            type="email" placeholder="Email Address" required 
+            value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+          />
+          <input 
+            type="password" placeholder="Password" required 
+            value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+          />
+          {!isLogin && (
+            <input 
+              type="password" placeholder="Confirm Password" required 
+              value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})}
+              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+            />
+          )}
+
+          <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
+            {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
+          </button>
+        </form>
+
+        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+          <span onClick={() => setIsLogin(!isLogin)} style={{ color: 'hsl(var(--primary))', fontWeight: 700, cursor: 'pointer' }}>
+            {isLogin ? 'Sign Up' : 'Login'}
+          </span>
+        </p>
+      </motion.div>
+    </div>
+  );
+};
 
 const CategoryItem = ({ name, icon, color }) => (
   <div style={{
@@ -281,6 +382,26 @@ function App() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('dayli_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleAuthSuccess = (userData, accessToken) => {
+    setUser(userData);
+    setToken(accessToken);
+    localStorage.setItem('dayli_user', JSON.stringify(userData));
+    localStorage.setItem('dayli_token', accessToken);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('dayli_user');
+    localStorage.removeItem('dayli_token');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -333,9 +454,12 @@ function App() {
     setIsCheckingOut(true);
     try {
       const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`${apiBaseUrl}/api/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({
           items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
           delivery_address: address,
@@ -363,6 +487,15 @@ function App() {
       <Navbar
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         onOpenCart={() => setIsCartOpen(true)}
+        user={user}
+        onLogout={handleLogout}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+      />
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onAuthSuccess={handleAuthSuccess} 
       />
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
