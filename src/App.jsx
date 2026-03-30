@@ -154,7 +154,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
   );
 };
 
-const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, initialTab = 'profile' }) => {
+const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder, initialTab = 'profile' }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -348,15 +348,26 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, initialTab =
                             </div>
                         ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontWeight: 800, fontSize: '0.9rem' }}>
-                        <span>Total Paid</span>
-                        <span>₹{order.total_amount}</span>
-                    </div>
-                    {order.payment_method === 'razorpay' && (
-                        <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            ✓ Paid Online via Razorpay
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>
+                            <span style={{ color: '#666', fontWeight: 400, marginRight: '0.5rem' }}>Total Paid</span>
+                            ₹{order.payable_amount || order.total_amount}
                         </div>
-                    )}
+                        <button 
+                            onClick={() => onTrackOrder(order.order_number)}
+                            style={{ 
+                                background: 'hsl(var(--primary))', 
+                                color: 'white', 
+                                padding: '0.5rem 1rem', 
+                                borderRadius: '0.75rem', 
+                                fontSize: '0.8rem', 
+                                fontWeight: 700,
+                                boxShadow: '0 2px 5px hsl(var(--primary) / 0.2)'
+                            }}
+                        >
+                            Track Order
+                        </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -864,6 +875,156 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
   );
 };
 
+const OrderStatus = ({ orderNumber, onBack }) => {
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchOrder();
+    const interval = setInterval(fetchOrder, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, [orderNumber]);
+
+  const fetchOrder = async () => {
+    try {
+      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+      const response = await fetch(`${apiBaseUrl}/api/orders/track/${orderNumber}`);
+      const data = await response.json();
+      if (data.status === 'success') {
+        setOrder(data.data);
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError("Failed to fetch order status.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusStep = (status) => {
+    const steps = ['pending', 'processing', 'shipped', 'delivered'];
+    const idx = steps.indexOf(status.toLowerCase());
+    return idx === -1 ? 0 : idx;
+  };
+
+  if (loading) return (
+    <div style={{ padding: '4rem', textAlign: 'center' }}>
+      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} style={{ display: 'inline-block' }}>
+        <Package size={40} color="hsl(var(--primary))" />
+      </motion.div>
+      <p style={{ marginTop: '1rem', fontWeight: 600 }}>Locating your order...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{ padding: '4rem', textAlign: 'center' }}>
+      <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>😕</div>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Order Not Found</h2>
+      <p style={{ color: '#666', marginBottom: '2rem' }}>We couldn't find an order with number <strong>{orderNumber}</strong></p>
+      <button onClick={onBack} className="btn btn-primary">Go Back Home</button>
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, marginBottom: '2rem', color: '#666' }}>
+        <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} /> Back to Shopping
+      </button>
+
+      <div style={{ background: 'white', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 10px 40px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.25rem' }}>Track Order</h1>
+            <p style={{ fontSize: '0.9rem', color: '#888' }}>Order #{order.order_number}</p>
+          </div>
+          <div style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', padding: '0.5rem 1rem', borderRadius: '2rem', fontWeight: 700, fontSize: '0.85rem', textTransform: 'capitalize' }}>
+            {order.order_status}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div style={{ position: 'relative', paddingLeft: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          {/* Vertical Line */}
+          <div style={{ position: 'absolute', left: '0.625rem', top: '1rem', bottom: '1rem', width: '2px', background: '#f1f5f9' }} />
+          
+          {[
+            { id: 'pending', label: 'Order Placed', desc: 'We have received your order' },
+            { id: 'processing', label: 'Processing', desc: 'Your items are being packed' },
+            { id: 'shipped', label: 'Out for Delivery', desc: 'Our partner is on the way' },
+            { id: 'delivered', label: 'Delivered', desc: 'Enjoy your fresh daily essentials!' }
+          ].map((step, idx) => {
+            const isCompleted = getStatusStep(order.order_status) >= idx;
+            const isCurrent = getStatusStep(order.order_status) === idx;
+
+            return (
+              <div key={step.id} style={{ position: 'relative' }}>
+                <div style={{ 
+                  position: 'absolute', 
+                  left: '-2.5rem', 
+                  width: '1.25rem', 
+                  height: '1.25rem', 
+                  borderRadius: '50%', 
+                  background: isCompleted ? 'hsl(var(--primary))' : 'white',
+                  border: `3px solid ${isCompleted ? 'hsl(var(--primary))' : '#e2e8f0'}`,
+                  zIndex: 2,
+                  transition: 'all 0.3s'
+                }}>
+                  {isCompleted && (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                      <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </motion.div>
+                  )}
+                </div>
+                <div style={{ opacity: isCompleted ? 1 : 0.4 }}>
+                  <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem', color: isCurrent ? 'hsl(var(--primary))' : 'inherit' }}>{step.label}</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{step.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {order.delivery_person && (
+          <div style={{ marginTop: '3rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid #f1f5f9' }}>
+            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'white', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <User size={24} color="hsl(var(--primary))" />
+            </div>
+            <div>
+              <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1px' }}>Delivery Partner</p>
+              <p style={{ fontWeight: 800, fontSize: '1.1rem' }}>{order.delivery_person.name}</p>
+            </div>
+            {order.delivery_person.phone && (
+              <a href={`tel:${order.delivery_person.phone}`} style={{ marginLeft: 'auto', background: 'white', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', color: 'hsl(var(--primary))', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                <Phone size={18} />
+              </a>
+            )}
+          </div>
+        )}
+
+        <div style={{ marginTop: '3rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
+            <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '1.25rem' }}>Order Summary</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {order.items.map(item => (
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '0.9rem', color: '#4b5563' }}>
+                            <span style={{ fontWeight: 800, color: 'black' }}>{item.quantity}x</span> {item.product.name}
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>₹{item.total_price}</div>
+                    </div>
+                ))}
+            </div>
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Total Amount</span>
+                <span style={{ fontWeight: 900, fontSize: '1.3rem', color: 'hsl(var(--primary))' }}>₹{order.payable_amount}</span>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('dayli_cart');
@@ -878,16 +1039,18 @@ function App() {
     const saved = localStorage.getItem('dayli_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileModalTab, setProfileModalTab] = useState('profile');
+  const [profileTab, setProfileTab] = useState('profile');
+  const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(null);
+  const [trackingOrderNumber, setTrackingOrderNumber] = useState(null);
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -1026,10 +1189,11 @@ function App() {
 
       // Step 2: If COD, we're done
       if (paymentMethod === 'cod') {
-        alert('Order placed! Order #' + orderNumber);
+        setOrderSuccess({ id: orderId, order_number: orderNumber });
         setCartItems([]);
         localStorage.removeItem('dayli_cart');
         setIsCartOpen(false);
+        setIsCheckingOut(false);
         return;
       }
 
@@ -1043,6 +1207,7 @@ function App() {
 
       if (!rzpData.razorpay_order_id) {
         alert('Could not initiate payment. Please try again.');
+        setIsCheckingOut(false);
         return;
       }
 
@@ -1068,7 +1233,7 @@ function App() {
             });
             const verifyData = await verifyRes.json();
             if (verifyRes.ok) {
-              alert('✅ Payment successful! Your Order #' + orderNumber + ' is confirmed.');
+              setOrderSuccess({ id: orderId, order_number: orderNumber });
               setCartItems([]);
               localStorage.removeItem('dayli_cart');
               setIsCartOpen(false);
@@ -1077,6 +1242,8 @@ function App() {
             }
           } catch {
             alert('Error verifying payment. Please contact support with Order #' + orderNumber);
+          } finally {
+            setIsCheckingOut(false);
           }
         },
         prefill: {
@@ -1088,6 +1255,7 @@ function App() {
         modal: {
           ondismiss: () => {
             alert('Payment cancelled. Your order (#' + orderNumber + ') was saved. You can complete payment later.');
+            setIsCheckingOut(false);
           }
         }
       };
@@ -1136,11 +1304,49 @@ function App() {
             setUser(updatedUser);
             localStorage.setItem('dayli_user', JSON.stringify(updatedUser));
         }}
+        onTrackOrder={(orderNumber) => {
+            setTrackingOrderNumber(orderNumber);
+            setIsProfileModalOpen(false);
+        }}
         initialTab={profileModalTab}
       />
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-        {searchResults !== null ? (
+        {trackingOrderNumber ? (
+            <OrderStatus 
+                orderNumber={trackingOrderNumber} 
+                onBack={() => {
+                    setTrackingOrderNumber(null);
+                    window.history.pushState({}, '', window.location.pathname);
+                }} 
+            />
+        ) : orderSuccess ? (
+            <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', fontSize: '2.5rem' }}>
+                    ✓
+                </motion.div>
+                <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Order Placed!</h1>
+                <p style={{ color: '#666', marginBottom: '2rem', lineHeight: '1.6' }}>
+                    Your order <strong>#{orderSuccess.order_number}</strong> has been successfully placed and is being prepared.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <button 
+                        onClick={() => setTrackingOrderNumber(orderSuccess.order_number)} 
+                        className="btn btn-primary"
+                        style={{ width: '100%', padding: '1rem' }}
+                    >
+                        Track Real-Time Status
+                    </button>
+                    <button 
+                        onClick={() => setOrderSuccess(null)} 
+                        style={{ width: '100%', padding: '1rem', fontWeight: 700, color: '#666' }}
+                    >
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        ) : searchResults !== null ? (
+            /* Search Results ... Same as before */
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.5rem' }}>Search Results for "{searchQuery}"</h2>
