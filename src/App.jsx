@@ -1087,7 +1087,19 @@ function App() {
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
-  const [trackingOrderNumber, setTrackingOrderNumber] = useState(null);
+  const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('orderNumber');
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setTrackingOrderNumber(params.get('orderNumber'));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -1351,6 +1363,7 @@ function App() {
         onTrackOrder={(orderNumber) => {
             setTrackingOrderNumber(orderNumber);
             setIsProfileModalOpen(false);
+            window.history.pushState({}, '', `?orderNumber=${orderNumber}`);
         }}
         initialTab={profileModalTab}
       />
@@ -1375,7 +1388,10 @@ function App() {
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <button 
-                        onClick={() => setTrackingOrderNumber(orderSuccess.order_number)} 
+                        onClick={() => {
+                            setTrackingOrderNumber(orderSuccess.order_number);
+                            window.history.pushState({}, '', `?orderNumber=${orderSuccess.order_number}`);
+                        }} 
                         className="btn btn-primary"
                         style={{ width: '100%', padding: '1rem' }}
                     >
