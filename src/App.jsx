@@ -276,11 +276,18 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         ) : (
             <form onSubmit={verificationId ? handleOtpVerify : handlePhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {!verificationId ? (
-                    <input 
-                        type="tel" placeholder="+91 9876543210" required 
-                        value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})}
-                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                    />
+                    <div style={{ display: 'flex', borderRadius: '0.75rem', border: '1px solid #ddd', overflow: 'hidden' }}>
+                        <span style={{ background: '#f5f5f5', padding: '0.75rem 0.75rem', fontWeight: 700, fontSize: '0.9rem', borderRight: '1px solid #ddd', color: '#444' }}>🇮🇳 +91</span>
+                        <input 
+                            type="tel" placeholder="9876543210" required 
+                            value={formData.phone_number.replace(/^\+91/, '')}
+                            onChange={e => {
+                                const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                setFormData({...formData, phone_number: '+91' + digits});
+                            }}
+                            style={{ flex: 1, padding: '0.75rem', border: 'none', outline: 'none', fontSize: '1rem' }}
+                        />
+                    </div>
                 ) : (
                     <input 
                         type="text" placeholder="6-digit OTP" required 
