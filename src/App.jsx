@@ -21,7 +21,7 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile }) => {
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
@@ -63,6 +63,8 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
             <input
               type="text"
               placeholder='Search "milk"'
+              value={searchQuery}
+              onChange={(e) => onSearch(e.target.value)}
               style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' }}
             />
           </div>
@@ -816,6 +818,9 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileModalTab, setProfileModalTab] = useState('profile');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -830,6 +835,31 @@ function App() {
     localStorage.removeItem('dayli_user');
     localStorage.removeItem('dayli_token');
   };
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults(null);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+        const response = await fetch(`${apiBaseUrl}/api/products?search=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        if (data.status === 'success') {
+          setSearchResults(data.data.data);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timer = setTimeout(fetchSearchResults, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -998,6 +1028,8 @@ function App() {
             setProfileModalTab(tab);
             setIsProfileModalOpen(true);
         }}
+        searchQuery={searchQuery}
+        onSearch={setSearchQuery}
       />
 
       <AuthModal 
@@ -1019,61 +1051,110 @@ function App() {
       />
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-        {/* Categories Section */}
-        <section style={{ marginBottom: '3rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem' }}>Shop by Category</h2>
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-            gap: '2rem 1rem'
-          }}>
-            {loading ? (
-              [1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} style={{ width: '80px', height: '100px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-              ))
-            ) : categories.map(cat => (
-              <CategoryItem key={cat.id} name={cat.name} icon={cat.icon || '📦'} color={cat.color || '#f0f0f0'} />
-            ))}
-          </div>
-        </section>
+        {searchResults !== null ? (
+          <section>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem' }}>Search Results for "{searchQuery}"</h2>
+              <button 
+                onClick={() => setSearchQuery('')}
+                style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Clear Search
+              </button>
+            </div>
+            {isSearching ? (
+                <div style={{ textAlign: 'center', padding: '4rem' }}>Searching...</div>
+            ) : searchResults.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+                    <Search size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                    <p>No products found for "{searchQuery}"</p>
+                </div>
+            ) : (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                    gap: '1.5rem'
+                }}>
+                    {searchResults.map(product => (
+                        <ProductCard
+                            key={product.id}
+                            product={{
+                                ...product,
+                                price: product.selling_price,
+                                image: (() => {
+                                    if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                                    const path = product.primary_image.image_path;
+                                    const isExternal = /^https?:\/\//.test(path);
+                                    return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                                })()
+                            }}
+                            quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                            onAdd={addToCart}
+                            onUpdate={updateQuantity}
+                        />
+                    ))}
+                </div>
+            )}
+          </section>
+        ) : (
+          <>
+            {/* Categories Section */}
+            <section style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.5rem' }}>Shop by Category</h2>
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+                gap: '2rem 1rem'
+              }}>
+                {loading ? (
+                  [1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} style={{ width: '80px', height: '100px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                  ))
+                ) : categories.map(cat => (
+                  <CategoryItem key={cat.id} name={cat.name} icon={cat.icon || '📦'} color={cat.color || '#f0f0f0'} />
+                ))}
+              </div>
+            </section>
 
-        {/* Featured Products Section */}
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem' }}>Daily Essentials</h2>
-            <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-            gap: '1.5rem'
-          }}>
-            {loading ? (
-              [1, 2, 3, 4].map(i => (
-                <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-              ))
-            ) : products.map(product => (
-              <ProductCard
-                key={product.id}
-                product={{
-                  ...product,
-                  price: product.selling_price,
-                  image: (() => {
-                    if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                    const path = product.primary_image.image_path;
-                    const isExternal = /^https?:\/\//.test(path);
-                    return isExternal ? path : `/storage/${path}`;
-                  })()
-                }}
-                quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                onAdd={addToCart}
-                onUpdate={updateQuantity}
-              />
-            ))}
-          </div>
-        </section>
+            {/* Featured Products Section */}
+            <section>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.5rem' }}>Daily Essentials</h2>
+                <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                gap: '1.5rem'
+              }}>
+                {loading ? (
+                  [1, 2, 3, 4].map(i => (
+                    <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                  ))
+                ) : products.map(product => (
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      ...product,
+                      price: product.selling_price,
+                      image: (() => {
+                        if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                        const path = product.primary_image.image_path;
+                        const isExternal = /^https?:\/\//.test(path);
+                        return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                      })()
+                    }}
+                    quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                    onAdd={addToCart}
+                    onUpdate={updateQuantity}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </main>
 
       <CartDrawer
