@@ -1041,7 +1041,7 @@ function App() {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState('profile');
+  const [profileModalTab, setProfileModalTab] = useState('profile');
   const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
