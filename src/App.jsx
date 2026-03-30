@@ -602,32 +602,46 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   );
 };
 
-const CategoryItem = ({ name, icon, color }) => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '0.5rem',
-    cursor: 'pointer'
-  }}>
-    <div style={{
-      width: '80px',
-      height: '80px',
-      background: color,
-      borderRadius: '1.25rem',
+const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
+  const isEmoji = !icon || icon.length <= 2;
+  const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
+
+  return (
+    <div 
+      onClick={() => onClick(id)}
+      style={{
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '2rem',
-      transition: 'transform 0.2s'
-    }} className="category-icon">
-      {icon}
+      gap: '0.5rem',
+      cursor: 'pointer'
+    }}>
+      <div style={{
+        width: '80px',
+        height: '80px',
+        background: color,
+        borderRadius: '1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '2rem',
+        transition: 'transform 0.2s',
+        border: isActive ? '3px solid hsl(var(--primary))' : 'none',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
+      }} className="category-icon">
+        {isEmoji ? (
+            <span>{icon || '📦'}</span>
+        ) : (
+            <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        )}
+      </div>
+      <div style={{ fontSize: '0.75rem', fontWeight: isActive ? 800 : 600, textAlign: 'center', maxWidth: '80px', color: isActive ? 'hsl(var(--primary))' : 'inherit' }}>
+        {name}
+      </div>
     </div>
-    <div style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', maxWidth: '80px' }}>
-      {name}
-    </div>
-  </div>
-);
+  );
+};
 
 const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
   <motion.div
@@ -821,6 +835,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -1101,39 +1116,67 @@ function App() {
             {/* Categories Section */}
             <section style={{ marginBottom: '3rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem' }}>Shop by Category</h2>
-              </div>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-                gap: '2rem 1rem'
-              }}>
-                {loading ? (
-                  [1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} style={{ width: '80px', height: '100px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                  ))
-                ) : categories.map(cat => (
-                  <CategoryItem key={cat.id} name={cat.name} icon={cat.icon || '📦'} color={cat.color || '#f0f0f0'} />
-                ))}
-              </div>
-            </section>
+              <h2 style={{ fontSize: '1.5rem' }}>Shop by Category</h2>
+              {selectedCategoryId && (
+                <button 
+                  onClick={() => setSelectedCategoryId(null)}
+                  style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  Show All
+                </button>
+              )}
+            </div>
+            <div style={{
+              display: 'flex',
+              gap: '1.5rem',
+              overflowX: 'auto',
+              paddingBottom: '1rem',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}>
+              {loading ? (
+                [1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} style={{ minWidth: '80px', height: '100px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                ))
+              ) : categories.map(cat => (
+                <CategoryItem 
+                  key={cat.id} 
+                  id={cat.id}
+                  name={cat.name} 
+                  icon={cat.icon || '📦'} 
+                  color={cat.color || '#f0f0f0'} 
+                  isActive={selectedCategoryId === cat.id}
+                  onClick={(id) => {
+                    setSelectedCategoryId(prev => prev === id ? null : id);
+                    setSearchQuery('');
+                  }}
+                />
+              ))}
+            </div>
+          </section>
 
-            {/* Featured Products Section */}
-            <section>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem' }}>Daily Essentials</h2>
-                <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>
-              </div>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                gap: '1.5rem'
-              }}>
-                {loading ? (
-                  [1, 2, 3, 4].map(i => (
-                    <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                  ))
-                ) : products.map(product => (
+          {/* Featured Products Section */}
+          <section>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem' }}>
+                {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name : 'Daily Essentials'}
+              </h2>
+              {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              {loading ? (
+                [1, 2, 3, 4].map(i => (
+                  <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                ))
+              ) : (
+                (selectedCategoryId 
+                  ? products.filter(p => p.category_id === selectedCategoryId)
+                  : products
+                ).map(product => (
                   <ProductCard
                     key={product.id}
                     product={{
@@ -1150,9 +1193,10 @@ function App() {
                     onAdd={addToCart}
                     onUpdate={updateQuantity}
                   />
-                ))}
-              </div>
-            </section>
+                ))
+              )}
+            </div>
+          </section>
           </>
         )}
       </main>
