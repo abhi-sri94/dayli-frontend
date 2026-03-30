@@ -490,14 +490,23 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                   <span>Grand Total</span>
                   <span>₹{cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0)}</span>
                 </div>
-                <button
-                  disabled={isCheckingOut}
-                  onClick={() => onCheckout(address)}
-                  className="btn btn-primary"
-                  style={{ width: '100%', padding: '1rem', opacity: isCheckingOut ? 0.7 : 1 }}
-                >
-                  {isCheckingOut ? 'Placing Order...' : 'Proceed to Checkout'}
-                </button>
+                <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+                  <button
+                    disabled={isCheckingOut}
+                    onClick={() => onCheckout(address, 'razorpay')}
+                    className="btn btn-primary"
+                    style={{ width: '100%', padding: '1rem', opacity: isCheckingOut ? 0.7 : 1 }}
+                  >
+                    {isCheckingOut ? 'Processing...' : '💳 Pay Online (UPI / Card)'}
+                  </button>
+                  <button
+                    disabled={isCheckingOut}
+                    onClick={() => onCheckout(address, 'cod')}
+                    style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '0.75rem', fontWeight: 600, fontSize: '0.9rem', background: 'white' }}
+                  >
+                    🏠 Cash on Delivery
+                  </button>
+                </div>
               </div>
             )}
           </motion.div>
@@ -585,31 +594,107 @@ function App() {
     }).filter(Boolean));
   };
 
-  const handleCheckout = async (address) => {
+  const handleCheckout = async (address, paymentMethod = 'razorpay') => {
     setIsCheckingOut(true);
     try {
       const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      // Step 1: Create order in DB
       const response = await fetch(`${apiBaseUrl}/api/orders`, {
         method: 'POST',
-        headers: headers,
+        headers,
         body: JSON.stringify({
           items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
           delivery_address: address,
-          payment_method: 'cod'
+          payment_method: paymentMethod
         })
       });
       const data = await response.json();
-      if (data.status === 'success') {
-        alert('Order placed successfully! Order #' + data.data.order_number);
+
+      if (data.status !== 'success') {
+        alert('Failed to create order: ' + data.message);
+        return;
+      }
+
+      const orderId = data.data.id;
+      const orderNumber = data.data.order_number;
+
+      // Step 2: If COD, we're done
+      if (paymentMethod === 'cod') {
+        alert('Order placed! Order #' + orderNumber);
         setCartItems([]);
         localStorage.removeItem('dayli_cart');
         setIsCartOpen(false);
-      } else {
-        alert('Failed to place order: ' + data.message);
+        return;
       }
+
+      // Step 3: Create Razorpay order
+      const rzpRes = await fetch(`${apiBaseUrl}/api/payment/razorpay/create`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ order_id: orderId })
+      });
+      const rzpData = await rzpRes.json();
+
+      if (!rzpData.razorpay_order_id) {
+        alert('Could not initiate payment. Please try again.');
+        return;
+      }
+
+      // Step 4: Open Razorpay Checkout popup
+      const options = {
+        key: rzpData.key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: 'Dayli',
+        description: 'Order #' + rzpData.order_number,
+        order_id: rzpData.razorpay_order_id,
+        handler: async (paymentResponse) => {
+          // Step 5: Verify payment on backend
+          try {
+            const verifyRes = await fetch(`${apiBaseUrl}/api/payment/razorpay/verify`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok) {
+              alert('✅ Payment successful! Your Order #' + orderNumber + ' is confirmed.');
+              setCartItems([]);
+              localStorage.removeItem('dayli_cart');
+              setIsCartOpen(false);
+            } else {
+              alert('Payment verification failed: ' + verifyData.message);
+            }
+          } catch {
+            alert('Error verifying payment. Please contact support with Order #' + orderNumber);
+          }
+        },
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || '',
+          contact: user?.phone_number || '',
+        },
+        theme: { color: '#7c3aed' },
+        modal: {
+          ondismiss: () => {
+            alert('Payment cancelled. Your order (#' + orderNumber + ') was saved. You can complete payment later.');
+          }
+        }
+      };
+
+      if (!window.Razorpay) {
+        alert('Razorpay is not loaded. Please check your internet connection.');
+        return;
+      }
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
       alert('Error placing order. Please try again.');
     } finally {
