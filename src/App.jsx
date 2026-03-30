@@ -648,7 +648,7 @@ function App() {
         key: rzpData.key_id,
         amount: rzpData.amount,
         currency: rzpData.currency,
-        name: 'Dayli',
+        name: 'Dayli Delivery',
         description: 'Order #' + rzpData.order_number,
         order_id: rzpData.razorpay_order_id,
         handler: async (paymentResponse) => {
