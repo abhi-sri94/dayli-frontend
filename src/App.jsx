@@ -886,6 +886,8 @@ function App() {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -948,6 +950,28 @@ function App() {
     };
     fetchData();
   }, []);
+
+  // Fetch products for selected category from server
+  useEffect(() => {
+    if (!selectedCategoryId) {
+      setCategoryProducts([]);
+      return;
+    }
+    const fetchCategoryProducts = async () => {
+      setIsCategoryLoading(true);
+      try {
+        const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${selectedCategoryId}&limit=50`);
+        const data = await res.json();
+        if (data.status === 'success') setCategoryProducts(data.data.data);
+      } catch (err) {
+        console.error('Category fetch failed:', err);
+      } finally {
+        setIsCategoryLoading(false);
+      }
+    };
+    fetchCategoryProducts();
+  }, [selectedCategoryId]);
 
   useEffect(() => {
     localStorage.setItem('dayli_cart', JSON.stringify(cartItems));
@@ -1205,15 +1229,21 @@ function App() {
               gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
               gap: '1.5rem'
             }}>
-              {loading ? (
+              {loading || isCategoryLoading ? (
                 [1, 2, 3, 4].map(i => (
                   <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
                 ))
-              ) : (
-                (selectedCategoryId 
-                  ? products.filter(p => p.category_id === selectedCategoryId)
-                  : products
-                ).map(product => (
+              ) : (() => {
+                const displayProducts = selectedCategoryId ? categoryProducts : products;
+                if (selectedCategoryId && displayProducts.length === 0) {
+                  return (
+                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+                      <p>No products in this category yet. Check back soon!</p>
+                    </div>
+                  );
+                }
+                return displayProducts.map(product => (
                   <ProductCard
                     key={product.id}
                     product={{
@@ -1231,7 +1261,7 @@ function App() {
                     onUpdate={updateQuantity}
                   />
                 ))
-              )}
+              })()}
             </div>
           </section>
           </>
