@@ -843,12 +843,34 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
               )}
             </div>
 
-            {cartItems.length > 0 && (
-              <div style={{ padding: '1.5rem', borderTop: '1px solid #eee', background: 'white' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontWeight: 600 }}>
-                  <span>Grand Total</span>
-                  <span>₹{cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0)}</span>
-                </div>
+            {cartItems.length > 0 && (() => {
+              const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+              const deliveryFee = subtotal < 100 ? 20 : 0;
+              const total = subtotal + deliveryFee;
+
+              return (
+                <div style={{ padding: '1.5rem', borderTop: '1px solid #eee', background: 'white' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+                      <span>Subtotal</span>
+                      <span>₹{subtotal}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+                      <span>Delivery Fee</span>
+                      <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
+                    </div>
+                    
+                    {deliveryFee > 0 && (
+                        <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '0.5rem' }}>
+                            💡 Add ₹{100 - subtotal} more for FREE delivery!
+                        </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee', fontWeight: 800, fontSize: '1.1rem' }}>
+                      <span>Grand Total</span>
+                      <span>₹{total}</span>
+                    </div>
+                  </div>
                 <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
                   <button
                     disabled={isCheckingOut}
@@ -865,9 +887,10 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                   >
                     🏠 Cash on Delivery
                   </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </motion.div>
         </>
       )}
@@ -1015,9 +1038,19 @@ const OrderStatus = ({ orderNumber, onBack }) => {
                     </div>
                 ))}
             </div>
-            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Total Amount</span>
-                <span style={{ fontWeight: 900, fontSize: '1.3rem', color: 'hsl(var(--primary))' }}>₹{order.payable_amount}</span>
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+                    <span>Subtotal</span>
+                    <span>₹{order.total_amount}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+                    <span>Delivery Fee</span>
+                    <span>{order.delivery_charge === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${order.delivery_charge}`}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Total Amount</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.3rem', color: 'hsl(var(--primary))' }}>₹{order.payable_amount}</span>
+                </div>
             </div>
         </div>
       </div>
