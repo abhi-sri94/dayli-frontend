@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
@@ -21,75 +21,350 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth }) => (
-  <nav className="navbar" style={{
-    position: 'sticky',
-    top: 0,
-    zIndex: 50,
-    background: 'white',
-    padding: '0.75rem 0',
-    borderBottom: '1px solid hsl(var(--border))',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
-  }}>
-    <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-      <div className="logo" style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px' }}>
-        dayli
-      </div>
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-      <div className="location" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          Delivery in 20-30 mins
-          <ChevronDown size={14} />
+  return (
+    <nav className="navbar" style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+      background: 'white',
+      padding: '0.75rem 0',
+      borderBottom: '1px solid hsl(var(--border))',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+    }}>
+      <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className="logo" style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px' }}>
+          dayli
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          <MapPin size={12} />
-          Bahraich, Uttar Pradesh
-        </div>
-      </div>
 
-      <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
-        <div style={{
-          background: 'hsl(var(--muted))',
-          borderRadius: 'var(--radius)',
-          padding: '0.75rem 1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <Search size={20} color="hsl(var(--muted-foreground))" />
-          <input
-            type="text"
-            placeholder='Search "milk"'
-            style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' }}
-          />
-        </div>
-      </div>
-
-      <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Hi, {user.name.split(' ')[0]}</span>
-            <button onClick={onLogout} style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>Logout</button>
+        <div className="location" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            Delivery in 20-30 mins
+            <ChevronDown size={14} />
           </div>
-        ) : (
-          <div onClick={onOpenAuth} style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Login</div>
-        )}
-        <button
-          onClick={onOpenCart}
-          className="btn btn-primary"
-          style={{ gap: '0.75rem', padding: '0.75rem 1.25rem' }}
-        >
-          <ShoppingCart size={20} />
-          {cartCount > 0 ? (
-            <span>{cartCount} Items</span>
+          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <MapPin size={12} />
+            Bahraich, Uttar Pradesh
+          </div>
+        </div>
+
+        <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
+          <div style={{
+            background: 'hsl(var(--muted))',
+            borderRadius: 'var(--radius)',
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
+          }}>
+            <Search size={20} color="hsl(var(--muted-foreground))" />
+            <input
+              type="text"
+              placeholder='Search "milk"'
+              style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' }}
+            />
+          </div>
+        </div>
+
+        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          {user ? (
+            <div style={{ position: 'relative' }}>
+              <div 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Hi, {user.name.split(' ')[0]}
+                <ChevronDown size={16} />
+              </div>
+
+              <AnimatePresence>
+                {isDropdownOpen && (
+                  <>
+                    <div 
+                      onClick={() => setIsDropdownOpen(false)}
+                      style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        marginTop: '1rem',
+                        background: 'white',
+                        borderRadius: 'var(--radius)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                        border: '1px solid #eee',
+                        minWidth: '200px',
+                        zIndex: 11,
+                        padding: '0.5rem'
+                      }}
+                    >
+                      <button 
+                        onClick={() => { onOpenProfile('profile'); setIsDropdownOpen(false); }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
+                        className="hover:bg-slate-50"
+                      >
+                        <User size={18} /> My Profile
+                      </button>
+                      <button 
+                        onClick={() => { onOpenProfile('orders'); setIsDropdownOpen(false); }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
+                        className="hover:bg-slate-50"
+                      >
+                        <Package size={18} /> My Orders
+                      </button>
+                      <div style={{ height: '1px', background: '#eee', margin: '0.5rem' }} />
+                      <button 
+                        onClick={() => { onLogout(); setIsDropdownOpen(false); }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', color: '#ef4444', transition: 'background 0.2s' }}
+                        className="hover:bg-red-50"
+                      >
+                        <LogOut size={18} /> Logout
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
-            <span>My Cart</span>
+            <div onClick={onOpenAuth} style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Login</div>
           )}
-        </button>
+          <button
+            onClick={onOpenCart}
+            className="btn btn-primary"
+            style={{ gap: '0.75rem', padding: '0.75rem 1.25rem' }}
+          >
+            <ShoppingCart size={20} />
+            {cartCount > 0 ? (
+              <span>{cartCount} Items</span>
+            ) : (
+              <span>My Cart</span>
+            )}
+          </button>
+        </div>
       </div>
+    </nav>
+  );
+};
+
+const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, initialTab = 'profile' }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingName, setEditingName] = useState(user?.name || '');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [isOpen, activeTab]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+      const response = await fetch(`${apiBaseUrl}/api/orders/my`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setOrders(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    try {
+      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+      const response = await fetch(`${apiBaseUrl}/api/user`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: editingName })
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        onUpdateUser(data.data.user);
+        alert('Profile updated!');
+      }
+    } catch (err) {
+      alert('Failed to update profile.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose} 
+        style={{ position: 'absolute', inset: 0, background: 'black' }} 
+      />
+      <motion.div 
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        style={{ 
+          position: 'relative', 
+          width: '100%', 
+          maxWidth: '450px', 
+          height: '100%', 
+          background: 'white', 
+          boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Account</h2>
+          <button onClick={onClose} style={{ fontSize: '1.5rem' }}>✕</button>
+        </div>
+
+        <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+          <button 
+            onClick={() => setActiveTab('profile')}
+            style={{ flex: 1, padding: '1rem', fontWeight: 700, fontSize: '0.9rem', color: activeTab === 'profile' ? 'hsl(var(--primary))' : '#888', borderBottom: activeTab === 'profile' ? '2px solid hsl(var(--primary))' : 'none' }}
+          >
+            Profile
+          </button>
+          <button 
+            onClick={() => setActiveTab('orders')}
+            style={{ flex: 1, padding: '1rem', fontWeight: 700, fontSize: '0.9rem', color: activeTab === 'orders' ? 'hsl(var(--primary))' : '#888', borderBottom: activeTab === 'orders' ? '2px solid hsl(var(--primary))' : 'none' }}
+          >
+            My Orders
+          </button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+          {activeTab === 'profile' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'hsl(var(--primary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
+                        {user?.name?.[0]}
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{user?.name}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#666' }}>{user?.email || user?.phone_number}</div>
+                    </div>
+                </div>
+
+                <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', display: 'block', marginBottom: '0.5rem' }}>Full Name</label>
+                        <input 
+                            type="text" 
+                            value={editingName} 
+                            onChange={e => setEditingName(e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', outline: 'none' }}
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        disabled={isUpdating}
+                        className="btn btn-primary" 
+                        style={{ width: 'fit-content', padding: '0.75rem 2rem' }}
+                    >
+                        {isUpdating ? 'Saving...' : 'Update Name'}
+                    </button>
+                </form>
+
+                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', marginBottom: '1rem' }}>Account Details</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {user?.email && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Mail size={18} color="#888" />
+                                <span style={{ fontSize: '0.9rem' }}>{user.email}</span>
+                            </div>
+                        )}
+                        {user?.phone_number && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Phone size={18} color="#888" />
+                                <span style={{ fontSize: '0.9rem' }}>{user.phone_number}</span>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <User size={18} color="#888" />
+                            <span style={{ fontSize: '0.9rem' }}>ID: {user?.firebase_uid || user?.id}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>Loading orders...</div>
+              ) : orders.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#999' }}>
+                    <Package size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                    <p>No orders yet</p>
+                </div>
+              ) : (
+                orders.map(order => (
+                  <div key={order.id} style={{ border: '1px solid #eee', borderRadius: '1rem', padding: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div>
+                            <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Order #{order.order_number}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#888' }}>{new Date(order.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div style={{ 
+                            padding: '0.25rem 0.75rem', 
+                            borderRadius: '2rem', 
+                            fontSize: '0.7rem', 
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            background: order.status === 'delivered' ? '#dcfce7' : order.status === 'pending' ? '#fef9c3' : '#f3f4f6',
+                            color: order.status === 'delivered' ? '#166534' : order.status === 'pending' ? '#854d0e' : '#374151'
+                        }}>
+                            {order.status}
+                        </div>
+                    </div>
+                    <div style={{ borderTop: '1px dashed #eee', margin: '0.75rem 0', paddingTop: '0.75rem' }}>
+                        {order.items?.map((item, idx) => (
+                            <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                <span>{item.quantity} x {item.product?.name || 'Item'}</span>
+                                <span style={{ color: '#666' }}>₹{item.price * item.quantity}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontWeight: 800, fontSize: '0.9rem' }}>
+                        <span>Total Paid</span>
+                        <span>₹{order.total_amount}</span>
+                    </div>
+                    {order.payment_method === 'razorpay' && (
+                        <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            ✓ Paid Online via Razorpay
+                        </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
-  </nav>
-);
+  );
+};
 
 const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -199,7 +474,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         body: JSON.stringify(formData)
       });
       const data = await response.json();
-      
+
       if (data.status === 'success') {
         onAuthSuccess(data.data.user, data.data.access_token);
         onClose();
@@ -217,7 +492,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div id="recaptcha-admin"></div>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         style={{ position: 'relative', width: '100%', maxWidth: '400px', background: 'white', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}
@@ -230,88 +505,88 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <button 
-                onClick={() => setAuthMethod('email')}
-                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'email' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'email' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Mail size={16} /> Email
-            </button>
-            <button 
-                onClick={() => setAuthMethod('phone')}
-                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'phone' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'phone' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Phone size={16} /> Phone
-            </button>
+          <button
+            onClick={() => setAuthMethod('email')}
+            style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'email' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'email' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <Mail size={16} /> Email
+          </button>
+          <button
+            onClick={() => setAuthMethod('phone')}
+            style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600, background: authMethod === 'phone' ? 'hsl(var(--primary))' : '#f0f0f0', color: authMethod === 'phone' ? 'white' : 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <Phone size={16} /> Phone
+          </button>
         </div>
 
         {authMethod === 'email' ? (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {!isLogin && (
-                    <input 
-                    type="text" placeholder="Full Name" required 
-                    value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                    />
-                )}
-                <input 
-                    type="email" placeholder="Email Address" required 
-                    value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                />
-                <input 
-                    type="password" placeholder="Password" required 
-                    value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                />
-                {!isLogin && (
-                    <input 
-                    type="password" placeholder="Confirm Password" required 
-                    value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                    />
-                )}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {!isLogin && (
+              <input
+                type="text" placeholder="Full Name" required
+                value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
+                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+              />
+            )}
+            <input
+              type="email" placeholder="Email Address" required
+              value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })}
+              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+            />
+            <input
+              type="password" placeholder="Password" required
+              value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })}
+              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+            />
+            {!isLogin && (
+              <input
+                type="password" placeholder="Confirm Password" required
+                value={formData.password_confirmation} onChange={e => setFormData({ ...formData, password_confirmation: e.target.value })}
+                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+              />
+            )}
 
-                <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                    {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
-                </button>
-            </form>
+            <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
+              {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
+            </button>
+          </form>
         ) : (
-            <form onSubmit={verificationId ? handleOtpVerify : handlePhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {!verificationId ? (
-                    <div style={{ display: 'flex', borderRadius: '0.75rem', border: '1px solid #ddd', overflow: 'hidden' }}>
-                        <span style={{ background: '#f5f5f5', padding: '0.75rem 0.75rem', fontWeight: 700, fontSize: '0.9rem', borderRight: '1px solid #ddd', color: '#444' }}>🇮🇳 +91</span>
-                        <input 
-                            type="tel" placeholder="9876543210" required 
-                            value={formData.phone_number.replace(/^\+91/, '')}
-                            onChange={e => {
-                                const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                setFormData({...formData, phone_number: '+91' + digits});
-                            }}
-                            style={{ flex: 1, padding: '0.75rem', border: 'none', outline: 'none', fontSize: '1rem' }}
-                        />
-                    </div>
-                ) : (
-                    <input 
-                        type="text" placeholder="6-digit OTP" required 
-                        value={formData.otp} onChange={e => setFormData({...formData, otp: e.target.value})}
-                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
-                    />
-                )}
-                <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                    {loading ? 'Processing...' : (verificationId ? 'Verify OTP' : 'Send OTP')}
-                </button>
-            </form>
+          <form onSubmit={verificationId ? handleOtpVerify : handlePhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {!verificationId ? (
+              <div style={{ display: 'flex', borderRadius: '0.75rem', border: '1px solid #ddd', overflow: 'hidden' }}>
+                <span style={{ background: '#f5f5f5', padding: '0.75rem 0.75rem', fontWeight: 700, fontSize: '0.9rem', borderRight: '1px solid #ddd', color: '#444' }}>🇮🇳 +91</span>
+                <input
+                  type="tel" placeholder="XXXXXXXXXX" required
+                  value={formData.phone_number.replace(/^\+91/, '')}
+                  onChange={e => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setFormData({ ...formData, phone_number: '+91' + digits });
+                  }}
+                  style={{ flex: 1, padding: '0.75rem', border: 'none', outline: 'none', fontSize: '1rem' }}
+                />
+              </div>
+            ) : (
+              <input
+                type="text" placeholder="6-digit OTP" required
+                value={formData.otp} onChange={e => setFormData({ ...formData, otp: e.target.value })}
+                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #ddd' }}
+              />
+            )}
+            <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
+              {loading ? 'Processing...' : (verificationId ? 'Verify OTP' : 'Send OTP')}
+            </button>
+          </form>
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0' }}>
-            <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
-            <span style={{ fontSize: '0.8rem', color: '#999' }}>OR</span>
-            <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
+          <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
+          <span style={{ fontSize: '0.8rem', color: '#999' }}>OR</span>
+          <div style={{ flex: 1, height: '1px', background: '#eee' }}></div>
         </div>
 
-        <button 
-            onClick={handleGoogleLogin}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', background: 'white', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" width="20" alt="Google" />
-            Continue with Google
+        <button
+          onClick={handleGoogleLogin}
+          style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', background: 'white', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" width="20" alt="Google" />
+          Continue with Google
         </button>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>
@@ -377,26 +652,26 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
       <div style={{ fontWeight: 700 }}>₹{product.price}</div>
       {quantity > 0 ? (
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           background: 'hsl(var(--primary))',
           color: 'white',
           borderRadius: '0.5rem',
           overflow: 'hidden'
         }}>
-          <button 
+          <button
             onClick={() => onUpdate(product.id, -1)}
             style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
           >-</button>
           <span style={{ minWidth: '1.5rem', textAlign: 'center', fontWeight: 700, fontSize: '0.85rem' }}>{quantity}</span>
-          <button 
+          <button
             onClick={() => onUpdate(product.id, 1)}
             style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
           >+</button>
         </div>
       ) : (
-        <button 
+        <button
           onClick={() => onAdd(product)}
           style={{
             color: 'hsl(var(--primary))',
@@ -539,6 +814,8 @@ function App() {
   });
   const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileModalTab, setProfileModalTab] = useState('profile');
 
   const handleAuthSuccess = (userData, accessToken) => {
     setUser(userData);
@@ -717,12 +994,28 @@ function App() {
         user={user}
         onLogout={handleLogout}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenProfile={(tab) => {
+            setProfileModalTab(tab);
+            setIsProfileModalOpen(true);
+        }}
       />
 
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
         onAuthSuccess={handleAuthSuccess} 
+      />
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        user={user}
+        token={token}
+        onUpdateUser={(updatedUser) => {
+            setUser(updatedUser);
+            localStorage.setItem('dayli_user', JSON.stringify(updatedUser));
+        }}
+        initialTab={profileModalTab}
       />
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
