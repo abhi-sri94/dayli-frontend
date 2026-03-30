@@ -21,7 +21,7 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch }) => {
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
@@ -35,7 +35,11 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
       <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <div className="logo" style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px' }}>
+        <div 
+            onClick={onHome}
+            className="logo" 
+            style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px', cursor: 'pointer' }}
+        >
           dayli
         </div>
 
@@ -1320,6 +1324,13 @@ function App() {
         }}
         searchQuery={searchQuery}
         onSearch={setSearchQuery}
+        onHome={() => {
+            setTrackingOrderNumber(null);
+            setOrderSuccess(null);
+            setSearchQuery('');
+            setSelectedCategoryId(null);
+            window.history.pushState({}, '', window.location.pathname);
+        }}
       />
 
       <AuthModal 
