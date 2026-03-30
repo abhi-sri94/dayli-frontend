@@ -1164,8 +1164,8 @@ function App() {
         ) : (
           <>
             {/* Fast Categories Section */}
-            <section style={{ marginBottom: '4rem', overflowX: 'hidden' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Fast Categories</h2>
+            <section style={{ marginBottom: '3rem', overflowX: 'hidden' }}>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Shop by Category</h2>
                 <div style={{
                     display: 'flex',
                     gap: '1.5rem',
@@ -1176,10 +1176,10 @@ function App() {
                     msOverflowStyle: 'none'
                 }}>
                     {loading ? (
-                        [1, 2, 3, 4].map(i => (
+                        [1, 2, 3, 4, 5, 6].map(i => (
                             <div key={i} style={{ minWidth: '90px', height: '90px', borderRadius: '50%', background: '#f5f5f5' }}></div>
                         ))
-                    ) : categories.filter(c => ['grocery', 'pharmacy', 'bakery', 'meat'].includes((c.name || '').toLowerCase())).map(cat => (
+                    ) : categories.map(cat => (
                         <FastCategoryItem 
                             key={cat.id}
                             id={cat.id}
@@ -1189,63 +1189,8 @@ function App() {
                             onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
                         />
                     ))}
-                    {/* Fallback if those specific ones aren't found */}
-                    {!loading && categories.filter(c => ['grocery', 'pharmacy', 'bakery', 'meat'].includes((c.name || '').toLowerCase())).length === 0 && (
-                        categories.slice(0, 4).map(cat => (
-                            <FastCategoryItem 
-                                key={cat.id}
-                                id={cat.id}
-                                name={cat.name}
-                                icon={cat.icon}
-                                isActive={selectedCategoryId === cat.id}
-                                onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
-                            />
-                        ))
-                    )}
                 </div>
             </section>
-
-            {/* Categories Section */}
-            <section style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem' }}>Shop by Category</h2>
-              {selectedCategoryId && (
-                <button 
-                  onClick={() => setSelectedCategoryId(null)}
-                  style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}
-                >
-                  Show All
-                </button>
-              )}
-            </div>
-            <div style={{
-              display: 'flex',
-              gap: '1.5rem',
-              overflowX: 'auto',
-              paddingBottom: '1rem',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}>
-              {loading ? (
-                [1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} style={{ minWidth: '80px', height: '100px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                ))
-              ) : categories.map(cat => (
-                <CategoryItem 
-                  key={cat.id} 
-                  id={cat.id}
-                  name={cat.name} 
-                  icon={cat.icon || '📦'} 
-                  color={cat.color || '#f0f0f0'} 
-                  isActive={selectedCategoryId === cat.id}
-                  onClick={(id) => {
-                    setSelectedCategoryId(prev => prev === id ? null : id);
-                    setSearchQuery('');
-                  }}
-                />
-              ))}
-            </div>
-          </section>
 
           {/* Featured Products Section */}
           <section>
