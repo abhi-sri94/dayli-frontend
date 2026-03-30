@@ -162,10 +162,10 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    if (isOpen && activeTab === 'orders') {
+    if (isOpen && activeTab === 'orders' && token) {
       fetchOrders();
     }
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, token]);
 
   const fetchOrders = async () => {
     setLoading(true);
