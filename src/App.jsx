@@ -643,6 +643,56 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
   );
 };
 
+const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
+  const isEmoji = !icon || icon.length <= 2;
+  const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
+
+  return (
+    <div 
+      onClick={() => onClick(id)}
+      style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '0.75rem',
+      cursor: 'pointer',
+      minWidth: '100px'
+    }}>
+      <div style={{
+        width: '90px',
+        height: '90px',
+        background: 'white',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '2.5rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        border: isActive ? '3px solid hsl(var(--primary))' : 'none',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}>
+        {isEmoji ? (
+            <span>{icon || '📦'}</span>
+        ) : (
+            <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        )}
+      </div>
+      <div style={{ 
+        fontSize: '0.7rem', 
+        fontWeight: 800, 
+        textAlign: 'center', 
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: isActive ? 'hsl(var(--primary))' : '#1a1a1a' 
+      }}>
+        {name}
+      </div>
+    </div>
+  );
+};
+
 const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
   <motion.div
     whileHover={{ y: -4 }}
@@ -1113,6 +1163,48 @@ function App() {
           </section>
         ) : (
           <>
+            {/* Fast Categories Section */}
+            <section style={{ marginBottom: '4rem', overflowX: 'hidden' }}>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Fast Categories</h2>
+                <div style={{
+                    display: 'flex',
+                    gap: '1.5rem',
+                    overflowX: 'auto',
+                    padding: '0.5rem 1rem 1.5rem',
+                    margin: '0 -1rem',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
+                }}>
+                    {loading ? (
+                        [1, 2, 3, 4].map(i => (
+                            <div key={i} style={{ minWidth: '90px', height: '90px', borderRadius: '50%', background: '#f5f5f5' }}></div>
+                        ))
+                    ) : categories.filter(c => ['grocery', 'pharmacy', 'bakery', 'meat'].includes((c.name || '').toLowerCase())).map(cat => (
+                        <FastCategoryItem 
+                            key={cat.id}
+                            id={cat.id}
+                            name={cat.name}
+                            icon={cat.icon}
+                            isActive={selectedCategoryId === cat.id}
+                            onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
+                        />
+                    ))}
+                    {/* Fallback if those specific ones aren't found */}
+                    {!loading && categories.filter(c => ['grocery', 'pharmacy', 'bakery', 'meat'].includes((c.name || '').toLowerCase())).length === 0 && (
+                        categories.slice(0, 4).map(cat => (
+                            <FastCategoryItem 
+                                key={cat.id}
+                                id={cat.id}
+                                name={cat.name}
+                                icon={cat.icon}
+                                isActive={selectedCategoryId === cat.id}
+                                onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
+                            />
+                        ))
+                    )}
+                </div>
+            </section>
+
             {/* Categories Section */}
             <section style={{ marginBottom: '3rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
