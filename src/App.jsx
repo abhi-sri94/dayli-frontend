@@ -28,22 +28,22 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
     <nav className="navbar" style={{
       position: 'sticky',
       top: 0,
-      zIndex: 50,
+      zIndex: 100,
       background: 'white',
-      padding: '0.75rem 0',
+      padding: '0.5rem 0',
       borderBottom: '1px solid hsl(var(--border))',
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
-      <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <div 
-            onClick={onHome}
-            className="logo" 
-            style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px', cursor: 'pointer' }}
+      <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        <div
+          onClick={onHome}
+          className="logo"
+          style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px', cursor: 'pointer' }}
         >
           dayli
         </div>
 
-        <div className="location" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+        <div className="location hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
           <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             Delivery in 20-30 mins
             <ChevronDown size={14} />
@@ -54,16 +54,16 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           </div>
         </div>
 
-        <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
+        <div className="search-container" style={{ flex: 1, position: 'relative' }}>
           <div style={{
             background: 'hsl(var(--muted))',
             borderRadius: 'var(--radius)',
-            padding: '0.75rem 1rem',
+            padding: '0.6rem 1rem',
             display: 'flex',
             alignItems: 'center',
             gap: '1rem'
           }}>
-            <Search size={20} color="hsl(var(--muted-foreground))" />
+            <Search size={18} color="hsl(var(--muted-foreground))" />
             <input
               type="text"
               placeholder='Search "milk"'
@@ -77,7 +77,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
         <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {user ? (
             <div style={{ position: 'relative' }}>
-              <div 
+              <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
               >
@@ -88,7 +88,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
               <AnimatePresence>
                 {isDropdownOpen && (
                   <>
-                    <div 
+                    <div
                       onClick={() => setIsDropdownOpen(false)}
                       style={{ position: 'fixed', inset: 0, zIndex: 10 }}
                     />
@@ -110,14 +110,14 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                         padding: '0.5rem'
                       }}
                     >
-                      <button 
+                      <button
                         onClick={() => { onOpenProfile('profile'); setIsDropdownOpen(false); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
                         className="hover:bg-slate-50"
                       >
                         <User size={18} /> My Profile
                       </button>
-                      <button 
+                      <button
                         onClick={() => { onOpenProfile('orders'); setIsDropdownOpen(false); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
                         className="hover:bg-slate-50"
@@ -125,7 +125,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                         <Package size={18} /> My Orders
                       </button>
                       <div style={{ height: '1px', background: '#eee', margin: '0.5rem' }} />
-                      <button 
+                      <button
                         onClick={() => { onLogout(); setIsDropdownOpen(false); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', color: '#ef4444', transition: 'background 0.2s' }}
                         className="hover:bg-red-50"
@@ -142,12 +142,15 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           )}
           <button
             onClick={onOpenCart}
-            className="btn btn-primary"
-            style={{ gap: '0.75rem', padding: '0.75rem 1.25rem' }}
+            className="btn btn-primary btn-cart"
+            style={{ gap: '0.5rem', padding: '0.6rem 1rem' }}
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={18} />
             {cartCount > 0 ? (
-              <span>{cartCount} Items</span>
+              <>
+                <span className="hide-on-mobile">{cartCount} Items</span>
+                <span className="show-on-mobile">{cartCount}</span>
+              </>
             ) : (
               <span>My Cart</span>
             )}
@@ -196,7 +199,7 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
       const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
       const response = await fetch(`${apiBaseUrl}/api/user`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -218,23 +221,23 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
         exit={{ opacity: 0 }}
-        onClick={onClose} 
-        style={{ position: 'absolute', inset: 0, background: 'black' }} 
+        onClick={onClose}
+        style={{ position: 'absolute', inset: 0, background: 'black' }}
       />
-      <motion.div 
+      <motion.div
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
-        style={{ 
-          position: 'relative', 
-          width: '100%', 
-          maxWidth: '450px', 
-          height: '100%', 
-          background: 'white', 
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '450px',
+          height: '100%',
+          background: 'white',
           boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
           display: 'flex',
           flexDirection: 'column'
@@ -246,13 +249,13 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
         </div>
 
         <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
-          <button 
+          <button
             onClick={() => setActiveTab('profile')}
             style={{ flex: 1, padding: '1rem', fontWeight: 700, fontSize: '0.9rem', color: activeTab === 'profile' ? 'hsl(var(--primary))' : '#888', borderBottom: activeTab === 'profile' ? '2px solid hsl(var(--primary))' : 'none' }}
           >
             Profile
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('orders')}
             style={{ flex: 1, padding: '1rem', fontWeight: 700, fontSize: '0.9rem', color: activeTab === 'orders' ? 'hsl(var(--primary))' : '#888', borderBottom: activeTab === 'orders' ? '2px solid hsl(var(--primary))' : 'none' }}
           >
@@ -263,57 +266,57 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
           {activeTab === 'profile' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'hsl(var(--primary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
-                        {user?.name?.[0]}
-                    </div>
-                    <div>
-                        <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{user?.name}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#666' }}>{user?.email || user?.phone_number}</div>
-                    </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'hsl(var(--primary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
+                  {user?.name?.[0]}
                 </div>
-
-                <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', display: 'block', marginBottom: '0.5rem' }}>Full Name</label>
-                        <input 
-                            type="text" 
-                            value={editingName} 
-                            onChange={e => setEditingName(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', outline: 'none' }}
-                        />
-                    </div>
-                    <button 
-                        type="submit" 
-                        disabled={isUpdating}
-                        className="btn btn-primary" 
-                        style={{ width: 'fit-content', padding: '0.75rem 2rem' }}
-                    >
-                        {isUpdating ? 'Saving...' : 'Update Name'}
-                    </button>
-                </form>
-
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', marginBottom: '1rem' }}>Account Details</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {user?.email && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <Mail size={18} color="#888" />
-                                <span style={{ fontSize: '0.9rem' }}>{user.email}</span>
-                            </div>
-                        )}
-                        {user?.phone_number && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <Phone size={18} color="#888" />
-                                <span style={{ fontSize: '0.9rem' }}>{user.phone_number}</span>
-                            </div>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <User size={18} color="#888" />
-                            <span style={{ fontSize: '0.9rem' }}>ID: {user?.firebase_uid || user?.id}</span>
-                        </div>
-                    </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{user?.name}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#666' }}>{user?.email || user?.phone_number}</div>
                 </div>
+              </div>
+
+              <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', display: 'block', marginBottom: '0.5rem' }}>Full Name</label>
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={e => setEditingName(e.target.value)}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', outline: 'none' }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="btn btn-primary"
+                  style={{ width: 'fit-content', padding: '0.75rem 2rem' }}
+                >
+                  {isUpdating ? 'Saving...' : 'Update Name'}
+                </button>
+              </form>
+
+              <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', marginBottom: '1rem' }}>Account Details</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {user?.email && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <Mail size={18} color="#888" />
+                      <span style={{ fontSize: '0.9rem' }}>{user.email}</span>
+                    </div>
+                  )}
+                  {user?.phone_number && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <Phone size={18} color="#888" />
+                      <span style={{ fontSize: '0.9rem' }}>{user.phone_number}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <User size={18} color="#888" />
+                    <span style={{ fontSize: '0.9rem' }}>ID: {user?.firebase_uid || user?.id}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -321,56 +324,56 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
                 <div style={{ textAlign: 'center', padding: '2rem' }}>Loading orders...</div>
               ) : orders.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#999' }}>
-                    <Package size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                    <p>No orders yet</p>
+                  <Package size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                  <p>No orders yet</p>
                 </div>
               ) : (
                 orders.map(order => (
                   <div key={order.id} style={{ border: '1px solid #eee', borderRadius: '1rem', padding: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <div>
-                            <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Order #{order.order_number}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#888' }}>{new Date(order.created_at).toLocaleDateString()}</div>
-                        </div>
-                        <div style={{ 
-                            padding: '0.25rem 0.75rem', 
-                            borderRadius: '2rem', 
-                            fontSize: '0.7rem', 
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            background: order.status === 'delivered' ? '#dcfce7' : order.status === 'pending' ? '#fef9c3' : '#f3f4f6',
-                            color: order.status === 'delivered' ? '#166534' : order.status === 'pending' ? '#854d0e' : '#374151'
-                        }}>
-                            {order.status}
-                        </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Order #{order.order_number}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#888' }}>{new Date(order.created_at).toLocaleDateString()}</div>
+                      </div>
+                      <div style={{
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '2rem',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        background: order.status === 'delivered' ? '#dcfce7' : order.status === 'pending' ? '#fef9c3' : '#f3f4f6',
+                        color: order.status === 'delivered' ? '#166534' : order.status === 'pending' ? '#854d0e' : '#374151'
+                      }}>
+                        {order.status}
+                      </div>
                     </div>
                     <div style={{ borderTop: '1px dashed #eee', margin: '0.75rem 0', paddingTop: '0.75rem' }}>
-                        {order.items?.map((item, idx) => (
-                            <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                <span>{item.quantity} x {item.product?.name || 'Item'}</span>
-                                <span style={{ color: '#666' }}>₹{item.price * item.quantity}</span>
-                            </div>
-                        ))}
+                      {order.items?.map((item, idx) => (
+                        <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span>{item.quantity} x {item.product?.name || 'Item'}</span>
+                          <span style={{ color: '#666' }}>₹{item.price * item.quantity}</span>
+                        </div>
+                      ))}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>
-                            <span style={{ color: '#666', fontWeight: 400, marginRight: '0.5rem' }}>Total Paid</span>
-                            ₹{order.payable_amount || order.total_amount}
-                        </div>
-                        <button 
-                            onClick={() => onTrackOrder(order.order_number)}
-                            style={{ 
-                                background: 'hsl(var(--primary))', 
-                                color: 'white', 
-                                padding: '0.5rem 1rem', 
-                                borderRadius: '0.75rem', 
-                                fontSize: '0.8rem', 
-                                fontWeight: 700,
-                                boxShadow: '0 2px 5px hsl(var(--primary) / 0.2)'
-                            }}
-                        >
-                            Track Order
-                        </button>
+                      <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>
+                        <span style={{ color: '#666', fontWeight: 400, marginRight: '0.5rem' }}>Total Paid</span>
+                        ₹{order.payable_amount || order.total_amount}
+                      </div>
+                      <button
+                        onClick={() => onTrackOrder(order.order_number)}
+                        style={{
+                          background: 'hsl(var(--primary))',
+                          color: 'white',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '0.75rem',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          boxShadow: '0 2px 5px hsl(var(--primary) / 0.2)'
+                        }}
+                      >
+                        Track Order
+                      </button>
                     </div>
                   </div>
                 ))
@@ -622,15 +625,15 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
   return (
-    <div 
+    <div
       onClick={() => onClick(id)}
       style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.5rem',
-      cursor: 'pointer'
-    }}>
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem',
+        cursor: 'pointer'
+      }}>
       <div style={{
         width: '80px',
         height: '80px',
@@ -646,9 +649,9 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
         overflow: 'hidden'
       }} className="category-icon">
         {isEmoji ? (
-            <span>{icon || '📦'}</span>
+          <span>{icon || '📦'}</span>
         ) : (
-            <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         )}
       </div>
       <div style={{ fontSize: '0.75rem', fontWeight: isActive ? 800 : 600, textAlign: 'center', maxWidth: '80px', color: isActive ? 'hsl(var(--primary))' : 'inherit' }}>
@@ -663,45 +666,49 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
   return (
-    <div 
+    <div
       onClick={() => onClick(id)}
       style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.75rem',
-      cursor: 'pointer',
-      minWidth: '100px'
-    }}>
-      <div style={{
-        width: '90px',
-        height: '90px',
-        background: 'white',
-        borderRadius: '50%',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '2.5rem',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        border: isActive ? '3px solid hsl(var(--primary))' : 'none',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+        gap: '0.75rem',
+        cursor: 'pointer',
+        minWidth: '100px'
       }}>
+      <div
+        className="category-circle"
+        style={{
+          width: '90px',
+          height: '90px',
+          background: 'white',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '2.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          border: isActive ? '3px solid hsl(var(--primary))' : 'none',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}>
         {isEmoji ? (
-            <span>{icon || '📦'}</span>
+          <span>{icon || '📦'}</span>
         ) : (
-            <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         )}
       </div>
-      <div style={{ 
-        fontSize: '0.7rem', 
-        fontWeight: 800, 
-        textAlign: 'center', 
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        color: isActive ? 'hsl(var(--primary))' : '#1a1a1a' 
-      }}>
+      <div
+        className="category-text"
+        style={{
+          fontSize: '0.7rem',
+          fontWeight: 800,
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: isActive ? 'hsl(var(--primary))' : '#1a1a1a'
+        }}>
         {name}
       </div>
     </div>
@@ -711,6 +718,7 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
 const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
   <motion.div
     whileHover={{ y: -4 }}
+    className="product-card"
     style={{
       background: 'white',
       border: '1px solid hsl(var(--border))',
@@ -721,7 +729,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
       gap: '0.5rem'
     }}
   >
-    <div style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="product-image-container" style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
     </div>
     <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
@@ -863,34 +871,34 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                       <span>Delivery Fee</span>
                       <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
                     </div>
-                    
+
                     {deliveryFee > 0 && (
-                        <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '0.5rem' }}>
-                            💡 Add ₹{100 - subtotal} more for FREE delivery!
-                        </div>
+                      <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '0.5rem' }}>
+                        💡 Add ₹{100 - subtotal} more for FREE delivery!
+                      </div>
                     )}
-                    
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee', fontWeight: 800, fontSize: '1.1rem' }}>
                       <span>Grand Total</span>
                       <span>₹{total}</span>
                     </div>
                   </div>
-                <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
-                  <button
-                    disabled={isCheckingOut}
-                    onClick={() => onCheckout(address, 'razorpay')}
-                    className="btn btn-primary"
-                    style={{ width: '100%', padding: '1rem', opacity: isCheckingOut ? 0.7 : 1 }}
-                  >
-                    {isCheckingOut ? 'Processing...' : '💳 Pay Online (UPI / Card)'}
-                  </button>
-                  <button
-                    disabled={isCheckingOut}
-                    onClick={() => onCheckout(address, 'cod')}
-                    style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '0.75rem', fontWeight: 600, fontSize: '0.9rem', background: 'white' }}
-                  >
-                    🏠 Cash on Delivery
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+                    <button
+                      disabled={isCheckingOut}
+                      onClick={() => onCheckout(address, 'razorpay')}
+                      className="btn btn-primary"
+                      style={{ width: '100%', padding: '1rem', opacity: isCheckingOut ? 0.7 : 1 }}
+                    >
+                      {isCheckingOut ? 'Processing...' : '💳 Pay Online (UPI / Card)'}
+                    </button>
+                    <button
+                      disabled={isCheckingOut}
+                      onClick={() => onCheckout(address, 'cod')}
+                      style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '0.75rem', fontWeight: 600, fontSize: '0.9rem', background: 'white' }}
+                    >
+                      🏠 Cash on Delivery
+                    </button>
                   </div>
                 </div>
               );
@@ -975,24 +983,24 @@ const OrderStatus = ({ orderNumber, onBack }) => {
         <div style={{ position: 'relative', paddingLeft: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           {/* Vertical Line */}
           <div style={{ position: 'absolute', left: '0.625rem', top: '1rem', bottom: '1rem', width: '2px', background: '#f1f5f9' }} />
-          
+
           {[
             { id: 'pending', label: 'Order Placed', desc: 'We have received your order' },
             { id: 'processing', label: 'Processing', desc: 'Your items are being packed' },
             { id: 'shipped', label: 'Out for Delivery', desc: 'Our partner is on the way' },
             { id: 'delivered', label: 'Delivered', desc: 'Enjoy your fresh daily essentials!' }
           ].map((step, idx) => {
-            const isCompleted = getStatusStep(order.order_status) >= idx;
-            const isCurrent = getStatusStep(order.order_status) === idx;
+            const isCompleted = getStatusStep(order.order_status?.toLowerCase() || '') >= idx;
+            const isCurrent = getStatusStep(order.order_status?.toLowerCase() || '') === idx;
 
             return (
               <div key={step.id} style={{ position: 'relative' }}>
-                <div style={{ 
-                  position: 'absolute', 
-                  left: '-2.5rem', 
-                  width: '1.25rem', 
-                  height: '1.25rem', 
-                  borderRadius: '50%', 
+                <div style={{
+                  position: 'absolute',
+                  left: '-2.5rem',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  borderRadius: '50%',
                   background: isCompleted ? 'hsl(var(--primary))' : 'white',
                   border: `3px solid ${isCompleted ? 'hsl(var(--primary))' : '#e2e8f0'}`,
                   zIndex: 2,
@@ -1000,12 +1008,20 @@ const OrderStatus = ({ orderNumber, onBack }) => {
                 }}>
                   {isCompleted && (
                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                      <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </motion.div>
                   )}
                 </div>
                 <div style={{ opacity: isCompleted ? 1 : 0.4 }}>
-                  <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem', color: isCurrent ? 'hsl(var(--primary))' : 'inherit' }}>{step.label}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem', color: isCurrent ? 'hsl(var(--primary))' : 'inherit' }}>{step.label}</h3>
+                    {isCurrent && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', fontWeight: 800, color: '#4caf50', background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '1rem', textTransform: 'uppercase' }}>
+                            <span style={{ width: '6px', height: '6px', background: '#4caf50', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
+                            Live
+                        </div>
+                    )}
+                  </div>
                   <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{step.desc}</p>
                 </div>
               </div>
@@ -1031,31 +1047,31 @@ const OrderStatus = ({ orderNumber, onBack }) => {
         )}
 
         <div style={{ marginTop: '3rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
-            <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '1.25rem' }}>Order Summary</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {order.items.map(item => (
-                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '0.9rem', color: '#4b5563' }}>
-                            <span style={{ fontWeight: 800, color: 'black' }}>{item.quantity}x</span> {item.product.name}
-                        </div>
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>₹{item.total_price}</div>
-                    </div>
-                ))}
+          <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '1.25rem' }}>Order Summary</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {order.items.map(item => (
+              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '0.9rem', color: '#4b5563' }}>
+                  <span style={{ fontWeight: 800, color: 'black' }}>{item.quantity}x</span> {item.product.name}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>₹{item.total_price}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+              <span>Subtotal</span>
+              <span>₹{order.total_amount}</span>
             </div>
-            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
-                    <span>Subtotal</span>
-                    <span>₹{order.total_amount}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
-                    <span>Delivery Fee</span>
-                    <span>{order.delivery_charge === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${order.delivery_charge}`}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee' }}>
-                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Total Amount</span>
-                    <span style={{ fontWeight: 900, fontSize: '1.3rem', color: 'hsl(var(--primary))' }}>₹{order.payable_amount}</span>
-                </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
+              <span>Delivery Fee</span>
+              <span>{order.delivery_charge === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${order.delivery_charge}`}</span>
             </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee' }}>
+              <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Total Amount</span>
+              <span style={{ fontWeight: 900, fontSize: '1.3rem', color: 'hsl(var(--primary))' }}>₹{order.payable_amount}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1331,24 +1347,24 @@ function App() {
         onLogout={handleLogout}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenProfile={(tab) => {
-            setProfileModalTab(tab);
-            setIsProfileModalOpen(true);
+          setProfileModalTab(tab);
+          setIsProfileModalOpen(true);
         }}
         searchQuery={searchQuery}
         onSearch={setSearchQuery}
         onHome={() => {
-            setTrackingOrderNumber(null);
-            setOrderSuccess(null);
-            setSearchQuery('');
-            setSelectedCategoryId(null);
-            window.history.pushState({}, '', window.location.pathname);
+          setTrackingOrderNumber(null);
+          setOrderSuccess(null);
+          setSearchQuery('');
+          setSelectedCategoryId(null);
+          window.history.pushState({}, '', window.location.pathname);
         }}
       />
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-        onAuthSuccess={handleAuthSuccess} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
 
       <ProfileModal
@@ -1357,60 +1373,60 @@ function App() {
         user={user}
         token={token}
         onUpdateUser={(updatedUser) => {
-            setUser(updatedUser);
-            localStorage.setItem('dayli_user', JSON.stringify(updatedUser));
+          setUser(updatedUser);
+          localStorage.setItem('dayli_user', JSON.stringify(updatedUser));
         }}
         onTrackOrder={(orderNumber) => {
-            setTrackingOrderNumber(orderNumber);
-            setIsProfileModalOpen(false);
-            window.history.pushState({}, '', `?orderNumber=${orderNumber}`);
+          setTrackingOrderNumber(orderNumber);
+          setIsProfileModalOpen(false);
+          window.history.pushState({}, '', `?orderNumber=${orderNumber}`);
         }}
         initialTab={profileModalTab}
       />
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
         {trackingOrderNumber ? (
-            <OrderStatus 
-                orderNumber={trackingOrderNumber} 
-                onBack={() => {
-                    setTrackingOrderNumber(null);
-                    window.history.pushState({}, '', window.location.pathname);
-                }} 
-            />
+          <OrderStatus
+            orderNumber={trackingOrderNumber}
+            onBack={() => {
+              setTrackingOrderNumber(null);
+              window.history.pushState({}, '', window.location.pathname);
+            }}
+          />
         ) : orderSuccess ? (
-            <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', fontSize: '2.5rem' }}>
-                    ✓
-                </motion.div>
-                <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Order Placed!</h1>
-                <p style={{ color: '#666', marginBottom: '2rem', lineHeight: '1.6' }}>
-                    Your order <strong>#{orderSuccess.order_number}</strong> has been successfully placed and is being prepared.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <button 
-                        onClick={() => {
-                            setTrackingOrderNumber(orderSuccess.order_number);
-                            window.history.pushState({}, '', `?orderNumber=${orderSuccess.order_number}`);
-                        }} 
-                        className="btn btn-primary"
-                        style={{ width: '100%', padding: '1rem' }}
-                    >
-                        Track Real-Time Status
-                    </button>
-                    <button 
-                        onClick={() => setOrderSuccess(null)} 
-                        style={{ width: '100%', padding: '1rem', fontWeight: 700, color: '#666' }}
-                    >
-                        Continue Shopping
-                    </button>
-                </div>
+          <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', fontSize: '2.5rem' }}>
+              ✓
+            </motion.div>
+            <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Order Placed!</h1>
+            <p style={{ color: '#666', marginBottom: '2rem', lineHeight: '1.6' }}>
+              Your order <strong>#{orderSuccess.order_number}</strong> has been successfully placed and is being prepared.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <button
+                onClick={() => {
+                  setTrackingOrderNumber(orderSuccess.order_number);
+                  window.history.pushState({}, '', `?orderNumber=${orderSuccess.order_number}`);
+                }}
+                className="btn btn-primary"
+                style={{ width: '100%', padding: '1rem' }}
+              >
+                Track Real-Time Status
+              </button>
+              <button
+                onClick={() => setOrderSuccess(null)}
+                style={{ width: '100%', padding: '1rem', fontWeight: 700, color: '#666' }}
+              >
+                Continue Shopping
+              </button>
             </div>
+          </div>
         ) : searchResults !== null ? (
-            /* Search Results ... Same as before */
+          /* Search Results ... Same as before */
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.5rem' }}>Search Results for "{searchQuery}"</h2>
-              <button 
+              <button
                 onClick={() => setSearchQuery('')}
                 style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}
               >
@@ -1418,98 +1434,15 @@ function App() {
               </button>
             </div>
             {isSearching ? (
-                <div style={{ textAlign: 'center', padding: '4rem' }}>Searching...</div>
+              <div style={{ textAlign: 'center', padding: '4rem' }}>Searching...</div>
             ) : searchResults.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-                    <Search size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                    <p>No products found for "{searchQuery}"</p>
-                </div>
+              <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+                <Search size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>No products found for "{searchQuery}"</p>
+              </div>
             ) : (
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                    gap: '1.5rem'
-                }}>
-                    {searchResults.map(product => (
-                        <ProductCard
-                            key={product.id}
-                            product={{
-                                ...product,
-                                price: product.selling_price,
-                                image: (() => {
-                                    if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                                    const path = product.primary_image.image_path;
-                                    const isExternal = /^https?:\/\//.test(path);
-                                    return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                                })()
-                            }}
-                            quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                            onAdd={addToCart}
-                            onUpdate={updateQuantity}
-                        />
-                    ))}
-                </div>
-            )}
-          </section>
-        ) : (
-          <>
-            {/* Fast Categories Section */}
-            <section style={{ marginBottom: '3rem', overflowX: 'hidden' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Shop by Category</h2>
-                <div style={{
-                    display: 'flex',
-                    gap: '1.5rem',
-                    overflowX: 'auto',
-                    padding: '0.5rem 1rem 1.5rem',
-                    margin: '0 -1rem',
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none'
-                }}>
-                    {loading ? (
-                        [1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} style={{ minWidth: '90px', height: '90px', borderRadius: '50%', background: '#f5f5f5' }}></div>
-                        ))
-                    ) : categories.map(cat => (
-                        <FastCategoryItem 
-                            key={cat.id}
-                            id={cat.id}
-                            name={cat.name}
-                            icon={cat.icon}
-                            isActive={selectedCategoryId === cat.id}
-                            onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
-                        />
-                    ))}
-                </div>
-            </section>
-
-          {/* Featured Products Section */}
-          <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem' }}>
-                {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name : 'Daily Essentials'}
-              </h2>
-              {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
-            </div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              {loading || isCategoryLoading ? (
-                [1, 2, 3, 4].map(i => (
-                  <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                ))
-              ) : (() => {
-                const displayProducts = selectedCategoryId ? categoryProducts : products;
-                if (selectedCategoryId && displayProducts.length === 0) {
-                  return (
-                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
-                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
-                      <p>No products in this category yet. Check back soon!</p>
-                    </div>
-                  );
-                }
-                return displayProducts.map(product => (
+              <div className="grid">
+                {searchResults.map(product => (
                   <ProductCard
                     key={product.id}
                     product={{
@@ -1526,10 +1459,85 @@ function App() {
                     onAdd={addToCart}
                     onUpdate={updateQuantity}
                   />
-                ))
-              })()}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
+        ) : (
+          <>
+            {/* Fast Categories Section */}
+            <section style={{ marginBottom: '3rem', overflowX: 'hidden' }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Shop by Category</h2>
+              <div style={{
+                display: 'flex',
+                gap: '1.5rem',
+                overflowX: 'auto',
+                padding: '0.5rem 1rem 1.5rem',
+                margin: '0 -1rem',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}>
+                {loading ? (
+                  [1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} style={{ minWidth: '90px', height: '90px', borderRadius: '50%', background: '#f5f5f5' }}></div>
+                  ))
+                ) : categories.map(cat => (
+                  <FastCategoryItem
+                    key={cat.id}
+                    id={cat.id}
+                    name={cat.name}
+                    icon={cat.icon}
+                    isActive={selectedCategoryId === cat.id}
+                    onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* Featured Products Section */}
+            <section>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.5rem' }}>
+                  {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name : 'Daily Essentials'}
+                </h2>
+                {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
+              </div>
+              <div className="grid">
+                {loading || isCategoryLoading ? (
+                  [1, 2, 3, 4].map(i => (
+                    <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                  ))
+                ) : (() => {
+                  const displayProducts = selectedCategoryId ? categoryProducts : products;
+                  if (selectedCategoryId && displayProducts.length === 0) {
+                    return (
+                      <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+                        <p>No products in this category yet. Check back soon!</p>
+                      </div>
+                    );
+                  }
+                  return displayProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={{
+                        ...product,
+                        price: product.selling_price,
+                        image: (() => {
+                          if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                          const path = product.primary_image.image_path;
+                          const isExternal = /^https?:\/\//.test(path);
+                          return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                        })()
+                      }}
+                      quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                      onAdd={addToCart}
+                      onUpdate={updateQuantity}
+                    />
+                  ))
+                })()}
+              </div>
+            </section>
           </>
         )}
       </main>
