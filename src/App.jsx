@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
@@ -38,12 +38,20 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
         <div
           onClick={onHome}
           className="logo"
-          style={{ color: 'hsl(var(--primary))', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-1px', cursor: 'pointer' }}
+          style={{ 
+            color: 'hsl(var(--primary))', 
+            fontWeight: 800, 
+            fontSize: '1.75rem', 
+            letterSpacing: '-1px', 
+            cursor: 'pointer',
+            userSelect: 'none',
+            WebkitUserSelect: 'none'
+          }}
         >
           dayli
         </div>
 
-        <div className="location hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+        <div className="location hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', userSelect: 'none', cursor: 'pointer' }}>
           <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             Delivery in 20-30 mins
             <ChevronDown size={14} />
@@ -54,7 +62,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           </div>
         </div>
 
-        <div className="search-container" style={{ flex: 1, position: 'relative' }}>
+        <div className="search-container" style={{ position: 'relative' }}>
           <div style={{
             background: 'hsl(var(--muted))',
             borderRadius: 'var(--radius)',
@@ -105,10 +113,11 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                         borderRadius: 'var(--radius)',
                         boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
                         border: '1px solid #eee',
-                        minWidth: '200px',
+                        minWidth: '220px',
                         zIndex: 11,
                         padding: '0.5rem'
                       }}
+                      className="profile-dropdown"
                     >
                       <button
                         onClick={() => { onOpenProfile('profile'); setIsDropdownOpen(false); }}
@@ -620,8 +629,30 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   );
 };
 
+const CATEGORY_MAPPER = {
+  'Vegetables & Fruits': '🥦',
+  'Spares and tools': '🔧',
+  'Spares and Tools': '🔧',
+  'Wellness and Hygiene': '🧼',
+  'Wellness and hygiene': '🧼',
+  'Electricals and lighting': '💡',
+  'Electricals and Lighting': '💡',
+  'Dairy, Bread & Eggs': '🥛',
+  'Cold Drinks & Juices': '🥤',
+  'Snacks & Munchies': '🍿',
+  'Meat': '🥩',
+  'Breakfast & Instant Food': '🥣',
+  'Sweet Tooth': '🍰',
+  'Cleaning Essentials': '🧹',
+  'Baby Care': '👶',
+  'Pooja Needs': '🙏',
+  'Home & Office': '🏢'
+};
+
 const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
-  const isEmoji = !icon || icon.length <= 2;
+  const [imgError, setImgError] = useState(false);
+  const emojiFallback = CATEGORY_MAPPER[name] || '📦';
+  const isEmoji = !icon || icon.length <= 2 || !icon.includes('.');
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
   return (
@@ -632,7 +663,10 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.5rem',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        flexShrink: 0,
+        userSelect: 'none',
+        WebkitUserSelect: 'none'
       }}>
       <div style={{
         width: '80px',
@@ -648,10 +682,15 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
         boxSizing: 'border-box',
         overflow: 'hidden'
       }} className="category-icon">
-        {isEmoji ? (
-          <span>{icon || '📦'}</span>
+        {isEmoji || imgError ? (
+          <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : (
-          <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img 
+            src={iconUrl} 
+            alt={name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            onError={() => setImgError(true)}
+          />
         )}
       </div>
       <div style={{ fontSize: '0.75rem', fontWeight: isActive ? 800 : 600, textAlign: 'center', maxWidth: '80px', color: isActive ? 'hsl(var(--primary))' : 'inherit' }}>
@@ -662,7 +701,9 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
 };
 
 const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
-  const isEmoji = !icon || icon.length <= 2;
+  const [imgError, setImgError] = useState(false);
+  const emojiFallback = CATEGORY_MAPPER[name] || '📦';
+  const isEmoji = !icon || icon.length <= 2 || !icon.includes('.');
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
   return (
@@ -674,7 +715,9 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
         alignItems: 'center',
         gap: '0.75rem',
         cursor: 'pointer',
-        minWidth: '100px'
+        flexShrink: 0,
+        userSelect: 'none',
+        WebkitUserSelect: 'none'
       }}>
       <div
         className="category-circle"
@@ -693,10 +736,15 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
           overflow: 'hidden',
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
-        {isEmoji ? (
-          <span>{icon || '📦'}</span>
+        {isEmoji || imgError ? (
+          <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : (
-          <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img 
+            src={iconUrl} 
+            alt={name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            onError={() => setImgError(true)}
+          />
         )}
       </div>
       <div
@@ -818,10 +866,52 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
               {cartItems.length === 0 ? (
-                <div style={{ textAlign: 'center', marginTop: '4rem', color: 'hsl(var(--muted-foreground))' }}>
-                  <ShoppingCart size={64} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                  <p>Your cart is empty</p>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ 
+                    textAlign: 'center', 
+                    marginTop: '6rem', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    padding: '0 2rem'
+                  }}
+                >
+                  <div style={{ 
+                    width: '120px', 
+                    height: '120px', 
+                    background: 'hsl(var(--primary) / 0.08)', 
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '2rem'
+                  }}>
+                    <ShoppingBag size={56} style={{ color: 'hsl(var(--primary))' }} />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Your cart is empty</h3>
+                  <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', marginBottom: '2rem', lineHeight: 1.5 }}>
+                    Your cart is feeling a bit light... let's fix that with some fresh groceries!
+                  </p>
+                  <button 
+                    onClick={onClose}
+                    style={{ 
+                      background: 'hsl(var(--primary))', 
+                      color: 'white', 
+                      padding: '0.8rem 2rem', 
+                      borderRadius: '2rem',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      boxShadow: '0 4px 15px hsl(var(--primary) / 0.3)',
+                      transition: 'transform 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                  >
+                    Start Shopping
+                  </button>
+                </motion.div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem' }}>
@@ -939,9 +1029,12 @@ const OrderStatus = ({ orderNumber, onBack }) => {
   };
 
   const getStatusStep = (status) => {
-    const steps = ['pending', 'processing', 'shipped', 'delivered'];
-    const idx = steps.indexOf(status.toLowerCase());
-    return idx === -1 ? 0 : idx;
+    const s = status?.toLowerCase() || '';
+    if (['received', 'accepted', 'pending'].includes(s)) return 0;
+    if (['preparing', 'delayed', 'processing', 'vendor_confirmation'].includes(s)) return 1;
+    if (['in_transit', 'delivered_otp', 'rider_assigned', 'at_pick_up', 'at_pickup', 'shipped'].includes(s)) return 2;
+    if (['delivered'].includes(s)) return 3;
+    return 0;
   };
 
   if (loading) return (
@@ -1016,10 +1109,10 @@ const OrderStatus = ({ orderNumber, onBack }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem', color: isCurrent ? 'hsl(var(--primary))' : 'inherit' }}>{step.label}</h3>
                     {isCurrent && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', fontWeight: 800, color: '#4caf50', background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '1rem', textTransform: 'uppercase' }}>
-                            <span style={{ width: '6px', height: '6px', background: '#4caf50', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
-                            Live
-                        </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', fontWeight: 800, color: '#4caf50', background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '1rem', textTransform: 'uppercase' }}>
+                        <span style={{ width: '6px', height: '6px', background: '#4caf50', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
+                        Live
+                      </div>
                     )}
                   </div>
                   <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{step.desc}</p>
@@ -1228,7 +1321,7 @@ function App() {
   const handleCheckout = async (address, paymentMethod = 'razorpay') => {
     setIsCheckingOut(true);
     try {
-      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
+      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://dayli-backend.onrender.com';
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -1243,9 +1336,20 @@ function App() {
         })
       });
       const data = await response.json();
+      
+      if (response.status === 401) {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('dayli_token');
+        localStorage.removeItem('dayli_user');
+        alert("Your session has expired. Please login again.");
+        setIsCheckingOut(false);
+        return;
+      }
 
       if (data.status !== 'success') {
-        alert('Failed to create order: ' + data.message);
+        alert('Failed to create order: ' + (data.message || "Order creation failed"));
+        setIsCheckingOut(false);
         return;
       }
 
@@ -1466,8 +1570,8 @@ function App() {
         ) : (
           <>
             {/* Fast Categories Section */}
-            <section style={{ marginBottom: '3rem', overflowX: 'hidden' }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800 }}>Shop by Category</h2>
+            <section style={{ marginBottom: '3rem' }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
               <div style={{
                 display: 'flex',
                 gap: '1.5rem',
@@ -1475,7 +1579,8 @@ function App() {
                 padding: '0.5rem 1rem 1.5rem',
                 margin: '0 -1rem',
                 scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
               }}>
                 {loading ? (
                   [1, 2, 3, 4, 5, 6].map(i => (
