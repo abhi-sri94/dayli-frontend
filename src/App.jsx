@@ -89,7 +89,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
               >
-                Hi, {user.name.split(' ')[0]}
+                Hi, {user.name ? (user.name.length > 15 ? 'User' : user.name.split(' ')[0]) : 'User'}
                 <ChevronDown size={16} />
               </div>
 
@@ -738,13 +738,15 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
         }}>
         {isEmoji || imgError ? (
           <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
-        ) : (
+        ) : iconUrl ? (
           <img 
             src={iconUrl} 
             alt={name} 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
             onError={() => setImgError(true)}
           />
+        ) : (
+          <span>{emojiFallback}</span>
         )}
       </div>
       <div
