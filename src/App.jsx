@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
+const apiBaseUrl = 'https://api.dayli.co.in';
+
 // Mock Data (will be replaced by API calls)
 const CATEGORIES = [
   { id: 1, name: 'Vegetables & Fruits', icon: '🥦', color: '#e8f5e9' },
@@ -186,7 +188,6 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
       const response = await fetch(`${apiBaseUrl}/api/orders/my`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -205,7 +206,6 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
       const response = await fetch(`${apiBaseUrl}/api/user`, {
         method: 'PUT',
         headers: {
@@ -469,7 +469,6 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   };
 
   const firebaseBackendLogin = async (payload) => {
-    const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
     try {
       const response = await fetch(`${apiBaseUrl}/api/auth/firebase`, {
         method: 'POST',
@@ -494,7 +493,6 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
     setError('');
 
     const endpoint = isLogin ? '/api/login' : '/api/register';
-    const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
 
     try {
       const response = await fetch(`${apiBaseUrl}${endpoint}`, {
@@ -1015,7 +1013,6 @@ const OrderStatus = ({ orderNumber, onBack }) => {
 
   const fetchOrder = async () => {
     try {
-      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
       const response = await fetch(`${apiBaseUrl}/api/orders/track/${orderNumber}`);
       const data = await response.json();
       if (data.status === 'success') {
@@ -1179,9 +1176,15 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem('dayli_categories');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem('dayli_products');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [loading, setLoading] = useState(!categories.length);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('dayli_user');
@@ -1234,7 +1237,6 @@ function App() {
       }
       setIsSearching(true);
       try {
-        const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
         const response = await fetch(`${apiBaseUrl}/api/products?search=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
         if (data.status === 'success') {
@@ -1253,9 +1255,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
-        const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
         const [prodRes, catRes] = await Promise.all([
           fetch(`${apiBaseUrl}/api/products?featured=1`),
           fetch(`${apiBaseUrl}/api/categories`)
@@ -1263,8 +1263,14 @@ function App() {
         const prodData = await prodRes.json();
         const catData = await catRes.json();
 
-        if (catData.status === 'success') setCategories(catData.data);
-        if (prodData.status === 'success') setProducts(prodData.data.data);
+        if (catData.status === 'success') {
+          setCategories(catData.data);
+          localStorage.setItem('dayli_categories', JSON.stringify(catData.data));
+        }
+        if (prodData.status === 'success') {
+          setProducts(prodData.data.data);
+          localStorage.setItem('dayli_products', JSON.stringify(prodData.data.data));
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -1283,7 +1289,6 @@ function App() {
     const fetchCategoryProducts = async () => {
       setIsCategoryLoading(true);
       try {
-        const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://api.dayli.co.in';
         const res = await fetch(`${apiBaseUrl}/api/products?category_id=${selectedCategoryId}&limit=50`);
         const data = await res.json();
         if (data.status === 'success') setCategoryProducts(data.data.data);
@@ -1323,7 +1328,6 @@ function App() {
   const handleCheckout = async (address, paymentMethod = 'razorpay') => {
     setIsCheckingOut(true);
     try {
-      const apiBaseUrl = window.location.hostname === 'localhost' ? '' : 'https://dayli-backend.onrender.com';
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
