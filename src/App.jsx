@@ -23,7 +23,7 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome }) => {
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
@@ -53,14 +53,18 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           dayli
         </div>
 
-        <div className="location hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', userSelect: 'none', cursor: 'pointer' }}>
+        <div 
+          onClick={onDetectLocation}
+          className="location hide-on-mobile" 
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', userSelect: 'none', cursor: 'pointer' }}
+        >
           <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             Delivery in 20-30 mins
             <ChevronDown size={14} />
           </div>
           <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <MapPin size={12} />
-            Bahraich, Uttar Pradesh
+            {isDetecting ? 'Detecting...' : (currentAddress || 'Bahraich, Uttar Pradesh')}
           </div>
         </div>
 
@@ -873,42 +877,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
   </motion.div>
 );
 
-const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, isCheckingOut }) => {
-  const [address, setAddress] = React.useState('Bahraich, Uttar Pradesh');
-  const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
-
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-
-    setIsDetectingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
-          const data = await response.json();
-          if (data && data.display_name) {
-            setAddress(data.display_name);
-          } else {
-            setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-          }
-        } catch (error) {
-          console.error("Error fetching address:", error);
-          alert("Could not detect address. Please enter it manually.");
-        } finally {
-          setIsDetectingLocation(false);
-        }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        setIsDetectingLocation(false);
-        alert("Location access denied. Please enter address manually.");
-      }
-    );
-  };
+const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, isCheckingOut, address, setAddress, onDetectLocation, isDetectingLocation }) => {
 
   return (
     <AnimatePresence>
@@ -1293,6 +1262,48 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileModalTab, setProfileModalTab] = useState('profile');
+  const [address, setAddress] = useState('Bahraich, Uttar Pradesh');
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const userAgent = "DayliApp/1.0";
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`, {
+            headers: { "User-Agent": userAgent }
+          });
+          const data = await response.json();
+          if (data && data.display_name) {
+            setAddress(data.display_name);
+          } else {
+            setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
+        } catch (error) {
+          console.error("Error fetching address:", error);
+          alert("Could not detect address. Please enter it manually.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setIsDetectingLocation(false);
+        if (error.code === 1) {
+          alert("Please allow location access in your browser settings to use this feature.");
+        } else {
+          alert("Could not detect your exact location. Please try moving outdoors or enter it manually.");
+        }
+      }
+    );
+  };
   const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
@@ -1569,6 +1580,9 @@ function App() {
           setSelectedCategoryId(null);
           window.history.pushState({}, '', window.location.pathname);
         }}
+        currentAddress={address}
+        onDetectLocation={handleDetectLocation}
+        isDetecting={isDetectingLocation}
       />
 
       <AuthModal
@@ -1760,6 +1774,10 @@ function App() {
         onUpdateQuantity={updateQuantity}
         onCheckout={handleCheckout}
         isCheckingOut={isCheckingOut}
+        address={address}
+        setAddress={setAddress}
+        onDetectLocation={handleDetectLocation}
+        isDetectingLocation={isDetectingLocation}
       />
 
       <footer style={{ borderTop: '1px solid #eee', padding: '4rem 0', background: '#f8f9fa' }}>
