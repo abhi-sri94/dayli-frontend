@@ -40,11 +40,11 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
         <div
           onClick={onHome}
           className="logo"
-          style={{ 
-            color: 'hsl(var(--primary))', 
-            fontWeight: 800, 
-            fontSize: '1.75rem', 
-            letterSpacing: '-1px', 
+          style={{
+            color: 'hsl(var(--primary))',
+            fontWeight: 800,
+            fontSize: '1.75rem',
+            letterSpacing: '-1px',
             cursor: 'pointer',
             userSelect: 'none',
             WebkitUserSelect: 'none'
@@ -349,14 +349,14 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
                     </div>
                   )}
                   {(!user?.email || user.email.includes('placeholder')) && (
-                    <motion.div 
+                    <motion.div
                       whileTap={{ scale: 0.98 }}
                       onClick={() => emailInputRef.current?.focus()}
-                      style={{ 
-                        marginTop: '0.5rem', 
-                        padding: '1rem', 
-                        background: 'hsl(var(--primary) / 0.05)', 
-                        borderRadius: '1rem', 
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '1rem',
+                        background: 'hsl(var(--primary) / 0.05)',
+                        borderRadius: '1rem',
                         border: '1px dashed hsl(var(--primary) / 0.2)',
                         cursor: 'pointer',
                         transition: 'background 0.2s'
@@ -728,10 +728,10 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
         {isEmoji || imgError ? (
           <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : (
-          <img 
-            src={iconUrl} 
-            alt={name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          <img
+            src={iconUrl}
+            alt={name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={() => setImgError(true)}
           />
         )}
@@ -782,10 +782,10 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
         {isEmoji || imgError ? (
           <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : iconUrl ? (
-          <img 
-            src={iconUrl} 
-            alt={name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          <img
+            src={iconUrl}
+            alt={name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -911,22 +911,22 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
               {cartItems.length === 0 ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  style={{ 
-                    textAlign: 'center', 
-                    marginTop: '6rem', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
+                  style={{
+                    textAlign: 'center',
+                    marginTop: '6rem',
+                    display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     padding: '0 2rem'
                   }}
                 >
-                  <div style={{ 
-                    width: '120px', 
-                    height: '120px', 
-                    background: 'hsl(var(--primary) / 0.08)', 
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    background: 'hsl(var(--primary) / 0.08)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
@@ -939,12 +939,12 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                   <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', marginBottom: '2rem', lineHeight: 1.5 }}>
                     Your cart is feeling a bit light... let's fix that with some fresh groceries!
                   </p>
-                  <button 
+                  <button
                     onClick={onClose}
-                    style={{ 
-                      background: 'hsl(var(--primary))', 
-                      color: 'white', 
-                      padding: '0.8rem 2rem', 
+                    style={{
+                      background: 'hsl(var(--primary))',
+                      color: 'white',
+                      padding: '0.8rem 2rem',
                       borderRadius: '2rem',
                       fontWeight: 700,
                       fontSize: '0.9rem',
@@ -1387,7 +1387,7 @@ function App() {
         })
       });
       const data = await response.json();
-      
+
       if (response.status === 401) {
         setToken(null);
         setUser(null);
