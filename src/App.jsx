@@ -1272,6 +1272,12 @@ function App() {
     }
 
     setIsDetectingLocation(true);
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    };
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
@@ -1281,14 +1287,34 @@ function App() {
             headers: { "User-Agent": userAgent }
           });
           const data = await response.json();
-          if (data && data.display_name) {
+          
+          if (data && data.address) {
+            const addr = data.address;
+            // Build a precision address: Road/Neighborhood, Area, City
+            const parts = [];
+            if (addr.road) parts.push(addr.road);
+            else if (addr.amenity) parts.push(addr.amenity);
+            
+            if (addr.suburb) parts.push(addr.suburb);
+            else if (addr.neighbourhood) parts.push(addr.neighbourhood);
+            else if (addr.residential) parts.push(addr.residential);
+
+            if (addr.city === 'Bahraich' || addr.town === 'Bahraich' || addr.village === 'Bahraich') {
+                parts.push('Bahraich');
+            } else {
+                parts.push(addr.city || addr.town || addr.village || 'Bahraich');
+            }
+
+            const formattedAddress = parts.length > 0 ? parts.join(', ') : data.display_name;
+            setAddress(formattedAddress);
+          } else if (data && data.display_name) {
             setAddress(data.display_name);
           } else {
             setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
           }
         } catch (error) {
           console.error("Error fetching address:", error);
-          alert("Could not detect address. Please enter it manually.");
+          alert("Could not detect exact area. Please enter it manually.");
         } finally {
           setIsDetectingLocation(false);
         }
@@ -1297,11 +1323,12 @@ function App() {
         console.error("Geolocation error:", error);
         setIsDetectingLocation(false);
         if (error.code === 1) {
-          alert("Please allow location access in your browser settings to use this feature.");
+          alert("Please allow 'Precise Location' access in your settings for exact area detection.");
         } else {
-          alert("Could not detect your exact location. Please try moving outdoors or enter it manually.");
+          alert("Could not detect your exact area. Please try moving outdoors.");
         }
-      }
+      },
+      options
     );
   };
   const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
