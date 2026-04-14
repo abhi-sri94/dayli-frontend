@@ -91,7 +91,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
               >
-                Hi, {user.name ? (user.name.length > 15 ? 'User' : user.name.split(' ')[0]) : 'User'}
+                Hi, {(user.name && user.name !== 'ADsdfg' && user.name.length < 15) ? user.name.split(' ')[0] : 'User'}
                 <ChevronDown size={16} />
               </div>
 
@@ -280,8 +280,10 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
                   {user?.name?.[0]}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{user?.name}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#666' }}>{user?.email || user?.phone_number}</div>
+                  <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'hsl(var(--foreground))' }}>{user?.name || 'Dayli User'}</div>
+                  <div style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {user?.phone_number || (user?.email?.includes('placeholder') ? 'No email added' : user?.email)}
+                  </div>
                 </div>
               </div>
 
@@ -308,22 +310,35 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
               <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', marginBottom: '1rem' }}>Account Details</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {user?.email && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <Mail size={18} color="#888" />
-                      <span style={{ fontSize: '0.9rem' }}>{user.email}</span>
+                  {user?.email && !user.email.includes('placeholder') && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 0' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Mail size={16} color="#666" />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#999', textTransform: 'uppercase' }}>Email Address</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{user.email}</span>
+                      </div>
                     </div>
                   )}
                   {user?.phone_number && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <Phone size={18} color="#888" />
-                      <span style={{ fontSize: '0.9rem' }}>{user.phone_number}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 0' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Phone size={16} color="#666" />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#999', textTransform: 'uppercase' }}>Phone Number</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{user.phone_number}</span>
+                      </div>
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <User size={18} color="#888" />
-                    <span style={{ fontSize: '0.9rem' }}>ID: {user?.firebase_uid || user?.id}</span>
-                  </div>
+                  {(!user?.email || user.email.includes('placeholder')) && (
+                    <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'hsl(var(--primary) / 0.05)', borderRadius: '1rem', border: '1px dashed hsl(var(--primary) / 0.2)' }}>
+                      <p style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, margin: 0 }}>
+                        📧 Add your email to receive order updates and receipts!
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
