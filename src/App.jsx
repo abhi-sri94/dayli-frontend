@@ -177,7 +177,9 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingName, setEditingName] = useState(user?.name || '');
+  const [editingEmail, setEditingEmail] = useState(user?.email?.includes('placeholder') ? '' : (user?.email || ''));
   const [isUpdating, setIsUpdating] = useState(false);
+  const emailInputRef = React.useRef(null);
 
   useEffect(() => {
     if (isOpen && activeTab === 'orders' && token) {
@@ -212,7 +214,7 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name: editingName })
+        body: JSON.stringify({ name: editingName, email: editingEmail })
       });
       const data = await response.json();
       if (data.status === 'success') {
@@ -294,9 +296,23 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
                     type="text"
                     value={editingName}
                     onChange={e => setEditingName(e.target.value)}
+                    placeholder="Enter your full name"
                     style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', outline: 'none' }}
                   />
                 </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#666', display: 'block', marginBottom: '0.5rem' }}>Email Address</label>
+                  <input
+                    ref={emailInputRef}
+                    type="email"
+                    value={editingEmail}
+                    onChange={e => setEditingEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #ddd', outline: 'none' }}
+                  />
+                </div>
+
                 <button
                   type="submit"
                   disabled={isUpdating}
@@ -333,11 +349,25 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
                     </div>
                   )}
                   {(!user?.email || user.email.includes('placeholder')) && (
-                    <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'hsl(var(--primary) / 0.05)', borderRadius: '1rem', border: '1px dashed hsl(var(--primary) / 0.2)' }}>
-                      <p style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, margin: 0 }}>
-                        📧 Add your email to receive order updates and receipts!
+                    <motion.div 
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => emailInputRef.current?.focus()}
+                      style={{ 
+                        marginTop: '0.5rem', 
+                        padding: '1rem', 
+                        background: 'hsl(var(--primary) / 0.05)', 
+                        borderRadius: '1rem', 
+                        border: '1px dashed hsl(var(--primary) / 0.2)',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'hsl(var(--primary) / 0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'hsl(var(--primary) / 0.05)'}
+                    >
+                      <p style={{ fontSize: '0.82rem', color: 'hsl(var(--primary))', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        📧 <span style={{ textDecoration: 'underline' }}>Add your email</span> to receive updates and receipts!
                       </p>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
