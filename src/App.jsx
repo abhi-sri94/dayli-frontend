@@ -875,6 +875,40 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
 
 const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, isCheckingOut }) => {
   const [address, setAddress] = React.useState('Bahraich, Uttar Pradesh');
+  const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+          if (data && data.display_name) {
+            setAddress(data.display_name);
+          } else {
+            setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
+        } catch (error) {
+          console.error("Error fetching address:", error);
+          alert("Could not detect address. Please enter it manually.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setIsDetectingLocation(false);
+        alert("Location access denied. Please enter address manually.");
+      }
+    );
+  };
 
   return (
     <AnimatePresence>
@@ -960,7 +994,28 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>Delivery Address</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Delivery Address</label>
+                      <button 
+                        onClick={handleDetectLocation}
+                        disabled={isDetectingLocation}
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          color: 'hsl(var(--primary))', 
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <MapPin size={12} />
+                        {isDetectingLocation ? 'Detecting...' : 'Detect My Location'}
+                      </button>
+                    </div>
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
