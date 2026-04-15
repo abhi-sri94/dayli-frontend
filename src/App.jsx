@@ -971,7 +971,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Delivery Address</label>
                       <button 
-                        onClick={handleDetectLocation}
+                        onClick={onDetectLocation}
                         disabled={isDetectingLocation}
                         style={{ 
                           fontSize: '0.75rem', 
