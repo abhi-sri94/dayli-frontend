@@ -827,7 +827,12 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
     }}
   >
     <div className="product-image-container" style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+      <img 
+        src={product.image} 
+        alt={product.name} 
+        loading="lazy"
+        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
+      />
     </div>
     <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
       {product.weight}
@@ -1773,19 +1778,12 @@ function App() {
                       product={{
                         ...product,
                         price: product.selling_price,
-                        image: (
-                          <img 
-                            src={(() => {
-                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                              const path = product.primary_image.image_path;
-                              const isExternal = /^https?:\/\//.test(path);
-                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                            })()} 
-                            alt={product.name} 
-                            loading="lazy"
-                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-                          />
-                        )
+                        image: (() => {
+                          if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                          const path = product.primary_image.image_path;
+                          const isExternal = /^https?:\/\//.test(path);
+                          return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                        })()
                       }}
                       quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
                       onAdd={addToCart}
