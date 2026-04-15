@@ -995,7 +995,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
 
                   {cartItems.map(item => (
                     <div key={item.id} style={{ display: 'flex', gap: '1rem' }}>
-                      <img src={item.image} alt={item.name} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                      <img src={item.image} alt={item.name} loading="lazy" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.name}</div>
                         <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{item.weight}</div>
@@ -1313,14 +1313,12 @@ function App() {
             setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
           }
         } catch (error) {
-          console.error("Error fetching address:", error);
           alert("Could not detect exact area. Please enter it manually.");
         } finally {
           setIsDetectingLocation(false);
         }
       },
       (error) => {
-        console.error("Geolocation error:", error);
         setIsDetectingLocation(false);
         if (error.code === 1) {
           alert("Please allow 'Precise Location' access in your settings for exact area detection.");
@@ -1381,7 +1379,7 @@ function App() {
           setSearchResults(data.data.data);
         }
       } catch (err) {
-        console.error("Search failed:", err);
+        // Silently handle search fail
       } finally {
         setIsSearching(false);
       }
@@ -1775,12 +1773,19 @@ function App() {
                       product={{
                         ...product,
                         price: product.selling_price,
-                        image: (() => {
-                          if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                          const path = product.primary_image.image_path;
-                          const isExternal = /^https?:\/\//.test(path);
-                          return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                        })()
+                        image: (
+                          <img 
+                            src={(() => {
+                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                              const path = product.primary_image.image_path;
+                              const isExternal = /^https?:\/\//.test(path);
+                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                            })()} 
+                            alt={product.name} 
+                            loading="lazy"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                          />
+                        )
                       }}
                       quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
                       onAdd={addToCart}
