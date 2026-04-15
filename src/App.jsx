@@ -757,12 +757,12 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
     <div
       onClick={() => onClick(id)}
       style={{
+        width: '100px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.75rem',
         cursor: 'pointer',
-        flexShrink: 0,
         userSelect: 'none',
         WebkitUserSelect: 'none'
       }}>
@@ -804,7 +804,10 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
           textAlign: 'center',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          color: isActive ? 'hsl(var(--primary))' : '#1a1a1a'
+          color: isActive ? 'hsl(var(--primary))' : '#1a1a1a',
+          width: '100%',
+          overflowWrap: 'break-word',
+          lineHeight: '1.2'
         }}>
         {name}
       </div>
@@ -1938,12 +1941,9 @@ function App() {
               <div style={{
                 display: 'flex',
                 gap: '1.5rem',
-                overflowX: 'auto',
-                padding: '0.5rem 1rem 1.5rem',
-                margin: '0 -1rem',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch'
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                padding: '0.5rem 0 1.5rem',
               }}>
                 {loading ? (
                   [1, 2, 3, 4, 5, 6].map(i => (
