@@ -812,10 +812,220 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
   );
 };
 
-const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
+const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => {
+  const [detail, setDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImg, setActiveImg] = useState(0);
+
+  useEffect(() => {
+    if (!product) return;
+    setLoading(true);
+    setActiveImg(0);
+    fetch(`${apiBaseUrl}/api/products/${product.slug || product.id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success') setDetail(data.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [product?.id]);
+
+  if (!product) return null;
+
+  const images = detail?.images?.length
+    ? detail.images.map(img => img.image_path?.startsWith('http') ? img.image_path : `${apiBaseUrl}/storage/${img.image_path}`)
+    : [product.image || 'https://placehold.co/300'];
+
+  const price = detail?.selling_price ?? product.price;
+  const basePrice = detail?.base_price;
+  const hasDiscount = basePrice && basePrice > price;
+  const discountPct = hasDiscount ? Math.round((1 - price / basePrice) * 100) : 0;
+  const shortDesc = detail?.short_description || '';
+  const longDesc = detail?.long_description || '';
+  const unit = detail?.unit || '';
+  const weight = detail?.weight || '';
+  const sku = detail?.sku || '';
+  const inStock = detail?.stock_status === 'in_stock' || detail?.stock_status == null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.55 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, background: 'black', zIndex: 200 }}
+      />
+      <motion.div
+        key="drawer"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          maxHeight: '92vh',
+          background: 'white',
+          borderRadius: '1.5rem 1.5rem 0 0',
+          zIndex: 201,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '0.75rem' }}>
+          <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#e2e8f0' }} />
+        </div>
+
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {loading ? (
+            <div style={{ padding: '4rem', textAlign: 'center', color: '#888' }}>
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} style={{ display: 'inline-block', marginBottom: '1rem' }}>
+                <Package size={36} color="hsl(var(--primary))" />
+              </motion.div>
+              <p style={{ fontWeight: 600 }}>Loading product...</p>
+            </div>
+          ) : (
+            <>
+              {/* Image Gallery */}
+              <div style={{ position: 'relative', background: '#f8fafc' }}>
+                <button
+                  onClick={onClose}
+                  style={{
+                    position: 'absolute', top: '1rem', right: '1rem', zIndex: 10,
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: 'white', border: '1px solid #eee',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)', fontSize: '1rem', cursor: 'pointer'
+                  }}
+                >✕</button>
+
+                <div style={{ height: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+                  <motion.img
+                    key={activeImg}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    src={images[activeImg]}
+                    alt={product.name}
+                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+
+                {images.length > 1 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', paddingBottom: '1rem' }}>
+                    {images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImg(idx)}
+                        style={{
+                          width: '48px', height: '48px', borderRadius: '0.5rem', overflow: 'hidden',
+                          border: `2px solid ${activeImg === idx ? 'hsl(var(--primary))' : '#e2e8f0'}`,
+                          padding: 0, cursor: 'pointer', background: '#f8fafc'
+                        }}
+                      >
+                        <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Product Info */}
+              <div style={{ padding: '1.5rem' }}>
+                {/* Badges */}
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                  {!inStock && (
+                    <span style={{ background: '#fee2e2', color: '#dc2626', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.7rem', fontWeight: 700 }}>OUT OF STOCK</span>
+                  )}
+                  {hasDiscount && (
+                    <span style={{ background: '#dcfce7', color: '#16a34a', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.7rem', fontWeight: 700 }}>{discountPct}% OFF</span>
+                  )}
+                </div>
+
+                <h1 style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.3, marginBottom: '0.5rem' }}>
+                  {detail?.name || product.name}
+                </h1>
+
+                {(unit || weight) && (
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' }}>
+                    {[weight && `${weight}`, unit].filter(Boolean).join(' • ')}
+                  </p>
+                )}
+
+                {shortDesc && (
+                  <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}>{shortDesc}</p>
+                )}
+
+                {/* Price Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'hsl(var(--primary))' }}>₹{price}</span>
+                  {hasDiscount && (
+                    <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{basePrice}</span>
+                  )}
+                </div>
+
+                {/* Long Description */}
+                {longDesc && (
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', color: '#1e293b' }}>About this product</h3>
+                    <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.7 }}>{longDesc}</p>
+                  </div>
+                )}
+
+                {/* Meta Info */}
+                {sku && (
+                  <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '0.75rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                      <span style={{ color: '#64748b' }}>SKU</span>
+                      <span style={{ fontWeight: 700 }}>{sku}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Sticky Add to Cart Footer */}
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #f1f5f9', background: 'white' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '1.3rem', fontWeight: 900 }}>₹{price}</span>
+              {unit && <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '0.3rem' }}>{unit}</span>}
+            </div>
+            {quantity > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', background: 'hsl(var(--primary))', color: 'white', borderRadius: '0.75rem', overflow: 'hidden' }}>
+                <button onClick={() => onUpdate(product.id, -1)} style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>-</button>
+                <span style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
+                <button onClick={() => onUpdate(product.id, 1)} style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>+</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { onAdd(product); }}
+                disabled={!inStock}
+                className="btn btn-primary"
+                style={{ padding: '0.75rem 2rem', opacity: inStock ? 1 : 0.5 }}
+              >
+                {inStock ? 'Add to Cart' : 'Out of Stock'}
+              </button>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
   <motion.div
     whileHover={{ y: -4 }}
     className="product-card"
+    onClick={() => onOpenDetail && onOpenDetail(product)}
     style={{
       background: 'white',
       border: '1px solid hsl(var(--border))',
@@ -823,7 +1033,8 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
       padding: '0.75rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.5rem'
+      gap: '0.5rem',
+      cursor: 'pointer'
     }}
   >
     <div className="product-image-container" style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -835,12 +1046,12 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
       />
     </div>
     <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
-      {product.weight}
+      {product.unit || product.weight}
     </div>
     <div style={{ fontWeight: 700, fontSize: '0.9rem', minHeight: '2.4rem', lineHeight: '1.2' }}>
       {product.name}
     </div>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
       <div style={{ fontWeight: 700 }}>₹{product.price}</div>
       {quantity > 0 ? (
         <div style={{
@@ -852,18 +1063,18 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate }) => (
           overflow: 'hidden'
         }}>
           <button
-            onClick={() => onUpdate(product.id, -1)}
+            onClick={(e) => { e.stopPropagation(); onUpdate(product.id, -1); }}
             style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
           >-</button>
           <span style={{ minWidth: '1.5rem', textAlign: 'center', fontWeight: 700, fontSize: '0.85rem' }}>{quantity}</span>
           <button
-            onClick={() => onUpdate(product.id, 1)}
+            onClick={(e) => { e.stopPropagation(); onUpdate(product.id, 1); }}
             style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
           >+</button>
         </div>
       ) : (
         <button
-          onClick={() => onAdd(product)}
+          onClick={(e) => { e.stopPropagation(); onAdd(product); }}
           style={{
             color: 'hsl(var(--primary))',
             border: '1px solid hsl(var(--primary))',
@@ -1339,6 +1550,7 @@ function App() {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
@@ -1712,6 +1924,7 @@ function App() {
                     quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
                     onAdd={addToCart}
                     onUpdate={updateQuantity}
+                    onOpenDetail={setSelectedProduct}
                   />
                 ))}
               </div>
@@ -1788,6 +2001,7 @@ function App() {
                       quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
                       onAdd={addToCart}
                       onUpdate={updateQuantity}
+                      onOpenDetail={setSelectedProduct}
                     />
                   ))
                 })()}
@@ -1809,6 +2023,16 @@ function App() {
         onDetectLocation={handleDetectLocation}
         isDetectingLocation={isDetectingLocation}
       />
+
+      {selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          quantity={cartItems.find(item => item.id === selectedProduct.id)?.quantity || 0}
+          onAdd={(p) => { addToCart(p); }}
+          onUpdate={updateQuantity}
+        />
+      )}
 
       <footer style={{ borderTop: '1px solid #eee', padding: '4rem 0', background: '#f8f9fa' }}>
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem' }}>
