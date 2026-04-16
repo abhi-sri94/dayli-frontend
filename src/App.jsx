@@ -1005,16 +1005,20 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
               <div style={{ display: 'flex', alignItems: 'center', background: 'hsl(var(--primary))', color: 'white', borderRadius: '0.75rem', overflow: 'hidden' }}>
                 <button onClick={() => onUpdate(product.id, -1)} style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>-</button>
                 <span style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
-                <button onClick={() => onUpdate(product.id, 1)} style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>+</button>
+                <button 
+                  onClick={() => onUpdate(product.id, 1)} 
+                  disabled={quantity >= (detail?.stock_quantity ?? 999)}
+                  style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem', opacity: quantity >= (detail?.stock_quantity ?? 999) ? 0.5 : 1 }}
+                >+</button>
               </div>
             ) : (
               <button
                 onClick={() => { onAdd(product); }}
-                disabled={!inStock}
+                disabled={!inStock || (detail?.stock_quantity ?? 999) <= 0}
                 className="btn btn-primary"
-                style={{ padding: '0.75rem 2rem', opacity: inStock ? 1 : 0.5 }}
+                style={{ padding: '0.75rem 2rem', opacity: (inStock && (detail?.stock_quantity ?? 999) > 0) ? 1 : 0.5 }}
               >
-                {inStock ? 'Add to Cart' : 'Out of Stock'}
+                {(inStock && (detail?.stock_quantity ?? 999) > 0) ? 'Add to Cart' : 'Out of Stock'}
               </button>
             )}
           </div>
@@ -1072,12 +1076,14 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
           <span style={{ minWidth: '1.5rem', textAlign: 'center', fontWeight: 700, fontSize: '0.85rem' }}>{quantity}</span>
           <button
             onClick={(e) => { e.stopPropagation(); onUpdate(product.id, 1); }}
-            style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
+            disabled={quantity >= (product.stock_quantity ?? 999)}
+            style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800, opacity: quantity >= (product.stock_quantity ?? 999) ? 0.5 : 1 }}
           >+</button>
         </div>
       ) : (
         <button
           onClick={(e) => { e.stopPropagation(); onAdd(product); }}
+          disabled={(product.stock_quantity ?? 999) <= 0}
           style={{
             color: 'hsl(var(--primary))',
             border: '1px solid hsl(var(--primary))',
@@ -1085,11 +1091,12 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
             borderRadius: '0.5rem',
             fontWeight: 700,
             fontSize: '0.8rem',
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
+            opacity: (product.stock_quantity ?? 999) <= 0 ? 0.5 : 1
           }}
           className="add-btn"
         >
-          Add
+          {(product.stock_quantity ?? 999) <= 0 ? 'Out of Stock' : 'Add'}
         </button>
       )}
     </div>
@@ -1664,9 +1671,21 @@ function App() {
   const addToCart = (product) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
+      const stock = product.stock_quantity ?? 999;
+      
       if (existing) {
+        if (existing.quantity >= stock) {
+          alert(`Only ${stock} units available in stock.`);
+          return prev;
+        }
         return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
       }
+      
+      if (stock <= 0) {
+        alert("This item is currently out of stock.");
+        return prev;
+      }
+      
       return [...prev, { ...product, quantity: 1 }];
     });
   };
@@ -1675,6 +1694,13 @@ function App() {
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = item.quantity + delta;
+        const stock = item.stock_quantity ?? 999;
+
+        if (delta > 0 && newQty > stock) {
+          alert(`Only ${stock} units available in stock.`);
+          return item;
+        }
+
         return newQty > 0 ? { ...item, quantity: newQty } : null;
       }
       return item;
