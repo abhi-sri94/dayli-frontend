@@ -1632,7 +1632,7 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
 
   if (loading) {
     return (
-      <div style={{ width: '100%', aspectRatio: '5/1', background: '#f5f5f5', borderRadius: '1rem', marginBottom: '1.5rem', animation: 'pulse 2s infinite' }} />
+      <div style={{ width: '100%', aspectRatio: '3/1', background: '#f5f5f5', borderRadius: '1rem', marginBottom: '1.5rem', animation: 'pulse 2s infinite' }} />
     );
   }
 
@@ -1654,7 +1654,7 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
     <div style={{ 
       position: 'relative', 
       width: '100%', 
-      aspectRatio: '5/1',
+      aspectRatio: '3/1',
       borderRadius: '1rem', 
       overflow: 'hidden', 
       marginBottom: '1.5rem', 
