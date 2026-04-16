@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
@@ -1154,7 +1154,25 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
   </motion.div>
 );
 
-const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, isCheckingOut, address, setAddress, onDetectLocation, isDetectingLocation }) => {
+const CartDrawer = ({ 
+  isOpen, 
+  onClose, 
+  cartItems, 
+  onUpdateQuantity, 
+  onCheckout, 
+  isCheckingOut, 
+  address, 
+  setAddress, 
+  onDetectLocation, 
+  isDetectingLocation,
+  appliedCoupon,
+  onApplyCoupon,
+  onRemoveCoupon,
+  couponInput,
+  setCouponInput,
+  couponError,
+  isApplyingCoupon
+}) => {
 
   return (
     <AnimatePresence>
@@ -1287,6 +1305,79 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                       </div>
                     </div>
                   ))}
+
+                  {/* Coupon Section */}
+                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Tag size={16} />
+                      Coupons & Offers
+                    </div>
+                    
+                    {appliedCoupon ? (
+                      <div style={{ 
+                        background: 'hsl(var(--primary) / 0.08)', 
+                        padding: '1rem', 
+                        borderRadius: '0.75rem', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        border: '1px dashed hsl(var(--primary) / 0.3)'
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: 800, color: 'hsl(var(--primary))', fontSize: '0.9rem' }}>{appliedCoupon.code}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Saved ₹{appliedCoupon.discount_amount} with this coupon!</div>
+                        </div>
+                        <button 
+                          onClick={onRemoveCoupon}
+                          style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ flex: 1, position: 'relative' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Enter coupon code"
+                            value={couponInput}
+                            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                            style={{ 
+                              width: '100%', 
+                              padding: '0.6rem 1rem', 
+                              borderRadius: '0.5rem', 
+                              border: '1px solid #ddd',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              outline: 'none'
+                            }}
+                          />
+                          {couponError && (
+                            <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', fontWeight: 500 }}>
+                              {couponError}
+                            </div>
+                          )}
+                        </div>
+                        <button 
+                          onClick={() => onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0))}
+                          disabled={isApplyingCoupon || !couponInput.trim()}
+                          style={{ 
+                            padding: '0 1.25rem', 
+                            borderRadius: '0.5rem', 
+                            background: 'hsl(var(--primary))', 
+                            color: 'white', 
+                            fontWeight: 700, 
+                            fontSize: '0.8rem',
+                            height: '2.5rem',
+                            opacity: (isApplyingCoupon || !couponInput.trim()) ? 0.6 : 1,
+                            cursor: (isApplyingCoupon || !couponInput.trim()) ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {isApplyingCoupon ? '...' : 'APPLY'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1294,7 +1385,8 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
             {cartItems.length > 0 && (() => {
               const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
               const deliveryFee = subtotal < 100 ? 20 : 0;
-              const total = subtotal + deliveryFee;
+              const couponDiscount = appliedCoupon ? appliedCoupon.discount_amount : 0;
+              const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
 
               return (
                 <div style={{ padding: '1.5rem', borderTop: '1px solid #eee', background: 'white' }}>
@@ -1303,6 +1395,17 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout, 
                       <span>Subtotal</span>
                       <span>₹{subtotal}</span>
                     </div>
+
+                    {couponDiscount > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Tag size={12} />
+                          Coupon Discount ({appliedCoupon.code})
+                        </span>
+                        <span>-₹{couponDiscount}</span>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
                       <span>Delivery Fee</span>
                       <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
@@ -1521,6 +1624,10 @@ function App() {
     const saved = localStorage.getItem('dayli_cart');
     return saved ? JSON.parse(saved) : [];
   });
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('dayli_categories');
@@ -1639,8 +1746,53 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     setToken(null);
+    setAppliedCoupon(null);
     localStorage.removeItem('dayli_user');
     localStorage.removeItem('dayli_token');
+  };
+
+  const handleApplyCoupon = async (subtotal) => {
+    if (!token) {
+      setCouponError('Please login to apply coupon');
+      return;
+    }
+    if (!couponInput.trim()) {
+      setCouponError('Enter a coupon code');
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponError('');
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/coupons/apply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          code: couponInput.trim(),
+          amount: subtotal
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAppliedCoupon(data.data);
+        setCouponError('');
+      } else {
+        setCouponError(data.message || 'Invalid coupon');
+      }
+    } catch (err) {
+      setCouponError('Failed to apply coupon');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError('');
   };
 
   useEffect(() => {
@@ -1771,7 +1923,8 @@ function App() {
         body: JSON.stringify({
           items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
           delivery_address: address,
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          coupon_code: appliedCoupon ? appliedCoupon.code : null
         })
       });
       const data = await response.json();
@@ -2101,6 +2254,13 @@ function App() {
         setAddress={setAddress}
         onDetectLocation={handleDetectLocation}
         isDetectingLocation={isDetectingLocation}
+        appliedCoupon={appliedCoupon}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={handleRemoveCoupon}
+        couponInput={couponInput}
+        setCouponInput={setCouponInput}
+        couponError={couponError}
+        isApplyingCoupon={isApplyingCoupon}
       />
 
       {selectedProduct && (
