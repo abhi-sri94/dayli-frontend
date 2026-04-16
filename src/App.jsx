@@ -1059,7 +1059,34 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       {product.name}
     </div>
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
-      <div style={{ fontWeight: 700 }}>₹{product.price}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontWeight: 800, fontSize: '1rem' }}>₹{product.price}</span>
+          {product.base_price && parseFloat(product.base_price) > parseFloat(product.price) && (
+            <span style={{ 
+              fontSize: '0.75rem', 
+              color: 'hsl(var(--muted-foreground))', 
+              textDecoration: 'line-through',
+              fontWeight: 500 
+            }}>
+              ₹{product.base_price}
+            </span>
+          )}
+        </div>
+        {product.base_price && parseFloat(product.base_price) > parseFloat(product.price) && (
+          <div style={{ 
+            fontSize: '0.65rem', 
+            background: 'hsl(var(--primary) / 0.1)', 
+            color: 'hsl(var(--primary))', 
+            padding: '2px 6px', 
+            borderRadius: '4px',
+            fontWeight: 800,
+            width: 'fit-content'
+          }}>
+            {Math.round(((product.base_price - product.price) / product.base_price) * 100)}% OFF
+          </div>
+        )}
+      </div>
       {quantity > 0 ? (
         <div style={{
           display: 'flex',
@@ -1943,6 +1970,7 @@ function App() {
                     product={{
                       ...product,
                       price: product.selling_price,
+                      base_price: product.base_price,
                       image: (() => {
                         if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
                         const path = product.primary_image.image_path;
@@ -2017,6 +2045,7 @@ function App() {
                       product={{
                         ...product,
                         price: product.selling_price,
+                        base_price: product.base_price,
                         image: (() => {
                           if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
                           const path = product.primary_image.image_path;
