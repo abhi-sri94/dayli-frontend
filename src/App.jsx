@@ -839,14 +839,14 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
     ? detail.images.map(img => img.image_path?.startsWith('http') ? img.image_path : `${apiBaseUrl}/storage/${img.image_path}`)
     : [product.image || 'https://placehold.co/300'];
 
-  const price = detail?.selling_price ?? product.price;
-  const basePrice = detail?.base_price;
-  const hasDiscount = basePrice && basePrice > price;
-  const discountPct = hasDiscount ? Math.round((1 - price / basePrice) * 100) : 0;
+  const price = detail?.selling_price || product.price;
+  const mrp = detail?.mrp || product.mrp;
+  const hasDiscount = mrp && parseFloat(mrp) > parseFloat(price);
+  const discountPct = hasDiscount ? Math.round(((mrp - price) / mrp) * 100) : 0;
   const shortDesc = detail?.short_description || '';
   const longDesc = detail?.long_description || '';
-  const unit = detail?.unit || '';
-  const weight = detail?.weight || '';
+  const unit = detail?.unit || product.unit;
+  const weight = detail?.weight || product.weight;
   const sku = detail?.sku || '';
   const inStock = detail?.stock_status === 'in_stock' || detail?.stock_status == null;
 
@@ -968,7 +968,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                   <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'hsl(var(--primary))' }}>₹{price}</span>
                   {hasDiscount && (
-                    <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{basePrice}</span>
+                    <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{mrp}</span>
                   )}
                 </div>
 
@@ -1062,18 +1062,18 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontWeight: 800, fontSize: '1rem' }}>₹{product.price}</span>
-          {product.base_price && parseFloat(product.base_price) > parseFloat(product.price) && (
+          {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
             <span style={{ 
               fontSize: '0.75rem', 
               color: 'hsl(var(--muted-foreground))', 
               textDecoration: 'line-through',
               fontWeight: 500 
             }}>
-              ₹{product.base_price}
+              ₹{product.mrp}
             </span>
           )}
         </div>
-        {product.base_price && parseFloat(product.base_price) > parseFloat(product.price) && (
+        {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
           <div style={{ 
             fontSize: '0.65rem', 
             background: 'hsl(var(--primary) / 0.1)', 
@@ -1083,7 +1083,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
             fontWeight: 800,
             width: 'fit-content'
           }}>
-            {Math.round(((product.base_price - product.price) / product.base_price) * 100)}% OFF
+            {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
           </div>
         )}
       </div>
@@ -1970,7 +1970,7 @@ function App() {
                     product={{
                       ...product,
                       price: product.selling_price,
-                      base_price: product.base_price,
+                      mrp: product.mrp,
                       image: (() => {
                         if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
                         const path = product.primary_image.image_path;
@@ -2045,7 +2045,7 @@ function App() {
                       product={{
                         ...product,
                         price: product.selling_price,
-                        base_price: product.base_price,
+                        mrp: product.mrp,
                         image: (() => {
                           if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
                           const path = product.primary_image.image_path;
