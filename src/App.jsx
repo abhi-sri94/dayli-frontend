@@ -1044,9 +1044,33 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       cursor: 'pointer'
     }}
   >
-    <div className="product-image-container" style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ 
+      height: '140px', 
+      marginBottom: '1rem', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      position: 'relative'
+    }}>
+      {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          background: 'hsl(var(--primary))',
+          color: 'white',
+          fontSize: '0.65rem',
+          fontWeight: 900,
+          padding: '2px 6px',
+          borderRadius: '4px',
+          zIndex: 1,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+        </div>
+      )}
       <img 
-        src={product.image} 
+        src={product.image || 'https://placehold.co/200'} 
         alt={product.name} 
         loading="lazy"
         style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
@@ -1061,7 +1085,11 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontWeight: 800, fontSize: '1rem' }}>₹{product.price}</span>
+          <span style={{ 
+            fontWeight: 800, 
+            fontSize: '1rem',
+            color: product.mrp && parseFloat(product.mrp) > parseFloat(product.price) ? 'hsl(var(--primary))' : 'inherit'
+          }}>₹{product.price}</span>
           {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
             <span style={{ 
               fontSize: '0.75rem', 
@@ -1073,19 +1101,6 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
             </span>
           )}
         </div>
-        {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
-          <div style={{ 
-            fontSize: '0.65rem', 
-            background: 'hsl(var(--primary) / 0.1)', 
-            color: 'hsl(var(--primary))', 
-            padding: '2px 6px', 
-            borderRadius: '4px',
-            fontWeight: 800,
-            width: 'fit-content'
-          }}>
-            {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
-          </div>
-        )}
       </div>
       {quantity > 0 ? (
         <div style={{
@@ -1647,8 +1662,8 @@ function App() {
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch(`${apiBaseUrl}/api/products?featured=1`),
-          fetch(`${apiBaseUrl}/api/categories`)
+          fetch(`${apiBaseUrl}/api/products?featured=1&v=${Date.now()}`),
+          fetch(`${apiBaseUrl}/api/categories?v=${Date.now()}`)
         ]);
         const prodData = await prodRes.json();
         const catData = await catRes.json();
@@ -1679,7 +1694,7 @@ function App() {
     const fetchCategoryProducts = async () => {
       setIsCategoryLoading(true);
       try {
-        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${selectedCategoryId}&limit=50`);
+        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${selectedCategoryId}${searchQuery ? `&search=${searchQuery}` : ''}&v=${Date.now()}`);
         const data = await res.json();
         if (data.status === 'success') setCategoryProducts(data.data.data);
       } catch (err) {
