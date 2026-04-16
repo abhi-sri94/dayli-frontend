@@ -1091,14 +1091,23 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
             color: product.mrp && parseFloat(product.mrp) > parseFloat(product.price) ? 'hsl(var(--primary))' : 'inherit'
           }}>₹{product.price}</span>
           {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
-            <span style={{ 
-              fontSize: '0.75rem', 
-              color: 'hsl(var(--muted-foreground))', 
-              textDecoration: 'line-through',
-              fontWeight: 500 
-            }}>
-              ₹{product.mrp}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ 
+                fontSize: '0.75rem', 
+                color: 'hsl(var(--muted-foreground))', 
+                textDecoration: 'line-through',
+                fontWeight: 500 
+              }}>
+                ₹{product.mrp}
+              </span>
+              <span style={{ 
+                fontSize: '0.7rem', 
+                color: 'hsl(var(--primary))', 
+                fontWeight: 700 
+              }}>
+                ({Math.round(((parseFloat(product.mrp) - parseFloat(product.price)) / parseFloat(product.mrp)) * 100)}% OFF)
+              </span>
+            </div>
           )}
         </div>
       </div>
