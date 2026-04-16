@@ -1619,6 +1619,79 @@ const OrderStatus = ({ orderNumber, onBack }) => {
   );
 };
 
+const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [banners.length]);
+
+  if (loading) {
+    return (
+      <div style={{ width: '100%', height: '220px', background: '#f5f5f5', borderRadius: '1.5rem', marginBottom: '2rem', animation: 'pulse 2s infinite' }} />
+    );
+  }
+
+  if (banners.length === 0) return null;
+
+  const currentBanner = banners[currentIndex];
+
+  const handleBannerClick = () => {
+    if (currentBanner.link_type === 'category' && currentBanner.link_id) {
+      onCategoryClick(parseInt(currentBanner.link_id));
+    } else if (currentBanner.link_type === 'product' && currentBanner.link_id) {
+      onProductClick(currentBanner.link_id);
+    } else if (currentBanner.link_type === 'external' && currentBanner.link_id) {
+      window.open(currentBanner.link_id, '_blank');
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%', borderRadius: '1.5rem', overflow: 'hidden', marginBottom: '3rem', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default' }}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          onClick={handleBannerClick}
+          style={{ width: '100%', height: 'auto', minHeight: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <img
+            src={currentBanner.image_url}
+            alt={currentBanner.title || 'Promotional Banner'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {banners.length > 1 && (
+        <div style={{ position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem' }}>
+          {banners.map((_, idx) => (
+            <div
+              key={idx}
+              onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
+              style={{
+                width: idx === currentIndex ? '24px' : '8px',
+                height: '8px',
+                borderRadius: '4px',
+                background: idx === currentIndex ? 'white' : 'rgba(255,255,255,0.5)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function App() {
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('dayli_cart');
@@ -1648,6 +1721,8 @@ function App() {
   const [profileModalTab, setProfileModalTab] = useState('profile');
   const [address, setAddress] = useState('Bahraich, Uttar Pradesh');
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [banners, setBanners] = useState([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -1822,12 +1897,14 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, banRes] = await Promise.all([
           fetch(`${apiBaseUrl}/api/products?featured=1&v=${Date.now()}`),
-          fetch(`${apiBaseUrl}/api/categories?v=${Date.now()}`)
+          fetch(`${apiBaseUrl}/api/categories?v=${Date.now()}`),
+          fetch(`${apiBaseUrl}/api/banners?v=${Date.now()}`)
         ]);
         const prodData = await prodRes.json();
         const catData = await catRes.json();
+        const banData = await banRes.json();
 
         if (catData.status === 'success') {
           setCategories(catData.data);
@@ -1837,10 +1914,14 @@ function App() {
           setProducts(prodData.data.data);
           localStorage.setItem('dayli_products', JSON.stringify(prodData.data.data));
         }
+        if (banData.success) {
+          setBanners(banData.data);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
+        setBannersLoading(false);
       }
     };
     fetchData();
@@ -2166,6 +2247,25 @@ function App() {
           </section>
         ) : (
           <>
+            <PromoBanners 
+              banners={banners} 
+              loading={bannersLoading} 
+              onCategoryClick={setSelectedCategoryId}
+              onProductClick={(id) => {
+                const fetchProdDetails = async () => {
+                  try {
+                    const res = await fetch(`${apiBaseUrl}/api/products/${id}`);
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                      setSelectedProduct(data.data);
+                    }
+                  } catch (err) {
+                    console.error("Error fetching banner product:", err);
+                  }
+                };
+                fetchProdDetails();
+              }}
+            />
             {/* Fast Categories Section */}
             <section style={{ marginBottom: '3rem' }}>
               <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
