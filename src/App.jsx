@@ -1632,7 +1632,7 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
 
   if (loading) {
     return (
-      <div style={{ width: '100%', height: '220px', background: '#f5f5f5', borderRadius: '1.5rem', marginBottom: '2rem', animation: 'pulse 2s infinite' }} />
+      <div style={{ width: '100%', aspectRatio: '5/1', background: '#f5f5f5', borderRadius: '1rem', marginBottom: '1.5rem', animation: 'pulse 2s infinite' }} />
     );
   }
 
@@ -1651,7 +1651,16 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', borderRadius: '1.5rem', overflow: 'hidden', marginBottom: '3rem', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default' }}>
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      aspectRatio: '5/1',
+      borderRadius: '1rem', 
+      overflow: 'hidden', 
+      marginBottom: '1.5rem', 
+      boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
+      cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default' 
+    }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -1660,7 +1669,7 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
           exit={{ opacity: 0, x: -50 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           onClick={handleBannerClick}
-          style={{ width: '100%', height: 'auto', minHeight: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <img
             src={currentBanner.image_url}
@@ -2164,7 +2173,7 @@ function App() {
         initialTab={profileModalTab}
       />
 
-      <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
+      <main className="container" style={{ paddingTop: '1rem', paddingBottom: '4rem' }}>
         {trackingOrderNumber ? (
           <OrderStatus
             orderNumber={trackingOrderNumber}
