@@ -960,7 +960,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                   </p>
                 )}
 
-                {shortDesc && (
+                {typeof shortDesc === 'string' && shortDesc.trim() !== '' && (
                   <div 
                     style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}
                     dangerouslySetInnerHTML={{ __html: shortDesc }}
@@ -976,7 +976,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                 </div>
 
                 {/* Long Description */}
-                {longDesc && (
+                {typeof longDesc === 'string' && longDesc.trim() !== '' && (
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', color: '#1e293b' }}>About this product</h3>
                     <div 
