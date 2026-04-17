@@ -961,7 +961,10 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                 )}
 
                 {shortDesc && (
-                  <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}>{shortDesc}</p>
+                  <div 
+                    style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}
+                    dangerouslySetInnerHTML={{ __html: shortDesc }}
+                  />
                 )}
 
                 {/* Price Row */}
@@ -976,7 +979,10 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                 {longDesc && (
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', color: '#1e293b' }}>About this product</h3>
-                    <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.7 }}>{longDesc}</p>
+                    <div 
+                      style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.7 }}
+                      dangerouslySetInnerHTML={{ __html: longDesc }}
+                    />
                   </div>
                 )}
 
