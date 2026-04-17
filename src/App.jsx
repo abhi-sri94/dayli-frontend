@@ -1764,25 +1764,34 @@ function App() {
           
           if (data && data.address) {
             const addr = data.address;
-            // Build a precision address: Road/Neighborhood, Area, City
             const parts = [];
-            if (addr.road) parts.push(addr.road);
-            else if (addr.amenity) parts.push(addr.amenity);
+
+            // 1. Specific House/Building
+            if (addr.house_number) parts.push(addr.house_number);
+            if (addr.building) parts.push(addr.building);
             
-            if (addr.suburb) parts.push(addr.suburb);
-            else if (addr.neighbourhood) parts.push(addr.neighbourhood);
-            else if (addr.residential) parts.push(addr.residential);
+            // 2. Road or Locality
+            if (addr.road) parts.push(addr.road);
+            else if (addr.pedestrian) parts.push(addr.pedestrian);
+            
+            // 3. Very Local Area (Neighborhood/Suburb)
+            const localArea = addr.neighbourhood || addr.suburb || addr.residential || addr.hamlet || addr.village;
+            if (localArea) parts.push(localArea);
 
-            if (addr.city === 'Bahraich' || addr.town === 'Bahraich' || addr.village === 'Bahraich') {
-                parts.push('Bahraich');
-            } else {
-                parts.push(addr.city || addr.town || addr.village || 'Bahraich');
-            }
+            // 4. District/City Segment
+            if (addr.subdistrict) parts.push(addr.subdistrict);
 
-            const formattedAddress = parts.length > 0 ? parts.join(', ') : data.display_name;
+            // 5. City/Town/Village (The Base)
+            const city = addr.city || addr.town || addr.village || 'Bahraich';
+            parts.push(city);
+
+            // 6. Postcode (Critical for delivery)
+            if (addr.postcode) parts.push(addr.postcode);
+            
+            const formattedAddress = parts.length > 2 ? parts.join(', ') : (data.display_name.split(',').slice(0, 3).join(','));
             setAddress(formattedAddress);
           } else if (data && data.display_name) {
-            setAddress(data.display_name);
+            setAddress(data.display_name.split(',').slice(0, 3).join(','));
           } else {
             setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
           }
