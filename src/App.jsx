@@ -6,6 +6,14 @@ import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "fireb
 
 const apiBaseUrl = 'https://api.dayli.co.in';
 
+const safeNum = (val) => {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  // Remove currency symbols, commas, and other non-numeric chars except the decimal point
+  const sanitized = String(val).replace(/[^0-9.]/g, '');
+  return parseFloat(sanitized) || 0;
+};
+
 // Mock Data (will be replaced by API calls)
 const CATEGORIES = [
   { id: 1, name: 'Vegetables & Fruits', icon: '🥦', color: '#e8f5e9' },
@@ -881,9 +889,9 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
     ? detail.images.map(img => img.image_path?.startsWith('http') ? img.image_path : `${apiBaseUrl}/storage/${img.image_path}`)
     : [product.image || 'https://placehold.co/300'];
 
-  const price = detail?.selling_price || product.price;
-  const mrp = detail?.mrp || product.mrp;
-  const hasDiscount = mrp && parseFloat(mrp) > parseFloat(price);
+  const price = safeNum(detail?.selling_price || product.price);
+  const mrp = safeNum(detail?.mrp || product.mrp);
+  const hasDiscount = mrp > price && price > 0;
   const discountPct = hasDiscount ? Math.round(((mrp - price) / mrp) * 100) : 0;
   const shortDesc = detail?.short_description || '';
   const longDesc = detail?.long_description || '';
@@ -1105,7 +1113,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       borderRadius: '16px',
       overflow: 'hidden'
     }}>
-      {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
+      {safeNum(product.mrp) > safeNum(product.price) && safeNum(product.price) > 0 && (
         <div style={{
           position: 'absolute',
           top: '8px',
@@ -1120,7 +1128,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
           boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
           fontFamily: 'var(--font-heading)'
         }}>
-          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+          {Math.round(((safeNum(product.mrp) - safeNum(product.price)) / safeNum(product.mrp)) * 100)}% OFF
         </div>
       )}
       <img 
@@ -1162,7 +1170,7 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
         <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1a1a1a' }}>
           ₹{product.price}
         </div>
-        {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
+        {safeNum(product.mrp) > safeNum(product.price) && safeNum(product.price) > 0 && (
           <span style={{ 
             fontSize: '0.7rem', 
             color: 'hsl(var(--muted-foreground))', 
