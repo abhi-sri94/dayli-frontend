@@ -1021,7 +1021,19 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                   <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'hsl(var(--primary))' }}>₹{price}</span>
                   {hasDiscount && (
-                    <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{mrp}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{mrp}</span>
+                      <span style={{ 
+                        background: 'hsl(var(--primary) / 0.1)', 
+                        color: 'hsl(var(--primary))', 
+                        padding: '2px 8px', 
+                        borderRadius: '6px', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 800 
+                      }}>
+                        {discountPct}% OFF
+                      </span>
+                    </div>
                   )}
                 </div>
 
@@ -1171,14 +1183,19 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
           ₹{product.price}
         </div>
         {safeNum(product.mrp) > safeNum(product.price) && safeNum(product.price) > 0 && (
-          <span style={{ 
-            fontSize: '0.7rem', 
-            color: 'hsl(var(--muted-foreground))', 
-            textDecoration: 'line-through',
-            fontWeight: 500 
-          }}>
-            ₹{product.mrp}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ 
+              fontSize: '0.7rem', 
+              color: 'hsl(var(--muted-foreground))', 
+              textDecoration: 'line-through',
+              fontWeight: 500 
+            }}>
+              ₹{product.mrp}
+            </span>
+            <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', fontWeight: 800 }}>
+              {Math.round(((safeNum(product.mrp) - safeNum(product.price)) / safeNum(product.mrp)) * 100)}% OFF
+            </span>
+          </div>
         )}
       </div>
 
@@ -1370,7 +1387,15 @@ const CartDrawer = ({
                         <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.name}</div>
                         <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{item.weight}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                          <div style={{ fontWeight: 700 }}>₹{item.price * item.quantity}</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ fontWeight: 700 }}>₹{item.price * item.quantity}</div>
+                            {safeNum(item.mrp) > safeNum(item.price) && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{safeNum(item.mrp) * item.quantity}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', fontWeight: 700 }}>{Math.round(((safeNum(item.mrp) - safeNum(item.price)) / safeNum(item.mrp)) * 100)}% OFF</span>
+                              </div>
+                            )}
+                          </div>
                           <div style={{ display: 'flex', alignItems: 'center', background: 'hsl(var(--primary))', color: 'white', borderRadius: '0.25rem', overflow: 'hidden' }}>
                             <button onClick={() => onUpdateQuantity(item.id, -1)} style={{ padding: '0.2rem 0.5rem', color: 'white' }}>-</button>
                             <span style={{ padding: '0 0.5rem', fontSize: '0.85rem', fontWeight: 700 }}>{item.quantity}</span>
@@ -1458,44 +1483,56 @@ const CartDrawer = ({
             </div>
 
             {cartItems.length > 0 && (() => {
+              const itemTotalMRP = cartItems.reduce((acc, item) => acc + (safeNum(item.mrp || item.price) * item.quantity), 0);
               const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+              const productSavings = itemTotalMRP - subtotal;
               const deliveryFee = subtotal < 100 ? 20 : 0;
               const couponDiscount = appliedCoupon ? appliedCoupon.discount_amount : 0;
               const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
 
               return (
                 <div style={{ padding: '1.5rem', borderTop: '1px solid #eee', background: 'white' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
-                      <span>Subtotal</span>
-                      <span>₹{subtotal}</span>
-                    </div>
-
-                    {couponDiscount > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Tag size={12} />
-                          Coupon Discount ({appliedCoupon.code})
-                        </span>
-                        <span>-₹{couponDiscount}</span>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.75rem', color: '#1a1a1a' }}>Bill Summary</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666' }}>
+                        <span>Item Total (MRP)</span>
+                        <span>₹{itemTotalMRP}</span>
                       </div>
-                    )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#666' }}>
-                      <span>Delivery Fee</span>
-                      <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
+                      {productSavings > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'hsl(var(--primary))' }}>
+                          <span>Product Discount</span>
+                          <span>-₹{productSavings}</span>
+                        </div>
+                      )}
+
+                      {couponDiscount > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Tag size={12} />
+                            Coupon Discount ({appliedCoupon.code})
+                          </span>
+                          <span>-₹{couponDiscount}</span>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666' }}>
+                        <span>Delivery Fee</span>
+                        <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', paddingTop: '0.6rem', borderTop: '1px solid #f1f5f9', fontWeight: 800, fontSize: '1.1rem', color: '#1a1a1a' }}>
+                        <span>Grand Total</span>
+                        <span>₹{total}</span>
+                      </div>
                     </div>
 
                     {deliveryFee > 0 && (
-                      <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '0.5rem' }}>
+                      <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '1rem' }}>
                         💡 Add ₹{100 - subtotal} more for FREE delivery!
                       </div>
                     )}
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee', fontWeight: 800, fontSize: '1.1rem' }}>
-                      <span>Grand Total</span>
-                      <span>₹{total}</span>
-                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
                     <button
