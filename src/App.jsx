@@ -43,47 +43,64 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           style={{
             color: 'hsl(var(--primary))',
             fontWeight: 800,
-            fontSize: '1.75rem',
-            letterSpacing: '-1px',
+            fontSize: '1.85rem',
+            letterSpacing: '-1.5px',
             cursor: 'pointer',
             userSelect: 'none',
-            WebkitUserSelect: 'none'
+            display: 'flex',
+            alignItems: 'baseline',
+            fontFamily: 'var(--font-heading)'
           }}
         >
-          dayli
+          dayli<span style={{ color: 'hsl(var(--accent))', fontSize: '2.5rem', lineHeight: 0 }}>.</span>
         </div>
 
         <div 
           onClick={onDetectLocation}
           className="location hide-on-mobile" 
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', userSelect: 'none', cursor: 'pointer' }}
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '0.1rem', 
+            userSelect: 'none', 
+            cursor: 'pointer',
+            padding: '4px 8px',
+            borderRadius: '8px',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'hsl(var(--muted))'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
         >
-          <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            Delivery in 20-30 mins
-            <ChevronDown size={14} />
+          <div style={{ fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+            Delivery in 15-20 mins
+            <ChevronDown size={14} strokeWidth={3} style={{ color: 'hsl(var(--primary))' }} />
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <MapPin size={12} />
+          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.2rem', maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <MapPin size={12} strokeWidth={2.5} />
             {isDetecting ? 'Detecting...' : (currentAddress || 'Bahraich, Uttar Pradesh')}
           </div>
         </div>
 
-        <div className="search-container" style={{ position: 'relative' }}>
+        <div className="search-container" style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>
           <div style={{
             background: 'hsl(var(--muted))',
-            borderRadius: 'var(--radius)',
-            padding: '0.6rem 1rem',
+            borderRadius: '12px',
+            padding: '0.75rem 1.25rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <Search size={18} color="hsl(var(--muted-foreground))" />
+            gap: '0.75rem',
+            border: '1px solid hsl(var(--border))',
+            transition: 'all 0.2s'
+          }}
+          className="search-inner"
+          >
+            <Search size={18} strokeWidth={2.5} color="hsl(var(--muted-foreground))" />
             <input
               type="text"
-              placeholder='Search "milk"'
+              placeholder='Search "milk", "bread" or "veggies"...'
               value={searchQuery}
               onChange={(e) => onSearch(e.target.value)}
-              style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' }}
+              style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
             />
           </div>
         </div>
@@ -703,47 +720,64 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
   return (
-    <div
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => onClick(id)}
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '0.5rem',
+        gap: '0.65rem',
         cursor: 'pointer',
         flexShrink: 0,
         userSelect: 'none',
-        WebkitUserSelect: 'none'
+        width: '90px'
       }}>
       <div style={{
-        width: '80px',
-        height: '80px',
-        background: color,
-        borderRadius: '1.25rem',
+        width: '85px',
+        height: '85px',
+        background: color || 'hsl(var(--muted))',
+        borderRadius: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '2rem',
-        transition: 'transform 0.2s',
-        border: isActive ? '3px solid hsl(var(--primary))' : 'none',
-        boxSizing: 'border-box',
-        overflow: 'hidden'
-      }} className="category-icon">
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        border: isActive ? '3px solid hsl(var(--primary))' : '1px solid rgba(0,0,0,0.04)',
+        boxShadow: isActive ? '0 8px 20px rgba(var(--primary), 0.2)' : '0 4px 12px rgba(0,0,0,0.03)',
+        overflow: 'hidden',
+        position: 'relative'
+      }} className="category-tile">
         {isEmoji || imgError ? (
-          <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
+          <span style={{ fontSize: '2.5rem' }}>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : (
-          <img
-            src={iconUrl}
-            alt={name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <img 
+            src={iconUrl} 
+            alt={name} 
             onError={() => setImgError(true)}
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'contain',
+              padding: '12px',
+              transition: 'transform 0.3s'
+            }}
+            loading="lazy"
           />
         )}
       </div>
-      <div style={{ fontSize: '0.75rem', fontWeight: isActive ? 800 : 600, textAlign: 'center', maxWidth: '80px', color: isActive ? 'hsl(var(--primary))' : 'inherit' }}>
+      <div className="category-text" style={{ 
+        fontSize: '0.75rem', 
+        fontWeight: 700, 
+        textAlign: 'center',
+        color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
+        lineHeight: 1.2,
+        fontFamily: 'var(--font-heading)',
+        letterSpacing: '-0.2px'
+      }}>
         {name}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -753,65 +787,73 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
   const isEmoji = !icon || icon.length <= 2 || !icon.includes('.');
   const iconUrl = isEmoji ? null : (icon.startsWith('http') ? icon : `https://api.dayli.co.in/storage/${icon}`);
 
+  // Dynamic Background Colors like Blinkit
+  const bgColors = {
+    'Vegetables & Fruits': '#e8f5e9',
+    'Dairy, Bread & Eggs': '#fff9c4',
+    'Cold Drinks & Juices': '#e1f5fe',
+    'Snacks & Munchies': '#fff3e0',
+    'Breakfast & Instant Food': '#f3e5f5',
+    'Sweet Tooth': '#fce4ec',
+    'default': '#f8fafc'
+  };
+  const bgColor = bgColors[name] || bgColors['default'];
+
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -5 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => onClick(id)}
       style={{
-        width: '100px',
+        width: 'auto',
+        minWidth: '100px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.75rem',
         cursor: 'pointer',
-        userSelect: 'none',
-        WebkitUserSelect: 'none'
+        userSelect: 'none'
       }}>
       <div
-        className="category-circle"
+        className="category-tile"
         style={{
-          width: '90px',
-          height: '90px',
-          background: 'white',
-          borderRadius: '50%',
+          width: '95px',
+          height: '95px',
+          background: bgColor,
+          borderRadius: '24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '2.5rem',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          border: isActive ? '3px solid hsl(var(--primary))' : 'none',
-          boxSizing: 'border-box',
+          border: isActive ? '3px solid hsl(var(--primary))' : '1px solid rgba(0,0,0,0.03)',
+          boxShadow: isActive ? '0 8px 16px rgba(var(--primary), 0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
           overflow: 'hidden',
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative'
         }}>
         {isEmoji || imgError ? (
-          <span>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
-        ) : iconUrl ? (
+          <span style={{ fontSize: '2.8rem' }}>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
+        ) : (
           <img
             src={iconUrl}
             alt={name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14px' }}
             onError={() => setImgError(true)}
+            loading="lazy"
           />
-        ) : (
-          <span>{emojiFallback}</span>
         )}
       </div>
-      <div
-        className="category-text"
-        style={{
-          fontSize: '0.7rem',
-          fontWeight: 800,
-          textAlign: 'center',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: isActive ? 'hsl(var(--primary))' : '#1a1a1a',
-          width: '100%',
-          overflowWrap: 'break-word',
-          lineHeight: '1.2'
-        }}>
+      <div className="category-text" style={{ 
+        fontSize: '0.8rem', 
+        fontWeight: 800, 
+        textAlign: 'center', 
+        maxWidth: '100px', 
+        color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
+        fontFamily: 'var(--font-heading)',
+        lineHeight: 1.1
+      }}>
         {name}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -1036,41 +1078,47 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
 
 const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
   <motion.div
-    whileHover={{ y: -4 }}
+    whileHover={{ y: -8, boxShadow: '0 12px 24px rgba(0,0,0,0.08)' }}
     className="product-card"
     onClick={() => onOpenDetail && onOpenDetail(product)}
     style={{
       background: 'white',
-      border: '1px solid hsl(var(--border))',
-      borderRadius: 'var(--radius)',
-      padding: '0.75rem',
+      border: '1px solid rgba(0,0,0,0.06)',
+      borderRadius: '20px',
+      padding: '0.85rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.5rem',
-      cursor: 'pointer'
+      gap: '0.4rem',
+      cursor: 'pointer',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      position: 'relative'
     }}
   >
     <div style={{ 
-      height: '140px', 
-      marginBottom: '1rem', 
+      height: '150px', 
+      marginBottom: '0.5rem', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      position: 'relative'
+      position: 'relative',
+      background: '#fcfcfc',
+      borderRadius: '16px',
+      overflow: 'hidden'
     }}>
       {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
         <div style={{
           position: 'absolute',
-          top: '0',
-          left: '0',
+          top: '8px',
+          left: '8px',
           background: 'hsl(var(--primary))',
           color: 'white',
-          fontSize: '0.65rem',
+          fontSize: '0.6rem',
           fontWeight: 900,
-          padding: '2px 6px',
-          borderRadius: '4px',
+          padding: '3px 8px',
+          borderRadius: '6px',
           zIndex: 1,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          fontFamily: 'var(--font-heading)'
         }}>
           {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
         </div>
@@ -1079,82 +1127,95 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
         src={product.image || 'https://placehold.co/200'} 
         alt={product.name} 
         loading="lazy"
-        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
+        style={{ maxHeight: '85%', maxWidth: '85%', objectFit: 'contain' }} 
       />
     </div>
-    <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
+    
+    <div style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
       {product.unit || product.weight}
     </div>
-    <div style={{ fontWeight: 700, fontSize: '0.9rem', minHeight: '2.4rem', lineHeight: '1.2' }}>
+    
+    <div style={{ 
+      fontWeight: 800, 
+      fontSize: '0.85rem', 
+      minHeight: '2.2rem', 
+      lineHeight: '1.25',
+      fontFamily: 'var(--font-heading)',
+      color: 'hsl(var(--foreground))',
+      overflow: 'hidden',
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical'
+    }}>
       {product.name}
     </div>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ 
-            fontWeight: 800, 
-            fontSize: '1rem',
-            color: product.mrp && parseFloat(product.mrp) > parseFloat(product.price) ? 'hsl(var(--primary))' : 'inherit'
-          }}>₹{product.price}</span>
-          {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ 
-                fontSize: '0.75rem', 
-                color: 'hsl(var(--muted-foreground))', 
-                textDecoration: 'line-through',
-                fontWeight: 500 
-              }}>
-                ₹{product.mrp}
-              </span>
-              <span style={{ 
-                fontSize: '0.7rem', 
-                color: 'hsl(var(--primary))', 
-                fontWeight: 700 
-              }}>
-                ({Math.round(((parseFloat(product.mrp) - parseFloat(product.price)) / parseFloat(product.mrp)) * 100)}% OFF)
-              </span>
-            </div>
-          )}
+
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between', 
+      marginTop: '0.75rem',
+      paddingTop: '0.5rem',
+      borderTop: '1px solid rgba(0,0,0,0.03)'
+    }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1a1a1a' }}>
+          ₹{product.price}
         </div>
+        {product.mrp && parseFloat(product.mrp) > parseFloat(product.price) && (
+          <span style={{ 
+            fontSize: '0.7rem', 
+            color: 'hsl(var(--muted-foreground))', 
+            textDecoration: 'line-through',
+            fontWeight: 500 
+          }}>
+            ₹{product.mrp}
+          </span>
+        )}
       </div>
+
       {quantity > 0 ? (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           background: 'hsl(var(--primary))',
           color: 'white',
-          borderRadius: '0.5rem',
-          overflow: 'hidden'
+          borderRadius: '10px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(var(--primary), 0.3)'
         }}>
           <button
             onClick={(e) => { e.stopPropagation(); onUpdate(product.id, -1); }}
-            style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800 }}
-          >-</button>
-          <span style={{ minWidth: '1.5rem', textAlign: 'center', fontWeight: 700, fontSize: '0.85rem' }}>{quantity}</span>
+            style={{ padding: '0.4rem 0.75rem', color: 'white', fontWeight: 900, fontSize: '1rem' }}
+          >−</button>
+          <span style={{ minWidth: '1.2rem', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem' }}>{quantity}</span>
           <button
             onClick={(e) => { e.stopPropagation(); onUpdate(product.id, 1); }}
             disabled={quantity >= (product.stock_quantity ?? 999)}
-            style={{ padding: '0.4rem 0.6rem', color: 'white', fontWeight: 800, opacity: quantity >= (product.stock_quantity ?? 999) ? 0.5 : 1 }}
+            style={{ padding: '0.4rem 0.75rem', color: 'white', fontWeight: 900, fontSize: '1.1rem', opacity: quantity >= (product.stock_quantity ?? 999) ? 0.5 : 1 }}
           >+</button>
         </div>
       ) : (
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={(e) => { e.stopPropagation(); onAdd(product); }}
           disabled={(product.stock_quantity ?? 999) <= 0}
           style={{
             color: 'hsl(var(--primary))',
-            border: '1px solid hsl(var(--primary))',
-            padding: '0.4rem 1.25rem',
-            borderRadius: '0.5rem',
-            fontWeight: 700,
-            fontSize: '0.8rem',
+            background: 'white',
+            border: '1.5px solid hsl(var(--primary))',
+            padding: '0.45rem 1.15rem',
+            borderRadius: '10px',
+            fontWeight: 800,
+            fontSize: '0.75rem',
             textTransform: 'uppercase',
-            opacity: (product.stock_quantity ?? 999) <= 0 ? 0.5 : 1
+            opacity: (product.stock_quantity ?? 999) <= 0 ? 0.5 : 1,
+            boxShadow: '0 2px 6px rgba(var(--primary), 0.1)'
           }}
           className="add-btn"
         >
-          {(product.stock_quantity ?? 999) <= 0 ? 'Out of Stock' : 'Add'}
-        </button>
+          {(product.stock_quantity ?? 999) <= 0 ? 'Sold Out' : 'Add'}
+        </motion.button>
       )}
     </div>
   </motion.div>
@@ -1660,22 +1721,23 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
     <div style={{ 
       position: 'relative', 
       width: '100%', 
-      aspectRatio: '3/1',
-      borderRadius: '1rem', 
+      aspectRatio: '16/6',
+      borderRadius: '24px', 
       overflow: 'hidden', 
-      marginBottom: '1.5rem', 
-      boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
-      cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default' 
+      marginBottom: '2.5rem', 
+      boxShadow: '0 20px 40px rgba(0,0,0,0.06)', 
+      cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default',
+      background: '#f8fafc'
     }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          initial={{ opacity: 0, scale: 1.02 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }}
           onClick={handleBannerClick}
-          style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '100%', height: '100%' }}
         >
           <img
             src={currentBanner.image_url}
@@ -1686,17 +1748,29 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
       </AnimatePresence>
 
       {banners.length > 1 && (
-        <div style={{ position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem' }}>
-          {banners.map((_, idx) => (
+        <div style={{ 
+          position: 'absolute', 
+          bottom: '1.25rem', 
+          left: '50%', 
+          transform: 'translateX(-50%)', 
+          display: 'flex', 
+          gap: '0.6rem',
+          background: 'rgba(255,255,255,0.3)',
+          backdropFilter: 'blur(8px)',
+          padding: '6px 12px',
+          borderRadius: '20px',
+          border: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          {banners.map((_, index) => (
             <div
-              key={idx}
-              onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
+              key={index}
+              onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); }}
               style={{
-                width: idx === currentIndex ? '24px' : '8px',
+                width: index === currentIndex ? '24px' : '8px',
                 height: '8px',
                 borderRadius: '4px',
-                background: idx === currentIndex ? 'white' : 'rgba(255,255,255,0.5)',
-                transition: 'all 0.3s ease',
+                background: index === currentIndex ? 'hsl(var(--primary))' : 'rgba(0,0,0,0.2)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 cursor: 'pointer'
               }}
             />
@@ -2294,15 +2368,16 @@ function App() {
             <section style={{ marginBottom: '3rem' }}>
               <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
               <div style={{
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
                 gap: '1.5rem',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                padding: '0.5rem 0 1.5rem',
+                rowGap: '2.5rem',
+                justifyItems: 'center',
+                padding: '1rem 0 3rem',
               }}>
                 {loading ? (
-                  [1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} style={{ minWidth: '90px', height: '90px', borderRadius: '50%', background: '#f5f5f5' }}></div>
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} style={{ width: '95px', height: '95px', borderRadius: '24px', background: '#f5f5f5' }}></div>
                   ))
                 ) : categories.map(cat => (
                   <FastCategoryItem
