@@ -1826,6 +1826,53 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
   );
 };
 
+const SecondaryBanners = ({ onCategoryClick }) => {
+  const banners = [
+    { title: 'Pharmacy', image: '/assets/banners/pharmacy_banner.png', id: null },
+    { title: 'Pet Care', image: '/assets/banners/pet_care_banner.png', id: null },
+    { title: 'Baby Care', image: '/assets/banners/baby_care_banner.png', id: null },
+  ];
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '1.25rem',
+      marginBottom: '3rem',
+      marginTop: '1rem'
+    }}>
+      {banners.map((banner, i) => (
+        <motion.div
+          key={i}
+          whileHover={{ scale: 1.02, y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => banner.id && onCategoryClick(banner.id)}
+          style={{
+            aspectRatio: '16/9',
+            borderRadius: '24px',
+            overflow: 'hidden',
+            cursor: banner.id ? 'pointer' : 'default',
+            boxShadow: '0 12px 24px rgba(0,0,0,0.04)',
+            background: 'white',
+            border: '1px solid rgba(0,0,0,0.05)',
+            position: 'relative'
+          }}
+        >
+          <img 
+            src={banner.image} 
+            alt={banner.title} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            onError={(e) => {
+              // Fallback to placeholder if assets aren't moved yet
+              e.target.src = `https://placehold.co/600x400?text=${banner.title}`;
+            }}
+          />
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('dayli_cart');
@@ -2409,6 +2456,9 @@ function App() {
                 fetchProdDetails();
               }}
             />
+
+            <SecondaryBanners onCategoryClick={setSelectedCategoryId} />
+
             {/* Fast Categories Section */}
             <section style={{ marginBottom: '3rem' }}>
               <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
