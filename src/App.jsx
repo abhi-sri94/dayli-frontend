@@ -1828,9 +1828,9 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
 
 const SecondaryBanners = ({ onCategoryClick }) => {
   const banners = [
-    { title: 'Pharmacy', image: '/assets/banners/pharmacy_banner.png', id: null },
-    { title: 'Pet Care', image: '/assets/banners/pet_care_banner.png', id: null },
-    { title: 'Baby Care', image: '/assets/banners/baby_care_banner.png', id: null },
+    { title: 'Pharmacy', image: '/assets/banners/pharmacy_banner.png', id: 2 },
+    { title: 'Pet Care', image: '/assets/banners/pet_care_banner.png', id: 10 },
+    { title: 'Baby Care', image: '/assets/banners/baby_care_banner.png', id: 11 },
   ];
 
   return (
