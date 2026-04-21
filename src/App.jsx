@@ -1848,7 +1848,7 @@ const SecondaryBanners = ({ onCategoryClick }) => {
           whileTap={{ scale: 0.98 }}
           onClick={() => banner.id && onCategoryClick(banner.id)}
           style={{
-            aspectRatio: '16/9',
+            aspectRatio: '16/7',
             borderRadius: '24px',
             overflow: 'hidden',
             cursor: banner.id ? 'pointer' : 'default',
