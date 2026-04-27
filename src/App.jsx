@@ -1983,7 +1983,6 @@ function App() {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
@@ -2120,7 +2119,7 @@ function App() {
 
   // Fetch products for selected category from server
   useEffect(() => {
-    if (!selectedCategoryId) { setSelectedSubCategoryId(null);
+    if (!selectedCategoryId) {
       setCategoryProducts([]);
       return;
     }
@@ -2511,40 +2510,26 @@ function App() {
                       </div>
                     );
                   }
-                  // Blinkit Style Sidebar 
-                  const currentCategory = categories.find(c => c.id === selectedCategoryId);
-                  const subcategories = currentCategory?.children || [];
-                  const finalProds = selectedSubCategoryId ? categoryProducts.filter(p => p.category_id === selectedSubCategoryId) : (selectedCategoryId ? categoryProducts : products);
-
-                  return (
-                    <div style={{ display: 'flex', gap: '1.5rem', width: '100%', alignItems: 'flex-start' }}>
-                      {selectedCategoryId && subcategories.length > 0 && (
-                        <div style={{ width: '90px', flexShrink: 0, borderRight: '1px solid #eee', paddingRight: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1.8rem', position: 'sticky', top: '120px', height: 'fit-content', maxHeight: 'calc(100vh - 140px)', overflowY: 'auto', scrollbarWidth: 'none' }}>
-                            <div onClick={() => setSelectedSubCategoryId(null)} style={{ cursor: 'pointer', opacity: selectedSubCategoryId === null ? 1 : 0.6, textAlign: 'center' }}>
-                              <div style={{ width: '58px', height: '58px', borderRadius: '50%', background: selectedSubCategoryId === null ? 'hsl(var(--primary)/0.1)' : '#f5f5f5', border: selectedSubCategoryId === null ? '2px solid hsl(var(--primary))' : '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.4rem', fontWeight: 700, color: 'hsl(var(--primary))' }}>All</div>
-                              <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>All</span>
-                            </div>
-                            {subcategories.map(sub => (
-                              <div key={sub.id} onClick={() => setSelectedSubCategoryId(sub.id)} style={{ cursor: 'pointer', opacity: selectedSubCategoryId === sub.id ? 1 : 0.6, textAlign: 'center' }}>
-                                <div style={{ width: '58px', height: '58px', borderRadius: '50%', background: 'white', border: selectedSubCategoryId === sub.id ? '2px solid hsl(var(--primary))' : '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.4rem', overflow: 'hidden' }}>
-                                  <img src={/^https?:\/\//.test(sub.icon || '') ? sub.icon : 'https://api.dayli.co.in/storage/' + sub.icon} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.src = 'https://placehold.co/100?text=' + sub.name.charAt(0)} />
-                                </div>
-                                <span style={{ fontSize: '0.7rem', fontWeight: selectedSubCategoryId === sub.id ? 700 : 500 }}>{sub.name}</span>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.2rem' }}>
-                        {finalProds.map(product => (
-                          <ProductCard
-                            key={product.id}
-                            product={{ ...product, price: product.selling_price, mrp: product.mrp, image: product.primary_image?.image_path ? (/^https?:\/\//.test(product.primary_image.image_path) ? product.primary_image.image_path : 'https://api.dayli.co.in/storage/' + product.primary_image.image_path) : 'https://placehold.co/200' }}
-                            quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                            onAdd={addToCart} onUpdate={updateQuantity} onOpenDetail={setSelectedProduct} />
-                        ))}
-                      </div>
-                    </div>
-                  );
+                  return displayProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={{
+                        ...product,
+                        price: product.selling_price,
+                        mrp: product.mrp,
+                        image: (() => {
+                          if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                          const path = product.primary_image.image_path;
+                          const isExternal = /^https?:\/\//.test(path);
+                          return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                        })()
+                      }}
+                      quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                      onAdd={addToCart}
+                      onUpdate={updateQuantity}
+                      onOpenDetail={setSelectedProduct}
+                    />
+                  ))
                 })()}
               </div>
             </section>
