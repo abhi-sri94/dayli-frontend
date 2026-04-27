@@ -1984,6 +1984,8 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
@@ -2120,7 +2122,7 @@ function App() {
 
   // Fetch products for selected category from server
   useEffect(() => {
-    if (!selectedCategoryId) {
+    if (!selectedCategoryId) { setSelectedSubCategoryId(null);
       setCategoryProducts([]);
       setSelectedSubCategoryId(null);
       return;
@@ -2140,6 +2142,8 @@ function App() {
     };
     fetchCategoryProducts();
   }, [selectedCategoryId]);
+
+  useEffect(() => { setSelectedSubCategoryId(null); }, [selectedCategoryId]);
 
   useEffect(() => {
     localStorage.setItem('dayli_cart', JSON.stringify(cartItems));
