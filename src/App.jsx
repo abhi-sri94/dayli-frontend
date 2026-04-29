@@ -33,6 +33,8 @@ const PRODUCTS = [
 
 const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting, isMobile }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const trendingSearches = ['Milk', 'Bread', 'Eggs', 'Chicken', 'Paneer', 'Maggi'];
 
   return (
     <nav className="navbar" style={{
@@ -123,9 +125,59 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                   placeholder='Search "milk", "bread" or "veggies"...'
                   value={searchQuery}
                   onChange={(e) => onSearch(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                   style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
                 />
               </div>
+
+              {/* Desktop Search Suggestions */}
+              <AnimatePresence>
+                {isSearchFocused && !searchQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '0.5rem',
+                      background: 'white',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                      border: '1px solid #eee',
+                      zIndex: 100,
+                      padding: '1rem'
+                    }}
+                  >
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#999', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Trending Searches</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {trendingSearches.map(item => (
+                        <button
+                          key={item}
+                          onClick={() => onSearch(item)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '20px',
+                            background: '#f3f4f6',
+                            border: '1px solid #e5e7eb',
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#e5e7eb'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#f3f4f6'}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -240,9 +292,55 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                 placeholder='Search "milk", "bread" or "veggies"...'
                 value={searchQuery}
                 onChange={(e) => onSearch(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
               />
             </div>
+
+            {/* Mobile Search Suggestions */}
+            <AnimatePresence>
+              {isSearchFocused && !searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    marginTop: '0.5rem',
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    border: '1px solid #eee',
+                    zIndex: 100,
+                    padding: '1rem'
+                  }}
+                >
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#999', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Trending</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {trendingSearches.map(item => (
+                      <button
+                        key={item}
+                        onClick={() => onSearch(item)}
+                        style={{
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '16px',
+                          background: '#f3f4f6',
+                          border: '1px solid #e5e7eb',
+                          fontSize: '0.8rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
