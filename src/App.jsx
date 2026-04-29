@@ -31,7 +31,7 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting }) => {
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting, isMobile }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
@@ -40,162 +40,211 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
       top: 0,
       zIndex: 100,
       background: 'white',
-      padding: '0.5rem 0',
+      padding: isMobile ? '0.75rem 1rem' : '0.5rem 0',
       borderBottom: '1px solid hsl(var(--border))',
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
-      <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-        <div
-          onClick={onHome}
-          className="logo"
-          style={{
-            color: 'hsl(var(--primary))',
-            fontWeight: 800,
-            fontSize: '1.85rem',
-            letterSpacing: '-1.5px',
-            cursor: 'pointer',
-            userSelect: 'none',
-            display: 'flex',
-            alignItems: 'baseline',
-            fontFamily: 'var(--font-heading)'
-          }}
-        >
-          dayli<span style={{ color: 'hsl(var(--accent))', fontSize: '2.5rem', lineHeight: 0 }}>.</span>
-        </div>
-
-        <div 
-          onClick={onDetectLocation}
-          className="location hide-on-mobile" 
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.1rem', 
-            userSelect: 'none', 
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: '8px',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'hsl(var(--muted))'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-        >
-          <div style={{ fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-            Delivery in 15-20 mins
-            <ChevronDown size={14} strokeWidth={3} style={{ color: 'hsl(var(--primary))' }} />
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.2rem', maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            <MapPin size={12} strokeWidth={2.5} />
-            {isDetecting ? 'Detecting...' : (currentAddress || 'Bahraich, Uttar Pradesh')}
-          </div>
-        </div>
-
-        <div className="search-container" style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>
-          <div style={{
-            background: 'hsl(var(--muted))',
-            borderRadius: '12px',
-            padding: '0.75rem 1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            border: '1px solid hsl(var(--border))',
-            transition: 'all 0.2s'
-          }}
-          className="search-inner"
-          >
-            <Search size={18} strokeWidth={2.5} color="hsl(var(--muted-foreground))" />
-            <input
-              type="text"
-              placeholder='Search "milk", "bread" or "veggies"...'
-              value={searchQuery}
-              onChange={(e) => onSearch(e.target.value)}
-              style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
-            />
-          </div>
-        </div>
-
-        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          {user ? (
-            <div style={{ position: 'relative' }}>
-              <div
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
-              >
-                Hi, {(user.name && user.name !== 'ADsdfg' && user.name.length < 15) ? user.name.split(' ')[0] : 'User'}
-                <ChevronDown size={16} />
-              </div>
-
-              <AnimatePresence>
-                {isDropdownOpen && (
-                  <>
-                    <div
-                      onClick={() => setIsDropdownOpen(false)}
-                      style={{ position: 'fixed', inset: 0, zIndex: 10 }}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        right: 0,
-                        marginTop: '1rem',
-                        background: 'white',
-                        borderRadius: 'var(--radius)',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                        border: '1px solid #eee',
-                        minWidth: '220px',
-                        zIndex: 11,
-                        padding: '0.5rem'
-                      }}
-                      className="profile-dropdown"
-                    >
-                      <button
-                        onClick={() => { onOpenProfile('profile'); setIsDropdownOpen(false); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
-                        className="hover:bg-slate-50"
-                      >
-                        <User size={18} /> My Profile
-                      </button>
-                      <button
-                        onClick={() => { onOpenProfile('orders'); setIsDropdownOpen(false); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
-                        className="hover:bg-slate-50"
-                      >
-                        <Package size={18} /> My Orders
-                      </button>
-                      <div style={{ height: '1px', background: '#eee', margin: '0.5rem' }} />
-                      <button
-                        onClick={() => { onLogout(); setIsDropdownOpen(false); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', color: '#ef4444', transition: 'background 0.2s' }}
-                        className="hover:bg-red-50"
-                      >
-                        <LogOut size={18} /> Logout
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
+      <div className="container" style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center', 
+        gap: isMobile ? '0.75rem' : '2rem'
+      }}>
+        {/* Top Row for Mobile / Single Row for Desktop */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          width: '100%',
+          flex: isMobile ? 'none' : 1
+        }}>
+          {!isMobile && (
+            <div
+              onClick={onHome}
+              className="logo"
+              style={{
+                color: 'hsl(var(--primary))',
+                fontWeight: 800,
+                fontSize: '1.85rem',
+                letterSpacing: '-1.5px',
+                cursor: 'pointer',
+                userSelect: 'none',
+                display: 'flex',
+                alignItems: 'baseline',
+                marginRight: '2rem',
+                fontFamily: 'var(--font-heading)'
+              }}
+            >
+              dayli<span style={{ color: 'hsl(var(--accent))', fontSize: '2.5rem', lineHeight: 0 }}>.</span>
             </div>
-          ) : (
-            <div onClick={onOpenAuth} style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Login</div>
           )}
-          <button
-            onClick={onOpenCart}
-            className="btn btn-primary btn-cart"
-            style={{ gap: '0.5rem', padding: '0.6rem 1rem' }}
+
+          <div 
+            onClick={onDetectLocation}
+            className="location" 
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '0.1rem', 
+              userSelect: 'none', 
+              cursor: 'pointer',
+              padding: '4px 0',
+              flex: 1
+            }}
           >
-            <ShoppingCart size={18} />
-            {cartCount > 0 ? (
-              <>
-                <span className="hide-on-mobile">{cartCount} Items</span>
-                <span className="show-on-mobile">{cartCount}</span>
-              </>
+            <div style={{ fontWeight: 900, fontSize: isMobile ? '1rem' : '0.85rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+              Delivery in 15-20 mins
+              <ChevronDown size={14} strokeWidth={3} style={{ color: 'hsl(var(--primary))' }} />
+            </div>
+            <div style={{ fontSize: isMobile ? '0.85rem' : '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.2rem', maxWidth: isMobile ? '250px' : '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {!isMobile && <MapPin size={12} strokeWidth={2.5} />}
+              {isDetecting ? 'Detecting...' : (currentAddress || 'Bahraich, Uttar Pradesh')}
+            </div>
+          </div>
+
+          {/* Desktop Search */}
+          {!isMobile && (
+            <div className="search-container" style={{ position: 'relative', flex: 2, maxWidth: '600px', margin: '0 2rem' }}>
+              <div style={{
+                background: 'hsl(var(--muted))',
+                borderRadius: '12px',
+                padding: '0.75rem 1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                border: '1px solid hsl(var(--border))',
+                transition: 'all 0.2s'
+              }}
+              className="search-inner"
+              >
+                <Search size={18} strokeWidth={2.5} color="hsl(var(--muted-foreground))" />
+                <input
+                  type="text"
+                  placeholder='Search "milk", "bread" or "veggies"...'
+                  value={searchQuery}
+                  onChange={(e) => onSearch(e.target.value)}
+                  style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1rem' : '1.5rem' }}>
+            {user ? (
+              <div style={{ position: 'relative' }}>
+                <div
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  {isMobile ? (
+                    <User size={24} strokeWidth={2.5} />
+                  ) : (
+                    <>
+                      Hi, {(user.name && user.name !== 'ADsdfg' && user.name.length < 15) ? user.name.split(' ')[0] : 'User'}
+                      <ChevronDown size={16} />
+                    </>
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <>
+                      <div
+                        onClick={() => setIsDropdownOpen(false)}
+                        style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          marginTop: '1rem',
+                          background: 'white',
+                          borderRadius: 'var(--radius)',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                          border: '1px solid #eee',
+                          minWidth: '200px',
+                          zIndex: 11,
+                          padding: '0.5rem'
+                        }}
+                        className="profile-dropdown"
+                      >
+                        <button
+                          onClick={() => { onOpenProfile('profile'); setIsDropdownOpen(false); }}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
+                          className="hover:bg-slate-50"
+                        >
+                          <User size={18} /> My Profile
+                        </button>
+                        <button
+                          onClick={() => { onOpenProfile('orders'); setIsDropdownOpen(false); }}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', transition: 'background 0.2s' }}
+                          className="hover:bg-slate-50"
+                        >
+                          <Package size={18} /> My Orders
+                        </button>
+                        <div style={{ height: '1px', background: '#eee', margin: '0.5rem' }} />
+                        <button
+                          onClick={() => { onLogout(); setIsDropdownOpen(false); }}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', color: '#ef4444', transition: 'background 0.2s' }}
+                          className="hover:bg-red-50"
+                        >
+                          <LogOut size={18} /> Logout
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
-              <span>My Cart</span>
+              <div onClick={onOpenAuth} style={{ fontWeight: 700, fontSize: isMobile ? '0.9rem' : '1rem', cursor: 'pointer', color: isMobile ? 'hsl(var(--primary))' : 'inherit' }}>
+                {isMobile ? <User size={24} /> : 'Login'}
+              </div>
             )}
-          </button>
+            
+            {!isMobile && (
+              <button
+                onClick={onOpenCart}
+                className="btn btn-primary btn-cart"
+                style={{ gap: '0.5rem', padding: '0.6rem 1rem' }}
+              >
+                <ShoppingCart size={18} />
+                {cartCount > 0 ? (
+                  <span>{cartCount} Items</span>
+                ) : (
+                  <span>My Cart</span>
+                )}
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Mobile Search - Bottom Row */}
+        {isMobile && (
+          <div className="search-container" style={{ position: 'relative', width: '100%' }}>
+            <div style={{
+              background: '#f3f4f6',
+              borderRadius: '12px',
+              padding: '0.75rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              border: '1px solid #eee'
+            }}>
+              <Search size={18} strokeWidth={2.5} color="#999" />
+              <input
+                type="text"
+                placeholder='Search "milk", "bread" or "veggies"...'
+                value={searchQuery}
+                onChange={(e) => onSearch(e.target.value)}
+                style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem', fontWeight: 500 }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
@@ -2337,6 +2386,7 @@ function App() {
         currentAddress={address}
         onDetectLocation={handleDetectLocation}
         isDetecting={isDetectingLocation}
+        isMobile={isMobile}
       />
 
       <AuthModal
