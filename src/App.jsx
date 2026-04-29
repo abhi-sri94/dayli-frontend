@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
@@ -1984,6 +1984,13 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
@@ -2438,39 +2445,43 @@ function App() {
           </section>
         ) : (
           <>
-            <PromoBanners 
-              banners={banners} 
-              loading={bannersLoading} 
-              onCategoryClick={setSelectedCategoryId}
-              onProductClick={(id) => {
-                const fetchProdDetails = async () => {
-                  try {
-                    const res = await fetch(`${apiBaseUrl}/api/products/${id}`);
-                    const data = await res.json();
-                    if (data.status === 'success') {
-                      setSelectedProduct(data.data);
-                    }
-                  } catch (err) {
-                    console.error("Error fetching banner product:", err);
-                  }
-                };
-                fetchProdDetails();
-              }}
-            />
-
-            <SecondaryBanners onCategoryClick={setSelectedCategoryId} />
+            {!isMobile && (
+              <>
+                <PromoBanners 
+                  banners={banners} 
+                  loading={bannersLoading} 
+                  onCategoryClick={setSelectedCategoryId}
+                  onProductClick={(id) => {
+                    const fetchProdDetails = async () => {
+                      try {
+                        const res = await fetch(`${apiBaseUrl}/api/products/${id}`);
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                          setSelectedProduct(data.data);
+                        }
+                      } catch (err) {
+                        console.error("Error fetching banner product:", err);
+                      }
+                    };
+                    fetchProdDetails();
+                  }}
+                />
+                <SecondaryBanners onCategoryClick={setSelectedCategoryId} />
+              </>
+            )}
 
             {/* Fast Categories Section */}
-            <section style={{ marginBottom: '3rem' }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-                gap: '1.5rem',
-                rowGap: '2.5rem',
-                justifyItems: 'center',
-                padding: '1rem 0 3rem',
-              }}>
+            {(!isMobile || !selectedCategoryId) && (
+              <section style={{ marginBottom: '3rem' }}>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 800, userSelect: 'none', WebkitUserSelect: 'none', cursor: 'default' }}>Shop by Category</h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(85px, 1fr))' : 'repeat(auto-fill, minmax(130px, 1fr))',
+                  gap: isMobile ? '0.8rem' : '1.5rem',
+                  rowGap: isMobile ? '1.5rem' : '2.5rem',
+                  justifyItems: 'center',
+                  padding: '1rem 0 3rem',
+                }}>
                 {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} style={{ width: '95px', height: '95px', borderRadius: '24px', background: '#f5f5f5' }}></div>
@@ -2487,11 +2498,33 @@ function App() {
                 ))}
               </div>
             </section>
+            )}
 
             {/* Featured Products Section */}
             <section>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                {isMobile && selectedCategoryId && (
+                  <button 
+                    onClick={() => {
+                      setSelectedCategoryId(null);
+                      setSelectedSubCategoryId(null);
+                    }}
+                    style={{ 
+                      background: '#f0f0f0', 
+                      border: 'none', 
+                      borderRadius: '50%', 
+                      width: '32px', 
+                      height: '32px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                )}
+                <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', margin: 0, flex: 1 }}>
                   {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name : 'Daily Essentials'}
                 </h2>
                 {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
@@ -2515,7 +2548,7 @@ function App() {
                         <div
                           className="subcategory-sidebar"
                           style={{
-                            width: '90px',
+                            width: isMobile ? '80px' : '90px',
                             flexShrink: 0,
                             borderRight: '1px solid #f0f0f0',
                             paddingRight: '0.8rem',
@@ -2602,7 +2635,7 @@ function App() {
                           className="grid"
                           style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                            gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))',
                             gap: '1.5rem',
                             width: '100%',
                           }}
