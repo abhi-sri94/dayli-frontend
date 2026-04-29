@@ -2587,7 +2587,7 @@ function App() {
                                 }}
                               >
                                 <img
-                                  src={/^https?:\/\//.test(sc.icon || '') ? sc.icon : `https://api.dayli.co.in/storage/${sc.icon}`}
+                                  src={(sc.icon && sc.icon.startsWith('http')) ? sc.icon : `https://api.dayli.co.in/storage/${sc.icon}`}
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                   onError={e => (e.target.src = `https://placehold.co/100?text=${sc.name?.[0] ?? 'C'}`)}
                                 />
@@ -2617,7 +2617,7 @@ function App() {
                                 image: (() => {
                                   if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
                                   const path = product.primary_image.image_path;
-                                  const isExternal = /^https?:\/\//.test(path);
+                                  const isExternal = path && path.startsWith('http');
                                   return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
                                 })(),
                               }}
