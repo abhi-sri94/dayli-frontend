@@ -1983,6 +1983,7 @@ function App() {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
@@ -2495,41 +2496,146 @@ function App() {
                 </h2>
                 {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
               </div>
-              <div className="grid">
-                {loading || isCategoryLoading ? (
-                  [1, 2, 3, 4].map(i => (
-                    <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                  ))
+              {loading || isCategoryLoading ? (
+                  <div className="grid">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
+                    ))}
+                  </div>
                 ) : (() => {
-                  const displayProducts = selectedCategoryId ? categoryProducts : products;
-                  if (selectedCategoryId && displayProducts.length === 0) {
-                    return (
-                      <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
-                        <p>No products in this category yet. Check back soon!</p>
+                  const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
+                  const hasSub = subCategories.length > 0;
+                  const finalProducts = selectedSubCategoryId
+                    ? categoryProducts.filter(p => p.category_id === selectedSubCategoryId)
+                    : (selectedCategoryId ? categoryProducts : products);
+
+                  return (
+                    <div style={{ display: 'flex', gap: '1.5rem', width: '100%' }}>
+                      {hasSub && (
+                        <div
+                          className="subcategory-sidebar"
+                          style={{
+                            width: '90px',
+                            flexShrink: 0,
+                            borderRight: '1px solid #f0f0f0',
+                            paddingRight: '0.8rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1.5rem',
+                            position: 'sticky',
+                            top: '100px',
+                            height: 'fit-content',
+                            maxHeight: 'calc(100vh - 140px)',
+                            overflowY: 'auto',
+                            scrollbarWidth: 'none',
+                          }}
+                        >
+                          {/* All button resets both category and subcategory */}
+                          <div
+                            onClick={() => {
+                              setSelectedCategoryId(null);
+                              setSelectedSubCategoryId(null);
+                            }}
+                            style={{
+                              cursor: 'pointer',
+                              textAlign: 'center',
+                              opacity: selectedCategoryId === null ? 1 : 0.5,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '64px',
+                                height: '64px',
+                                borderRadius: '16px',
+                                background: selectedCategoryId === null ? 'hsl(var(--primary)/0.1)' : '#f8f9fa',
+                                border: selectedCategoryId === null ? '2px solid hsl(var(--primary))' : '1px solid #eee',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto',
+                                fontWeight: 800,
+                                color: 'hsl(var(--primary))',
+                                fontSize: '0.8rem',
+                              }}
+                            >
+                              All
+                            </div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: '0.4rem', display: 'block' }}>All</span>
+                          </div>
+                          {subCategories.map(sc => (
+                            <div
+                              key={sc.id}
+                              onClick={() => setSelectedSubCategoryId(sc.id)}
+                              style={{
+                                cursor: 'pointer',
+                                textAlign: 'center',
+                                opacity: selectedSubCategoryId === sc.id ? 1 : 0.5,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: '64px',
+                                  height: '64px',
+                                  borderRadius: '16px',
+                                  background: '#fff',
+                                  border: selectedSubCategoryId === sc.id ? '2px solid hsl(var(--primary))' : '1px solid #eee',
+                                  overflow: 'hidden',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  margin: '0 auto',
+                                }}
+                              >
+                                <img
+                                  src={/^https?:\/\//.test(sc.icon || '') ? sc.icon : `https://api.dayli.co.in/storage/${sc.icon}`}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  onError={e => (e.target.src = `https://placehold.co/100?text=${sc.name?.[0] ?? 'C'}`)}
+                                />
+                              </div>
+                              <span style={{ fontSize: '0.75rem', fontWeight: selectedSubCategoryId === sc.id ? 700 : 500, marginTop: '0.4rem', display: 'block' }}>{sc.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <div
+                          className="grid"
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                            gap: '1.5rem',
+                            width: '100%',
+                          }}
+                        >
+                          {finalProducts.length > 0 ? finalProducts.map(product => (
+                            <ProductCard
+                              key={product.id}
+                              product={{
+                                ...product,
+                                price: product.selling_price,
+                                mrp: product.mrp,
+                                image: (() => {
+                                  if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                                  const path = product.primary_image.image_path;
+                                  const isExternal = /^https?:\/\//.test(path);
+                                  return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                                })(),
+                              }}
+                              quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                              onAdd={addToCart}
+                              onUpdate={updateQuantity}
+                              onOpenDetail={setSelectedProduct}
+                            />
+                          )) : (
+                              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+                                <p>No products in this category yet. Check back soon!</p>
+                              </div>
+                          )}
+                        </div>
                       </div>
-                    );
-                  }
-                  return displayProducts.map(product => (
-                    <ProductCard
-                      key={product.id}
-                      product={{
-                        ...product,
-                        price: product.selling_price,
-                        mrp: product.mrp,
-                        image: (() => {
-                          if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                          const path = product.primary_image.image_path;
-                          const isExternal = /^https?:\/\//.test(path);
-                          return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                        })()
-                      }}
-                      quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                      onAdd={addToCart}
-                      onUpdate={updateQuantity}
-                      onOpenDetail={setSelectedProduct}
-                    />
-                  ))
+                    </div>
+                  );
                 })()}
               </div>
             </section>
