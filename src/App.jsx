@@ -348,6 +348,71 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
   );
 };
 
+const MobileCartBar = ({ cartItems, onOpenCart, isMobile }) => {
+  if (!isMobile || cartItems.length === 0) return null;
+
+  const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalPrice = cartItems.reduce((acc, item) => acc + (safeNum(item.price) * item.quantity), 0);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        onClick={onOpenCart}
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          left: '1rem',
+          right: '1rem',
+          background: 'hsl(var(--primary))',
+          borderRadius: '16px',
+          padding: '1rem 1.25rem',
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 10px 30px rgba(22, 163, 74, 0.4)',
+          zIndex: 1000,
+          cursor: 'pointer'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ position: 'relative', background: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '12px' }}>
+            <ShoppingBag size={22} strokeWidth={2.5} />
+            <span style={{ 
+              position: 'absolute', 
+              top: -5, 
+              right: -5, 
+              background: '#ef4444', 
+              color: 'white', 
+              borderRadius: '50%', 
+              width: '20px', 
+              height: '20px', 
+              fontSize: '0.75rem', 
+              fontWeight: 800, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              border: '2px solid hsl(var(--primary))'
+            }}>
+              {totalCount}
+            </span>
+          </div>
+          <div>
+            <div style={{ fontSize: '1rem', fontWeight: 800 }}>{totalCount} {totalCount === 1 ? 'Item' : 'Items'}</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9, fontWeight: 500 }}>₹{totalPrice} • View Cart</div>
+          </div>
+        </div>
+        <div style={{ background: 'white', color: 'hsl(var(--primary))', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 800, fontSize: '0.9rem' }}>
+          Checkout <ChevronRight size={18} strokeWidth={3} />
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder, initialTab = 'profile' }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [orders, setOrders] = useState([]);
@@ -2484,6 +2549,12 @@ function App() {
         currentAddress={address}
         onDetectLocation={handleDetectLocation}
         isDetecting={isDetectingLocation}
+        isMobile={isMobile}
+      />
+
+      <MobileCartBar
+        cartItems={cartItems}
+        onOpenCart={() => setIsCartOpen(true)}
         isMobile={isMobile}
       />
 
