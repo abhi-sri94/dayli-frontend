@@ -2719,6 +2719,13 @@ function App() {
       <style>{`
         .category-icon:hover { transform: scale(1.05); }
         .add-btn:hover { background: hsl(var(--primary) / 0.1); }
+        @media (max-width: 768px) {
+          .profile-dropdown {
+            right: auto !important;
+            left: -20px !important;
+            min-width: 180px !important;
+          }
+        }
       `}</style>
     </div>
   );
