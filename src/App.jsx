@@ -2771,8 +2771,8 @@ function App() {
         .add-btn:hover { background: hsl(var(--primary) / 0.1); }
         @media (max-width: 768px) {
           .profile-dropdown {
-            right: auto !important;
-            left: -20px !important;
+            right: 0 !important;
+            left: auto !important;
             min-width: 180px !important;
           }
         }
