@@ -31,6 +31,34 @@ const PRODUCTS = [
   { id: 104, name: 'Lay\'s Classic Salted', weight: '50 g', price: 20, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d.jpg?auto=format&fit=crop&q=80&w=200' },
 ];
 
+// Skeleton Components
+const CategorySkeleton = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: '80px' }}>
+    <div className="skeleton skeleton-circle" style={{ width: '64px', height: '64px' }} />
+    <div className="skeleton" style={{ width: '50px', height: '12px' }} />
+  </div>
+);
+
+const ProductSkeleton = () => (
+  <div style={{ 
+    padding: '1rem', 
+    background: 'white', 
+    borderRadius: '1rem', 
+    border: '1px solid #eee',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  }}>
+    <div className="skeleton" style={{ width: '100%', aspectRatio: '1/1', borderRadius: '0.75rem' }} />
+    <div className="skeleton" style={{ width: '80%', height: '16px' }} />
+    <div className="skeleton" style={{ width: '40%', height: '12px' }} />
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.5rem' }}>
+      <div className="skeleton" style={{ width: '50px', height: '20px' }} />
+      <div className="skeleton" style={{ width: '70px', height: '32px', borderRadius: '0.5rem' }} />
+    </div>
+  </div>
+);
+
 const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting, isMobile }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -2730,9 +2758,15 @@ function App() {
                   padding: '1rem 0 3rem',
                 }}>
                 {loading ? (
-                  Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} style={{ width: '95px', height: '95px', borderRadius: '24px', background: '#f5f5f5' }}></div>
-                  ))
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: isMobile ? '1rem' : '2rem', 
+                    overflowX: 'auto', 
+                    padding: '0.5rem 0',
+                    scrollbarWidth: 'none'
+                  }}>
+                    {[...Array(8)].map((_, i) => <CategorySkeleton key={i} />)}
+                  </div>
                 ) : categories.map(cat => (
                   <FastCategoryItem
                     key={cat.id}
@@ -2777,10 +2811,13 @@ function App() {
                 {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
               </div>
               {loading || isCategoryLoading ? (
-                  <div className="grid">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} style={{ height: '250px', background: '#f5f5f5', borderRadius: 'var(--radius)' }}></div>
-                    ))}
+                  <div className="grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))', 
+                    gap: '1.5rem', 
+                    width: '100%' 
+                  }}>
+                    {[...Array(8)].map((_, i) => <ProductSkeleton key={i} />)}
                   </div>
                 ) : (() => {
                   const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
@@ -2905,12 +2942,15 @@ function App() {
                               onOpenDetail={setSelectedProduct}
                             />
                           )) : (
-                              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
-                                <p>No products in this category yet. Check back soon!</p>
-                              </div>
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
+                              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+                              <p>No products in this category yet. Check back soon!</p>
+                            </div>
                           )}
                         </div>
+                      );
+                    })()}
+                  </div>
 
                         {/* Pagination Controls */}
                         {selectedCategoryId && totalPages > 1 && (
@@ -3150,6 +3190,20 @@ function App() {
             min-width: 180px !important;
           }
         }
+
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        .skeleton {
+          background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite linear;
+          border-radius: 8px;
+        }
+
+        .skeleton-circle { border-radius: 50%; }
       `}</style>
     </div>
   );
