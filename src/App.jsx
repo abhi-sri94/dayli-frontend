@@ -182,8 +182,16 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           )}
 
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1rem' : '1.5rem' }}>
-            {user ? (
-              <div style={{ position: 'relative' }}>
+            
+          <button 
+            onClick={() => window.open('https://wa.me/919999999999', '_blank')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', color: '#666', marginRight: '1.5rem' }}
+            className="hover:text-primary transition-colors"
+          >
+            <Phone size={18} /> Help
+          </button>
+
+          <div style={{ position: 'relative' }}>
                 <div
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
@@ -2544,6 +2552,7 @@ function App() {
         }}
         searchQuery={searchQuery}
         onSearch={setSearchQuery}
+        onHelp={() => window.open('https://wa.me/919999999999', '_blank')}
         onHome={() => {
           setTrackingOrderNumber(null);
           setOrderSuccess(null);
@@ -2763,7 +2772,10 @@ function App() {
                   const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
                   const hasSub = subCategories.length > 0;
                   const finalProducts = selectedSubCategoryId
-                    ? categoryProducts.filter(p => p.category_id === selectedSubCategoryId)
+                    ? categoryProducts.filter(p => 
+                        p.sub_category_id === selectedSubCategoryId || 
+                        p.category_id === selectedSubCategoryId
+                      )
                     : (selectedCategoryId ? categoryProducts : products);
 
                   return (
