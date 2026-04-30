@@ -183,13 +183,13 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
 
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1rem' : '1.5rem' }}>
             
-          <button 
-            onClick={() => window.open('https://wa.me/919999999999', '_blank')}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', color: '#666', marginRight: '1.5rem' }}
-            className="hover:text-primary transition-colors"
-          >
-            <Phone size={18} /> Help
-          </button>
+           <button 
+             onClick={() => setShowSupport(true)}
+             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', color: '#666', marginRight: '1.5rem' }}
+             className="hover:text-primary transition-colors"
+           >
+             <Phone size={18} /> Help
+           </button>
 
             {user ? (
               <div style={{ position: 'relative' }}>
@@ -2220,6 +2220,9 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showSupport, setShowSupport] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -2355,19 +2358,18 @@ function App() {
   useEffect(() => {
     if (!selectedCategoryId) {
       setCategoryProducts([]);
+      setCategoryPage(1);
       return;
     }
     const fetchCategoryProducts = async () => {
       setIsCategoryLoading(true);
       try {
-        // Use subcategory ID if selected, otherwise parent category ID
         const targetId = selectedSubCategoryId || selectedCategoryId;
-        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${targetId}${searchQuery ? `&search=${searchQuery}` : ''}&v=${Date.now()}`);
+        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${targetId}&page=${categoryPage}${searchQuery ? `&search=${searchQuery}` : ''}&limit=12&v=${Date.now()}`);
         const data = await res.json();
         if (data.status === 'success') {
-          // Flatten data if it's paginated
-          const productsArray = data.data.data || data.data || [];
-          setCategoryProducts(productsArray);
+          setCategoryProducts(data.data.data || []);
+          setTotalPages(data.data.last_page || 1);
         }
       } catch (err) {
         console.error('Category fetch failed:', err);
@@ -2376,6 +2378,11 @@ function App() {
       }
     };
     fetchCategoryProducts();
+  }, [selectedCategoryId, selectedSubCategoryId, categoryPage]);
+
+  // Reset page when category changes
+  useEffect(() => {
+    setCategoryPage(1);
   }, [selectedCategoryId, selectedSubCategoryId]);
 
   useEffect(() => {
@@ -2904,6 +2911,89 @@ function App() {
                               </div>
                           )}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {selectedCategoryId && totalPages > 1 && (
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            flexWrap: 'wrap',
+                            gap: '0.75rem', 
+                            marginTop: '4rem',
+                            padding: '1rem',
+                            borderTop: '1px solid #eee'
+                          }}>
+                            <button 
+                              disabled={categoryPage === 1}
+                              onClick={() => {
+                                setCategoryPage(prev => prev - 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              style={{
+                                padding: '0.6rem 1.25rem',
+                                borderRadius: '0.75rem',
+                                border: '1px solid #ddd',
+                                background: 'white',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                opacity: categoryPage === 1 ? 0.5 : 1,
+                                cursor: categoryPage === 1 ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              Previous
+                            </button>
+                            
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              {[...Array(totalPages)].map((_, i) => (
+                                <button
+                                  key={i + 1}
+                                  onClick={() => {
+                                    setCategoryPage(i + 1);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '0.75rem',
+                                    border: '1px solid ' + (categoryPage === i + 1 ? 'hsl(var(--primary))' : '#eee'),
+                                    background: categoryPage === i + 1 ? 'hsl(var(--primary))' : 'white',
+                                    color: categoryPage === i + 1 ? 'white' : 'black',
+                                    fontWeight: 800,
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                    boxShadow: categoryPage === i + 1 ? '0 4px 12px hsl(var(--primary) / 0.3)' : 'none',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {i + 1}
+                                </button>
+                              ))}
+                            </div>
+
+                            <button 
+                              disabled={categoryPage === totalPages}
+                              onClick={() => {
+                                setCategoryPage(prev => prev + 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              style={{
+                                padding: '0.6rem 1.25rem',
+                                borderRadius: '0.75rem',
+                                border: '1px solid #ddd',
+                                background: 'white',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                opacity: categoryPage === totalPages ? 0.5 : 1,
+                                cursor: categoryPage === totalPages ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              Next
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -2912,6 +3002,102 @@ function App() {
           </>
         )}
       </main>
+
+      <AnimatePresence>
+        {showSupport && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1000,
+              background: 'white',
+              overflowY: 'auto'
+            }}
+          >
+            <div className="container" style={{ maxWidth: '600px', padding: '2rem 1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+                <button 
+                  onClick={() => setShowSupport(false)} 
+                  style={{ background: 'hsl(var(--muted))', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.5px' }}>Support Center</h1>
+              </div>
+
+              <div style={{ 
+                background: 'linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%)', 
+                padding: '2.5rem 2rem', 
+                borderRadius: '2rem', 
+                textAlign: 'center',
+                marginBottom: '3rem',
+                border: '1px solid hsl(var(--primary) / 0.1)'
+              }}>
+                <div style={{ fontSize: '3.5rem', marginBottom: '1.5rem' }}>👋</div>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '0.75rem', color: 'hsl(var(--foreground))' }}>How can we help today?</h2>
+                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.95rem', lineHeight: 1.6 }}>We're here to assist you with any questions about your orders, delivery, or payments.</p>
+              </div>
+
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Phone size={20} style={{ color: 'hsl(var(--primary))' }} />
+                Quick Contact
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '3.5rem' }}>
+                <button 
+                  onClick={() => window.open('https://wa.me/918381831848', '_blank')}
+                  style={{ 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
+                    padding: '1.75rem 1rem', borderRadius: '1.5rem', background: '#25D366', color: 'white',
+                    border: 'none', fontWeight: 800, fontSize: '0.95rem',
+                    boxShadow: '0 8px 20px rgba(37, 211, 102, 0.25)'
+                  }}
+                >
+                  <Phone size={28} />
+                  WhatsApp
+                </button>
+                <button 
+                  onClick={() => window.location.href = 'tel:+918381831848'}
+                  style={{ 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
+                    padding: '1.75rem 1rem', borderRadius: '1.5rem', background: 'hsl(var(--primary))', color: 'white',
+                    border: 'none', fontWeight: 800, fontSize: '0.95rem',
+                    boxShadow: '0 8px 20px hsl(var(--primary) / 0.25)'
+                  }}
+                >
+                  <Phone size={28} />
+                  Call Us
+                </button>
+              </div>
+
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem' }}>Frequently Asked Questions</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {[
+                  { q: "Where is my order?", a: "You can track your order in real-time in the 'Orders' section of your profile. Typical delivery time in Bahraich is 20-30 minutes." },
+                  { q: "How do I return items?", a: "Fresh items (vegetables, dairy) must be returned at the time of delivery. Other items can be returned within 24 hours if unopened." },
+                  { q: "What are the delivery charges?", a: "Delivery is FREE for orders above ₹100. For orders below ₹100, a small fee of ₹20 applies to ensure quality service." },
+                  { q: "Is COD available?", a: "Yes! We support Cash on Delivery as well as all online payment methods including UPI, Cards, and Netbanking." }
+                ].map((faq, i) => (
+                  <div key={i} style={{ background: 'hsl(var(--muted) / 0.3)', padding: '1.5rem', borderRadius: '1.25rem' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.75rem', color: 'hsl(var(--foreground))' }}>
+                      {faq.q}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.6, fontWeight: 500 }}>
+                      {faq.a}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>
+                <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>© 2026 Dayli Quick Commerce. Bahraich, UP.</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <CartDrawer
         isOpen={isCartOpen}
