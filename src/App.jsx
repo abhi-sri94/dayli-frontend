@@ -2359,9 +2359,15 @@ function App() {
     const fetchCategoryProducts = async () => {
       setIsCategoryLoading(true);
       try {
-        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${selectedCategoryId}${searchQuery ? `&search=${searchQuery}` : ''}&v=${Date.now()}`);
+        // Use subcategory ID if selected, otherwise parent category ID
+        const targetId = selectedSubCategoryId || selectedCategoryId;
+        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${targetId}${searchQuery ? `&search=${searchQuery}` : ''}&v=${Date.now()}`);
         const data = await res.json();
-        if (data.status === 'success') setCategoryProducts(data.data.data);
+        if (data.status === 'success') {
+          // Flatten data if it's paginated
+          const productsArray = data.data.data || data.data || [];
+          setCategoryProducts(productsArray);
+        }
       } catch (err) {
         console.error('Category fetch failed:', err);
       } finally {
@@ -2369,7 +2375,7 @@ function App() {
       }
     };
     fetchCategoryProducts();
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, selectedSubCategoryId]);
 
   useEffect(() => {
     localStorage.setItem('dayli_cart', JSON.stringify(cartItems));
@@ -2771,12 +2777,7 @@ function App() {
                 ) : (() => {
                   const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
                   const hasSub = subCategories.length > 0;
-                  const finalProducts = selectedSubCategoryId
-                    ? categoryProducts.filter(p => 
-                        p.sub_category_id === selectedSubCategoryId || 
-                        p.category_id === selectedSubCategoryId
-                      )
-                    : (selectedCategoryId ? categoryProducts : products);
+                  const finalProducts = selectedCategoryId ? categoryProducts : products;
 
                   return (
                     <div style={{ display: 'flex', gap: '1.5rem', width: '100%' }}>
