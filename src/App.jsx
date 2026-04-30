@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag, ArrowLeft, Plus, Minus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
@@ -1419,18 +1419,23 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
           color: 'white',
           borderRadius: '10px',
           overflow: 'hidden',
-          boxShadow: '0 4px 12px rgba(var(--primary), 0.3)'
+          boxShadow: '0 4px 12px rgba(var(--primary), 0.3)',
+          flexShrink: 0
         }}>
           <button
             onClick={(e) => { e.stopPropagation(); onUpdate(product.id, -1); }}
-            style={{ padding: '0.4rem 0.75rem', color: 'white', fontWeight: 900, fontSize: '1rem' }}
-          >−</button>
-          <span style={{ minWidth: '1.2rem', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem' }}>{quantity}</span>
+            style={{ padding: '0.5rem 0.6rem', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Minus size={14} strokeWidth={3} />
+          </button>
+          <span style={{ minWidth: '1rem', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem' }}>{quantity}</span>
           <button
             onClick={(e) => { e.stopPropagation(); onUpdate(product.id, 1); }}
             disabled={quantity >= (product.stock_quantity ?? 999)}
-            style={{ padding: '0.4rem 0.75rem', color: 'white', fontWeight: 900, fontSize: '1.1rem', opacity: quantity >= (product.stock_quantity ?? 999) ? 0.5 : 1 }}
-          >+</button>
+            style={{ padding: '0.5rem 0.6rem', color: 'white', opacity: quantity >= (product.stock_quantity ?? 999) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Plus size={14} strokeWidth={3} />
+          </button>
         </div>
       ) : (
         <motion.button
