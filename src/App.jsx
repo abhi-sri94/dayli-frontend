@@ -191,7 +191,8 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
             <Phone size={18} /> Help
           </button>
 
-          <div style={{ position: 'relative' }}>
+            {user ? (
+              <div style={{ position: 'relative' }}>
                 <div
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
