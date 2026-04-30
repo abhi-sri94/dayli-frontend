@@ -2811,50 +2811,78 @@ function App() {
                 {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
               </div>
               {loading || isCategoryLoading ? (
-                  <div className="grid" style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))', 
-                    gap: '1.5rem', 
-                    width: '100%' 
-                  }}>
-                    {[...Array(8)].map((_, i) => <ProductSkeleton key={i} />)}
-                  </div>
-                ) : (() => {
-                  const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
-                  const hasSub = subCategories.length > 0;
-                  const finalProducts = selectedCategoryId ? categoryProducts : products;
+                <div className="grid" style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))', 
+                  gap: '1.5rem', 
+                  width: '100%' 
+                }}>
+                  {[...Array(8)].map((_, i) => <ProductSkeleton key={i} />)}
+                </div>
+              ) : (() => {
+                const subCategories = selectedCategoryId ? (categories.find(c => c.id === selectedCategoryId)?.children || []) : [];
+                const hasSub = subCategories.length > 0;
+                const finalProducts = selectedCategoryId ? categoryProducts : products;
 
-                  return (
-                    <div style={{ display: 'flex', gap: '1.5rem', width: '100%' }}>
-                      {hasSub && (
+                return (
+                  <div style={{ display: 'flex', gap: '1.5rem', width: '100%' }}>
+                    {hasSub && (
+                      <div
+                        className="subcategory-sidebar"
+                        style={{
+                          width: isMobile ? '80px' : '90px',
+                          flexShrink: 0,
+                          borderRight: '1px solid #f0f0f0',
+                          paddingRight: '0.8rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1.5rem',
+                          position: 'sticky',
+                          top: '100px',
+                          height: 'fit-content',
+                          maxHeight: 'calc(100vh - 140px)',
+                          overflowY: 'auto',
+                          scrollbarWidth: 'none',
+                        }}
+                      >
                         <div
-                          className="subcategory-sidebar"
+                          onClick={() => {
+                            setSelectedSubCategoryId(null);
+                          }}
                           style={{
-                            width: isMobile ? '80px' : '90px',
-                            flexShrink: 0,
-                            borderRight: '1px solid #f0f0f0',
-                            paddingRight: '0.8rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1.5rem',
-                            position: 'sticky',
-                            top: '100px',
-                            height: 'fit-content',
-                            maxHeight: 'calc(100vh - 140px)',
-                            overflowY: 'auto',
-                            scrollbarWidth: 'none',
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            opacity: selectedSubCategoryId === null ? 1 : 0.5,
                           }}
                         >
-                          {/* All button resets both category and subcategory */}
                           <div
-                            onClick={() => {
-                              setSelectedCategoryId(null);
-                              setSelectedSubCategoryId(null);
+                            style={{
+                              width: '64px',
+                              height: '64px',
+                              borderRadius: '16px',
+                              background: selectedSubCategoryId === null ? 'hsl(var(--primary)/0.1)' : '#f8f9fa',
+                              border: selectedSubCategoryId === null ? '2px solid hsl(var(--primary))' : '1px solid #eee',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              margin: '0 auto',
+                              fontWeight: 800,
+                              color: 'hsl(var(--primary))',
+                              fontSize: '0.8rem',
                             }}
+                          >
+                            All
+                          </div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: '0.4rem', display: 'block' }}>All</span>
+                        </div>
+                        {subCategories.map(sc => (
+                          <div
+                            key={sc.id}
+                            onClick={() => setSelectedSubCategoryId(sc.id)}
                             style={{
                               cursor: 'pointer',
                               textAlign: 'center',
-                              opacity: selectedCategoryId === null ? 1 : 0.5,
+                              opacity: selectedSubCategoryId === sc.id ? 1 : 0.5,
                             }}
                           >
                             <div
@@ -2862,182 +2890,149 @@ function App() {
                                 width: '64px',
                                 height: '64px',
                                 borderRadius: '16px',
-                                background: selectedCategoryId === null ? 'hsl(var(--primary)/0.1)' : '#f8f9fa',
-                                border: selectedCategoryId === null ? '2px solid hsl(var(--primary))' : '1px solid #eee',
+                                background: '#fff',
+                                border: selectedSubCategoryId === sc.id ? '2px solid hsl(var(--primary))' : '1px solid #eee',
+                                overflow: 'hidden',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 margin: '0 auto',
-                                fontWeight: 800,
-                                color: 'hsl(var(--primary))',
-                                fontSize: '0.8rem',
                               }}
                             >
-                              All
+                              <img
+                                src={(sc.icon && sc.icon.startsWith('http')) ? sc.icon : `https://api.dayli.co.in/storage/${sc.icon}`}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={e => (e.target.src = `https://placehold.co/100?text=${sc.name?.[0] ?? 'C'}`)}
+                              />
                             </div>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: '0.4rem', display: 'block' }}>All</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: selectedSubCategoryId === sc.id ? 700 : 500, marginTop: '0.4rem', display: 'block' }}>{sc.name}</span>
                           </div>
-                          {subCategories.map(sc => (
-                            <div
-                              key={sc.id}
-                              onClick={() => setSelectedSubCategoryId(sc.id)}
-                              style={{
-                                cursor: 'pointer',
-                                textAlign: 'center',
-                                opacity: selectedSubCategoryId === sc.id ? 1 : 0.5,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: '64px',
-                                  height: '64px',
-                                  borderRadius: '16px',
-                                  background: '#fff',
-                                  border: selectedSubCategoryId === sc.id ? '2px solid hsl(var(--primary))' : '1px solid #eee',
-                                  overflow: 'hidden',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  margin: '0 auto',
-                                }}
-                              >
-                                <img
-                                  src={(sc.icon && sc.icon.startsWith('http')) ? sc.icon : `https://api.dayli.co.in/storage/${sc.icon}`}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                  onError={e => (e.target.src = `https://placehold.co/100?text=${sc.name?.[0] ?? 'C'}`)}
-                                />
-                              </div>
-                              <span style={{ fontSize: '0.75rem', fontWeight: selectedSubCategoryId === sc.id ? 700 : 500, marginTop: '0.4rem', display: 'block' }}>{sc.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div style={{ flex: 1 }}>
-                        <div
-                          className="grid"
-                          style={{
-                            display: 'grid',
-                            gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))',
-                            gap: '1.5rem',
-                            width: '100%',
-                          }}
-                        >
-                          {finalProducts.length > 0 ? finalProducts.map(product => (
-                            <ProductCard
-                              key={product.id}
-                              product={{
-                                ...product,
-                                price: product.selling_price,
-                                mrp: product.mrp,
-                                image: (() => {
-                                  if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                                  const path = product.primary_image.image_path;
-                                  const isExternal = path && path.startsWith('http');
-                                  return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                                })(),
-                              }}
-                              quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                              onAdd={addToCart}
-                              onUpdate={updateQuantity}
-                              onOpenDetail={setSelectedProduct}
-                            />
-                          )) : (
-                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
-                              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
-                              <p>No products in this category yet. Check back soon!</p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                        {/* Pagination Controls */}
-                        {selectedCategoryId && totalPages > 1 && (
-                          <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            alignItems: 'center', 
-                            flexWrap: 'wrap',
-                            gap: '0.75rem', 
-                            marginTop: '4rem',
-                            padding: '1rem',
-                            borderTop: '1px solid #eee'
-                          }}>
-                            <button 
-                              disabled={categoryPage === 1}
-                              onClick={() => {
-                                setCategoryPage(prev => prev - 1);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              style={{
-                                padding: '0.6rem 1.25rem',
-                                borderRadius: '0.75rem',
-                                border: '1px solid #ddd',
-                                background: 'white',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                opacity: categoryPage === 1 ? 0.5 : 1,
-                                cursor: categoryPage === 1 ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s'
-                              }}
-                            >
-                              Previous
-                            </button>
-                            
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              {[...Array(totalPages)].map((_, i) => (
-                                <button
-                                  key={i + 1}
-                                  onClick={() => {
-                                    setCategoryPage(i + 1);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }}
-                                  style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '0.75rem',
-                                    border: '1px solid ' + (categoryPage === i + 1 ? 'hsl(var(--primary))' : '#eee'),
-                                    background: categoryPage === i + 1 ? 'hsl(var(--primary))' : 'white',
-                                    color: categoryPage === i + 1 ? 'white' : 'black',
-                                    fontWeight: 800,
-                                    fontSize: '0.9rem',
-                                    cursor: 'pointer',
-                                    boxShadow: categoryPage === i + 1 ? '0 4px 12px hsl(var(--primary) / 0.3)' : 'none',
-                                    transition: 'all 0.2s'
-                                  }}
-                                >
-                                  {i + 1}
-                                </button>
-                              ))}
-                            </div>
-
-                            <button 
-                              disabled={categoryPage === totalPages}
-                              onClick={() => {
-                                setCategoryPage(prev => prev + 1);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              style={{
-                                padding: '0.6rem 1.25rem',
-                                borderRadius: '0.75rem',
-                                border: '1px solid #ddd',
-                                background: 'white',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                opacity: categoryPage === totalPages ? 0.5 : 1,
-                                cursor: categoryPage === totalPages ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s'
-                              }}
-                            >
-                              Next
-                            </button>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div
+                        className="grid"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))',
+                          gap: '1.5rem',
+                          width: '100%',
+                        }}
+                      >
+                        {finalProducts.length > 0 ? finalProducts.map(product => (
+                          <ProductCard
+                            key={product.id}
+                            product={{
+                              ...product,
+                              price: product.selling_price,
+                              mrp: product.mrp,
+                              image: (() => {
+                                if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                                const path = product.primary_image.image_path;
+                                const isExternal = path && path.startsWith('http');
+                                return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                              })(),
+                            }}
+                            quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                            onAdd={addToCart}
+                            onUpdate={updateQuantity}
+                            onOpenDetail={setSelectedProduct}
+                          />
+                        )) : (
+                          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#999' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+                            <p>No products in this category yet. Check back soon!</p>
                           </div>
                         )}
                       </div>
+
+                      {/* Pagination Controls */}
+                      {selectedCategoryId && totalPages > 1 && (
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          flexWrap: 'wrap',
+                          gap: '0.75rem', 
+                          marginTop: '4rem',
+                          padding: '1rem',
+                          borderTop: '1px solid #eee'
+                        }}>
+                          <button 
+                            disabled={categoryPage === 1}
+                            onClick={() => {
+                              setCategoryPage(prev => prev - 1);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            style={{
+                              padding: '0.6rem 1.25rem',
+                              borderRadius: '0.75rem',
+                              border: '1px solid #ddd',
+                              background: 'white',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              opacity: categoryPage === 1 ? 0.5 : 1,
+                              cursor: categoryPage === 1 ? 'not-allowed' : 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            Previous
+                          </button>
+                          
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            {[...Array(totalPages)].map((_, i) => (
+                              <button
+                                key={i + 1}
+                                onClick={() => {
+                                  setCategoryPage(i + 1);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  borderRadius: '0.75rem',
+                                  border: '1px solid ' + (categoryPage === i + 1 ? 'hsl(var(--primary))' : '#eee'),
+                                  background: categoryPage === i + 1 ? 'hsl(var(--primary))' : 'white',
+                                  color: categoryPage === i + 1 ? 'white' : 'black',
+                                  fontWeight: 800,
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                  boxShadow: categoryPage === i + 1 ? '0 4px 12px hsl(var(--primary) / 0.3)' : 'none',
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                {i + 1}
+                              </button>
+                            ))}
+                          </div>
+
+                          <button 
+                            disabled={categoryPage === totalPages}
+                            onClick={() => {
+                              setCategoryPage(prev => prev + 1);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            style={{
+                              padding: '0.6rem 1.25rem',
+                              borderRadius: '0.75rem',
+                              border: '1px solid #ddd',
+                              background: 'white',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              opacity: categoryPage === totalPages ? 0.5 : 1,
+                              cursor: categoryPage === totalPages ? 'not-allowed' : 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  );
-                })()}
+                  </div>
+                );
+              })()}
             </section>
           </>
         )}
