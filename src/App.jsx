@@ -59,7 +59,7 @@ const ProductSkeleton = () => (
   </div>
 );
 
-const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting, isMobile }) => {
+const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfile, searchQuery, onSearch, onHome, currentAddress, onDetectLocation, isDetecting, isMobile, searchResults, isSearching, onOpenDetail }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const trendingSearches = ['Milk', 'Bread', 'Eggs', 'Chicken', 'Paneer', 'Maggi'];
@@ -203,6 +203,81 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                         </button>
                       ))}
                     </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Live Results */}
+                {isSearchFocused && searchQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '0.5rem',
+                      background: 'white',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                      border: '1px solid #eee',
+                      zIndex: 100,
+                      padding: '0.5rem',
+                      maxHeight: '400px',
+                      overflowY: 'auto'
+                    }}
+                  >
+                    {isSearching ? (
+                      <div style={{ padding: '1.5rem', textAlign: 'center', color: '#666' }}>
+                         <div className="shimmer" style={{ width: '40px', height: '40px', borderRadius: '50%', margin: '0 auto 10px' }} />
+                         Searching...
+                      </div>
+                    ) : (
+                      searchResults && searchResults.length > 0 ? (
+                        <div>
+                           {searchResults.slice(0, 6).map(product => (
+                              <div 
+                                key={product.id} 
+                                onClick={() => onOpenDetail(product)}
+                                style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: '1rem', 
+                                  padding: '0.75rem', 
+                                  borderRadius: '8px', 
+                                  cursor: 'pointer',
+                                  transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              >
+                                 <img 
+                                   src={product.image || 'https://placehold.co/50'} 
+                                   alt={product.name} 
+                                   style={{ width: '45px', height: '45px', objectFit: 'contain', borderRadius: '6px', background: '#fcfcfc' }} 
+                                 />
+                                 <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#111' }}>{product.name}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{product.unit} • <span style={{ fontWeight: 700, color: 'hsl(var(--primary))' }}>₹{product.selling_price}</span></div>
+                                 </div>
+                                 <ChevronRight size={16} color="#ccc" />
+                              </div>
+                           ))}
+                           <div 
+                             onClick={() => setIsSearchFocused(false)}
+                             style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'hsl(var(--primary))', cursor: 'pointer', borderTop: '1px solid #f3f4f6', marginTop: '0.5rem' }}
+                           >
+                              See all results
+                           </div>
+                        </div>
+                      ) : (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                           <Search size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
+                           <div style={{ fontSize: '0.9rem' }}>No products found for "{searchQuery}"</div>
+                        </div>
+                      )
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -375,6 +450,64 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                       </button>
                     ))}
                   </div>
+                </motion.div>
+              )}
+
+              {/* Mobile Live Results */}
+              {isSearchFocused && searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    marginTop: '0.5rem',
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    border: '1px solid #eee',
+                    zIndex: 100,
+                    padding: '0.5rem',
+                    maxHeight: '350px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {isSearching ? (
+                    <div style={{ padding: '1rem', textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>Searching...</div>
+                  ) : (
+                    searchResults && searchResults.length > 0 ? (
+                      <div>
+                         {searchResults.slice(0, 5).map(product => (
+                            <div 
+                              key={product.id} 
+                              onClick={() => onOpenDetail(product)}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.75rem', 
+                                padding: '0.6rem', 
+                                borderBottom: '1px solid #f9fafb'
+                              }}
+                            >
+                               <img 
+                                 src={product.image || 'https://placehold.co/40'} 
+                                 alt={product.name} 
+                                 style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px' }} 
+                               />
+                               <div style={{ flex: 1 }}>
+                                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{product.name}</div>
+                                  <div style={{ fontSize: '0.7rem', color: '#666' }}>{product.unit} • ₹{product.selling_price}</div>
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                    ) : (
+                      <div style={{ padding: '1.5rem', textAlign: 'center', color: '#999', fontSize: '0.85rem' }}>No results found</div>
+                    )
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -2617,6 +2750,9 @@ function App() {
         }}
         searchQuery={searchQuery}
         onSearch={setSearchQuery}
+        searchResults={searchResults}
+        isSearching={isSearching}
+        onOpenDetail={(product) => setSelectedProduct(product)}
         onHelp={() => window.open('https://wa.me/919999999999', '_blank')}
         onHome={() => {
           setTrackingOrderNumber(null);
