@@ -2382,6 +2382,9 @@ function App() {
     fetchData();
   }, []);
 
+  // Cache for category products to make switching instant
+  const [productsCache, setProductsCache] = useState({});
+
   // Fetch products for selected category from server
   useEffect(() => {
     if (!selectedCategoryId) {
@@ -2389,15 +2392,35 @@ function App() {
       setCategoryPage(1);
       return;
     }
-    const fetchCategoryProducts = async () => {
+
+    const targetId = selectedSubCategoryId || selectedCategoryId;
+    const cacheKey = `${targetId}-${categoryPage}-${searchQuery}`;
+
+    // Use cache if available for instant loading
+    if (productsCache[cacheKey]) {
+      setCategoryProducts(productsCache[cacheKey].products);
+      setTotalPages(productsCache[cacheKey].totalPages);
+      // We still fetch in background to keep it fresh (SWR pattern)
+    } else {
       setIsCategoryLoading(true);
+    }
+
+    const fetchCategoryProducts = async () => {
       try {
-        const targetId = selectedSubCategoryId || selectedCategoryId;
-        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${targetId}&page=${categoryPage}${searchQuery ? `&search=${searchQuery}` : ''}&limit=12&v=${Date.now()}`);
+        const res = await fetch(`${apiBaseUrl}/api/products?category_id=${targetId}&page=${categoryPage}${searchQuery ? `&search=${searchQuery}` : ''}&limit=12`);
         const data = await res.json();
         if (data.status === 'success') {
-          setCategoryProducts(data.data.data || []);
-          setTotalPages(data.data.last_page || 1);
+          const newProducts = data.data.data || [];
+          const newTotalPages = data.data.last_page || 1;
+          
+          setCategoryProducts(newProducts);
+          setTotalPages(newTotalPages);
+          
+          // Update cache
+          setProductsCache(prev => ({
+            ...prev,
+            [cacheKey]: { products: newProducts, totalPages: newTotalPages }
+          }));
         }
       } catch (err) {
         console.error('Category fetch failed:', err);
@@ -2406,7 +2429,7 @@ function App() {
       }
     };
     fetchCategoryProducts();
-  }, [selectedCategoryId, selectedSubCategoryId, categoryPage]);
+  }, [selectedCategoryId, selectedSubCategoryId, categoryPage, searchQuery]);
 
   // Reset page when category changes
   useEffect(() => {
