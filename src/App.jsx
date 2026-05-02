@@ -2841,66 +2841,86 @@ function App() {
           </div>
         ) : searchResults !== null ? (
           /* Search Results ... Same as before */
-          <section style={{ paddingBottom: '4rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Search Results</h2>
+          <section style={{ paddingBottom: '4rem', minHeight: '60vh' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', padding: isMobile ? '0 0.5rem' : 0 }}>
+              <div>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.5px' }}>Search Results</h2>
+                {searchResults && searchResults.length > 0 && !isSearching && (
+                  <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+                    Showing results for "<span style={{ fontWeight: 700, color: 'black' }}>{searchQuery}</span>"
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => setSearchQuery('')}
-                style={{ color: 'hsl(var(--primary))', fontWeight: 700, fontSize: '0.9rem', background: 'hsl(var(--primary) / 0.1)', padding: '0.5rem 1rem', borderRadius: '2rem' }}
+                style={{ 
+                  color: 'hsl(var(--primary))', 
+                  fontWeight: 800, 
+                  fontSize: '0.85rem', 
+                  background: 'hsl(var(--primary) / 0.1)', 
+                  padding: '0.6rem 1.25rem', 
+                  borderRadius: '2rem',
+                  border: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
               >
-                Clear Search
+                Clear
               </button>
             </div>
 
             {isSearching ? (
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                {[...Array(4)].map((_, i) => <ProductSkeleton key={i} />)}
+              <div className="grid">
+                {[...Array(isMobile ? 4 : 8)].map((_, i) => <ProductSkeleton key={i} />)}
               </div>
             ) : (
               <>
                 {/* Main Results */}
                 {searchResults && searchResults.length > 0 ? (
-                  <>
-                    <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-                      Showing results for "<span style={{ fontWeight: 700, color: '#000' }}>{searchQuery}</span>"
-                    </p>
-                    <div className="grid">
-                      {searchResults.map(product => (
-                        <ProductCard
-                          key={product.id}
-                          product={{
-                            ...product,
-                            price: product.selling_price,
-                            mrp: product.mrp,
-                            image: (() => {
-                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                              const path = product.primary_image.image_path;
-                              const isExternal = /^https?:\/\//.test(path);
-                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                            })()
-                          }}
-                          quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                          onAdd={addToCart}
-                          onUpdate={updateQuantity}
-                          onOpenDetail={setSelectedProduct}
-                        />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '1.5rem', marginBottom: '3rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>No results for "{searchQuery}"</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Check for typos or try searching with more general terms.</p>
+                  <div className="grid">
+                    {searchResults.map(product => (
+                      <ProductCard
+                        key={product.id}
+                        product={{
+                          ...product,
+                          price: product.selling_price,
+                          mrp: product.mrp,
+                          image: (() => {
+                            if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                            const path = product.primary_image.image_path;
+                            const isExternal = /^https?:\/\//.test(path);
+                            return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                          })()
+                        }}
+                        quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                        onAdd={addToCart}
+                        onUpdate={updateQuantity}
+                        onOpenDetail={setSelectedProduct}
+                      />
+                    ))}
                   </div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ background: '#f8fafc', padding: '3rem 2rem', borderRadius: '2rem', marginBottom: '3rem', border: '1px solid #e2e8f0', textAlign: 'center' }}
+                  >
+                    <div style={{ width: '64px', height: '64px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}>
+                      <Search size={28} color="#cbd5e1" />
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.5rem' }}>No exact matches for "{searchQuery}"</h3>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>Don't worry, we've found some alternatives for you below.</p>
+                  </motion.div>
                 )}
 
                 {/* Suggestions Fallback */}
                 {(!searchResults || searchResults.length === 0) && searchSuggestion && suggestedProducts.length > 0 && (
-                  <div style={{ marginTop: '3rem' }}>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Showing results for "<span style={{ color: '#22c55e' }}>{searchSuggestion}</span>"</h3>
-                      <p style={{ fontSize: '0.85rem', color: '#666' }}>We couldn't find exact matches, so we found something similar.</p>
+                  <div style={{ marginTop: '4rem' }}>
+                    <div style={{ marginBottom: '2rem', padding: '0 0.5rem' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#dcfce7', color: '#166534', padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem' }}>
+                        <Tag size={14} /> Did you mean?
+                      </div>
+                      <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Showing results for "<span style={{ color: '#22c55e', textDecoration: 'underline', textUnderlineOffset: '4px' }}>{searchSuggestion}</span>"</h3>
                     </div>
                     <div className="grid">
                       {suggestedProducts.map(product => (
@@ -2929,12 +2949,15 @@ function App() {
 
                 {/* Related Products Discovery */}
                 {(!searchResults || searchResults.length === 0) && relatedProducts.length > 0 && (
-                  <div style={{ marginTop: '4rem', paddingTop: '3rem', borderTop: '2px dashed #f1f5f9' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2rem' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ShoppingBag size={20} color="hsl(var(--primary))" />
+                  <div style={{ marginTop: '5rem', paddingTop: '4rem', borderTop: '2px dashed #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem', padding: '0 0.5rem' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--primary))' }}>
+                        <ShoppingBag size={24} />
                       </div>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Showing related products</h3>
+                      <div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>You might also like</h3>
+                        <p style={{ fontSize: '0.9rem', color: '#64748b' }}>Curated essentials just for you</p>
+                      </div>
                     </div>
                     <div className="grid">
                       {relatedProducts.map(product => (
