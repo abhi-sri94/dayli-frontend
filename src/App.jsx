@@ -2368,6 +2368,9 @@ function App() {
   const [token, setToken] = useState(() => localStorage.getItem('dayli_token'));
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
+  const [searchSuggestion, setSearchSuggestion] = useState(null);
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
@@ -2470,6 +2473,9 @@ function App() {
         const data = await response.json();
         if (data.status === 'success') {
           setSearchResults(data.data.data);
+          setSearchSuggestion(data.suggestion);
+          setSuggestedProducts(data.suggested_products || []);
+          setRelatedProducts(data.related || []);
         }
       } catch (err) {
         // Silently handle search fail
@@ -2835,46 +2841,126 @@ function App() {
           </div>
         ) : searchResults !== null ? (
           /* Search Results ... Same as before */
-          <section>
+          <section style={{ paddingBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem' }}>Search Results for "{searchQuery}"</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Search Results</h2>
               <button
                 onClick={() => setSearchQuery('')}
-                style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}
+                style={{ color: 'hsl(var(--primary))', fontWeight: 700, fontSize: '0.9rem', background: 'hsl(var(--primary) / 0.1)', padding: '0.5rem 1rem', borderRadius: '2rem' }}
               >
                 Clear Search
               </button>
             </div>
+
             {isSearching ? (
-              <div style={{ textAlign: 'center', padding: '4rem' }}>Searching...</div>
-            ) : searchResults.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-                <Search size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <p>No products found for "{searchQuery}"</p>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                {[...Array(4)].map((_, i) => <ProductSkeleton key={i} />)}
               </div>
             ) : (
-              <div className="grid">
-                {searchResults.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={{
-                      ...product,
-                      price: product.selling_price,
-                      mrp: product.mrp,
-                      image: (() => {
-                        if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
-                        const path = product.primary_image.image_path;
-                        const isExternal = /^https?:\/\//.test(path);
-                        return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
-                      })()
-                    }}
-                    quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
-                    onAdd={addToCart}
-                    onUpdate={updateQuantity}
-                    onOpenDetail={setSelectedProduct}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Main Results */}
+                {searchResults && searchResults.length > 0 ? (
+                  <>
+                    <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+                      Showing results for "<span style={{ fontWeight: 700, color: '#000' }}>{searchQuery}</span>"
+                    </p>
+                    <div className="grid">
+                      {searchResults.map(product => (
+                        <ProductCard
+                          key={product.id}
+                          product={{
+                            ...product,
+                            price: product.selling_price,
+                            mrp: product.mrp,
+                            image: (() => {
+                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                              const path = product.primary_image.image_path;
+                              const isExternal = /^https?:\/\//.test(path);
+                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                            })()
+                          }}
+                          quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                          onAdd={addToCart}
+                          onUpdate={updateQuantity}
+                          onOpenDetail={setSelectedProduct}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '1.5rem', marginBottom: '3rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                    <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>No results for "{searchQuery}"</h3>
+                    <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Check for typos or try searching with more general terms.</p>
+                  </div>
+                )}
+
+                {/* Suggestions Fallback */}
+                {(!searchResults || searchResults.length === 0) && searchSuggestion && suggestedProducts.length > 0 && (
+                  <div style={{ marginTop: '3rem' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Showing results for "<span style={{ color: '#22c55e' }}>{searchSuggestion}</span>"</h3>
+                      <p style={{ fontSize: '0.85rem', color: '#666' }}>We couldn't find exact matches, so we found something similar.</p>
+                    </div>
+                    <div className="grid">
+                      {suggestedProducts.map(product => (
+                        <ProductCard
+                          key={product.id}
+                          product={{
+                            ...product,
+                            price: product.selling_price,
+                            mrp: product.mrp,
+                            image: (() => {
+                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                              const path = product.primary_image.image_path;
+                              const isExternal = /^https?:\/\//.test(path);
+                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                            })()
+                          }}
+                          quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                          onAdd={addToCart}
+                          onUpdate={updateQuantity}
+                          onOpenDetail={setSelectedProduct}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Related Products Discovery */}
+                {(!searchResults || searchResults.length === 0) && relatedProducts.length > 0 && (
+                  <div style={{ marginTop: '4rem', paddingTop: '3rem', borderTop: '2px dashed #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ShoppingBag size={20} color="hsl(var(--primary))" />
+                      </div>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Showing related products</h3>
+                    </div>
+                    <div className="grid">
+                      {relatedProducts.map(product => (
+                        <ProductCard
+                          key={product.id}
+                          product={{
+                            ...product,
+                            price: product.selling_price,
+                            mrp: product.mrp,
+                            image: (() => {
+                              if (!product.primary_image || !product.primary_image.image_path) return 'https://placehold.co/200';
+                              const path = product.primary_image.image_path;
+                              const isExternal = /^https?:\/\//.test(path);
+                              return isExternal ? path : `https://api.dayli.co.in/storage/${path}`;
+                            })()
+                          }}
+                          quantity={cartItems.find(item => item.id === product.id)?.quantity || 0}
+                          onAdd={addToCart}
+                          onUpdate={updateQuantity}
+                          onOpenDetail={setSelectedProduct}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </section>
         ) : (
