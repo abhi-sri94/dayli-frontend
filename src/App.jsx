@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, ChevronDown, Menu, Phone, Mail, User, Package, LogOut, ChevronRight, ShoppingBag, Tag, ArrowLeft, Plus, Minus, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, googleProvider } from './firebase';
 import { signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { Share } from '@capacitor/share';
+
 
 const apiBaseUrl = 'https://api.dayli.co.in';
 
@@ -70,7 +75,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
       top: 0,
       zIndex: 100,
       background: 'white',
-      padding: isMobile ? '0.75rem 1rem' : '0.5rem 0',
+      padding: isMobile ? 'calc(env(safe-area-inset-top) + 0.75rem) 1rem 0.75rem' : '0.5rem 0',
       borderBottom: '1px solid hsl(var(--border))',
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
@@ -533,7 +538,7 @@ const MobileCartBar = ({ cartItems, onOpenCart, isMobile }) => {
         onClick={onOpenCart}
         style={{
           position: 'fixed',
-          bottom: '1.5rem',
+          bottom: 'calc(env(safe-area-inset-bottom) + 1rem)',
           left: '1rem',
           right: '1rem',
           background: 'hsl(var(--primary))',
@@ -1382,9 +1387,27 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
                   )}
                 </div>
 
-                <h1 style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.3, marginBottom: '0.5rem' }}>
-                  {detail?.name || product.name}
-                </h1>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                  <h1 style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1.3, marginBottom: '0.5rem', flex: 1 }}>
+                    {detail?.name || product.name}
+                  </h1>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={async () => {
+                      try {
+                        await Share.share({
+                          title: product.name,
+                          text: `Check out ${product.name} on Dayli!`,
+                          url: `https://dayli.co.in/product/${product.id}`,
+                          dialogTitle: 'Share with friends',
+                        });
+                      } catch (err) {}
+                    }}
+                    style={{ padding: '8px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex' }}
+                  >
+                    <Share2 size={18} color="hsl(var(--primary))" />
+                  </motion.button>
+                </div>
 
                 {(unit || weight) && (
                   <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' }}>
@@ -1507,6 +1530,38 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       borderRadius: '16px',
       overflow: 'hidden'
     }}>
+      <motion.button
+        whileTap={{ scale: 0.8 }}
+        onClick={async (e) => {
+          e.stopPropagation();
+          try {
+            await Share.share({
+              title: product.name,
+              text: `Check out ${product.name} on Dayli!`,
+              url: `https://dayli.co.in/product/${product.id}`,
+              dialogTitle: 'Share with friends',
+            });
+          } catch (err) {
+            console.log('Share failed or was canceled');
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          background: 'rgba(255,255,255,0.9)',
+          border: 'none',
+          padding: '6px',
+          borderRadius: '50%',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          zIndex: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Share2 size={14} color="hsl(var(--primary))" />
+      </motion.button>
       {safeNum(product.mrp) > safeNum(product.price) && safeNum(product.price) > 0 && (
         <div style={{
           position: 'absolute',
@@ -2261,6 +2316,23 @@ const SecondaryBanners = ({ onCategoryClick }) => {
 };
 
 function App() {
+  // Native Mobile Initialization
+  useEffect(() => {
+    const initNative = async () => {
+      try {
+        // Style the status bar (top of the phone)
+        await StatusBar.setStyle({ style: Style.Light });
+        await StatusBar.setBackgroundColor({ color: '#ffffff' });
+        
+        // Hide the splash screen once the app is loaded
+        await SplashScreen.hide();
+      } catch (e) {
+        console.log('Running in browser, skipping native APIs');
+      }
+    };
+    initNative();
+  }, []);
+
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('dayli_cart');
     return saved ? JSON.parse(saved) : [];
@@ -2580,6 +2652,8 @@ function App() {
   }, [cartItems]);
 
   const addToCart = (product) => {
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       const stock = product.stock_quantity ?? 999;
@@ -2602,6 +2676,8 @@ function App() {
   };
 
   const updateQuantity = (id, delta) => {
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = item.quantity + delta;
@@ -2658,6 +2734,7 @@ function App() {
 
       // Step 2: If COD, we're done
       if (paymentMethod === 'cod') {
+        Haptics.notification({ type: NotificationType.Success }).catch(() => {});
         setOrderSuccess({ id: orderId, order_number: orderNumber });
         setCartItems([]);
         localStorage.removeItem('dayli_cart');
@@ -2702,6 +2779,7 @@ function App() {
             });
             const verifyData = await verifyRes.json();
             if (verifyRes.ok) {
+              Haptics.notification({ type: NotificationType.Success }).catch(() => {});
               setOrderSuccess({ id: orderId, order_number: orderNumber });
               setCartItems([]);
               localStorage.removeItem('dayli_cart');
@@ -2813,9 +2891,45 @@ function App() {
           />
         ) : orderSuccess ? (
           <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', fontSize: '2.5rem' }}>
-              ✓
-            </motion.div>
+            <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 2rem' }}>
+              {[
+                { icon: '🥦', x: -40, y: -40, delay: 0.1 },
+                { icon: '🥛', x: 40, y: -40, delay: 0.2 },
+                { icon: '🍎', x: -50, y: 10, delay: 0.3 },
+                { icon: '🥤', x: 50, y: 10, delay: 0.4 },
+                { icon: '🍿', x: 0, y: -60, delay: 0.5 },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{ opacity: 1, scale: 1, x: item.x, y: item.y }}
+                  transition={{ delay: item.delay, type: 'spring', damping: 10 }}
+                  style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', zIndex: 0 }}
+                >
+                  {item.icon}
+                </motion.div>
+              ))}
+              <motion.div 
+                initial={{ scale: 0 }} 
+                animate={{ scale: 1 }} 
+                style={{ 
+                  position: 'relative',
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: '#f0fdf4', 
+                  color: '#22c55e', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  fontSize: '2.5rem',
+                  zIndex: 1,
+                  boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2)'
+                }}
+              >
+                ✓
+              </motion.div>
+            </div>
             <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Order Placed!</h1>
             <p style={{ color: '#666', marginBottom: '2rem', lineHeight: '1.6' }}>
               Your order <strong>#{orderSuccess.order_number}</strong> has been successfully placed and is being prepared.

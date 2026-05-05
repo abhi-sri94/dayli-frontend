@@ -13,6 +13,11 @@
     "app:open:ios": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "firebase": "^12.11.0",
     "framer-motion": "^10.12.16",
     "lucide-react": "^0.244.0",
@@ -21,6 +26,7 @@
     "react-router-dom": "^6.11.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.1",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^4.0.0",
