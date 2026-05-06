@@ -2529,6 +2529,9 @@ function App() {
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [forgotTimer, setForgotTimer] = useState(0);
   const [isAppending, setIsAppending] = useState(false);
+  const [quickAddProducts, setQuickAddProducts] = useState([]);
+  const [quickAddSearch, setQuickAddSearch] = useState('');
+  const [isQuickLoading, setIsQuickLoading] = useState(false);
   const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('orderNumber');
@@ -2559,6 +2562,20 @@ function App() {
     }
     return () => clearInterval(interval);
   }, [forgotTimer]);
+
+  useEffect(() => {
+    if (orderSuccess && forgotTimer > 0) {
+      setIsQuickLoading(true);
+      fetch(`${apiBaseUrl}/api/products?limit=20&search=${quickAddSearch}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            setQuickAddProducts(data.data.data);
+          }
+        })
+        .finally(() => setIsQuickLoading(false));
+    }
+  }, [orderSuccess, quickAddSearch]);
 
   const handleQuickAdd = async (product) => {
     if (!orderSuccess || forgotTimer <= 0) return;
@@ -3080,27 +3097,65 @@ function App() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem' }} className="no-scrollbar">
-                    {PRODUCTS.map(product => (
-                      <div 
-                        key={product.id}
-                        onClick={() => handleQuickAdd(product)}
-                        style={{ 
-                          minWidth: '100px', 
-                          background: 'white', 
-                          padding: '0.75rem', 
-                          borderRadius: '1rem', 
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                          cursor: 'pointer',
-                          position: 'relative'
-                        }}
-                      >
-                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', marginTop: '0.25rem' }}>+ ₹{product.price}</div>
-                        {isAppending && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '1rem' }}>...</div>}
-                      </div>
-                    ))}
+                  <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#16a34a' }} />
+                    <input 
+                      type="text" 
+                      placeholder="Search extra items..."
+                      value={quickAddSearch}
+                      onChange={(e) => setQuickAddSearch(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        padding: '0.5rem 1rem 0.5rem 2.25rem', 
+                        borderRadius: '2rem', 
+                        border: '1px solid #bbf7d0',
+                        fontSize: '0.8rem',
+                        outline: 'none',
+                        background: 'white'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem', minHeight: '130px' }} className="no-scrollbar">
+                    {isQuickLoading ? (
+                      [1,2,3].map(i => (
+                        <div key={i} className="skeleton" style={{ minWidth: '100px', height: '120px', borderRadius: '1rem' }} />
+                      ))
+                    ) : quickAddProducts.length > 0 ? (
+                      quickAddProducts.map(product => {
+                        const imgUrl = product.primary_image ? `${apiBaseUrl}/storage/${product.primary_image.image_path}` : product.image;
+                        return (
+                          <div 
+                            key={product.id}
+                            onClick={() => handleQuickAdd(product)}
+                            style={{ 
+                              minWidth: '100px', 
+                              background: 'white', 
+                              padding: '0.75rem', 
+                              borderRadius: '1rem', 
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                              cursor: 'pointer',
+                              position: 'relative',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <img 
+                              src={imgUrl} 
+                              alt={product.name} 
+                              style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.5rem' }} 
+                              onError={(e) => e.target.src = 'https://placehold.co/100x100?text=Product'}
+                            />
+                            <div style={{ fontSize: '0.7rem', fontWeight: 700, width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>{product.name}</div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', marginTop: 'auto', paddingTop: '0.25rem' }}>+ ₹{product.selling_price || product.price}</div>
+                            {isAppending && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '1rem' }}>...</div>}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ width: '100%', textAlign: 'center', fontSize: '0.8rem', color: '#166534', padding: '1rem' }}>No products found.</div>
+                    )}
                   </div>
                 </motion.div>
               )}
