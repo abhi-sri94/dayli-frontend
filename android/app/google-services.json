@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "786855902799",
+    "project_id": "dalyi-delivery",
+    "storage_bucket": "dalyi-delivery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786855902799:android:841e79c68f82d958df743a",
+        "android_client_info": {
+          "package_name": "in.co.dayli.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786855902799-569l3aud2k4t3j1kme83ic38894vrf9m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.co.dayli.app",
+            "certificate_hash": "ff2a25cc6ee4729ed6f7a02bb9619683b4221d0f"
+          }
+        },
+        {
+          "client_id": "786855902799-b8ag0qgdr0ej0ieauehl1rqjp4lg8503.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCn68SaKwQf-WVWUaWp6Dpsofz3-UCp59c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786855902799-b8ag0qgdr0ej0ieauehl1rqjp4lg8503.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
