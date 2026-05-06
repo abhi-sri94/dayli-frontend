@@ -1997,64 +1997,65 @@ const CartDrawer = ({
               const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
 
               return (
-                <div style={{ padding: '1.5rem', borderTop: '1px solid #eee', background: 'white' }}>
+                <div style={{ 
+                  padding: '1.25rem', 
+                  borderTop: '1px solid #eee', 
+                  background: 'white',
+                  boxShadow: '0 -10px 20px rgba(0,0,0,0.05)',
+                  position: 'sticky',
+                  bottom: 0,
+                  zIndex: 10
+                }}>
                   <div style={{ marginBottom: '1rem' }}>
-                    <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.75rem', color: '#1a1a1a' }}>Bill Summary</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#1a1a1a', margin: 0 }}>Bill Summary</h3>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1a1a1a' }}>₹{total}</div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
                         <span>Item Total (MRP)</span>
                         <span>₹{itemTotalMRP}</span>
                       </div>
 
-                      {productSavings > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'hsl(var(--primary))' }}>
-                          <span>Product Discount</span>
-                          <span>-₹{productSavings}</span>
+                      {(productSavings > 0 || couponDiscount > 0) && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
+                          <span>Total Savings</span>
+                          <span>-₹{productSavings + couponDiscount}</span>
                         </div>
                       )}
 
-                      {couponDiscount > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <Tag size={12} />
-                            Coupon Discount ({appliedCoupon.code})
-                          </span>
-                          <span>-₹{couponDiscount}</span>
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
                         <span>Delivery Fee</span>
                         <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
                       </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', paddingTop: '0.6rem', borderTop: '1px solid #f1f5f9', fontWeight: 800, fontSize: '1.1rem', color: '#1a1a1a' }}>
-                        <span>Grand Total</span>
-                        <span>₹{total}</span>
-                      </div>
                     </div>
-
-                    {deliveryFee > 0 && (
-                      <div style={{ background: 'hsl(var(--primary) / 0.05)', padding: '0.75rem', borderRadius: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600, marginTop: '1rem' }}>
-                        💡 Add ₹{100 - subtotal} more for FREE delivery!
-                      </div>
-                    )}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button
                       disabled={isCheckingOut}
                       onClick={() => onCheckout(address, 'razorpay')}
                       className="btn btn-primary"
-                      style={{ width: '100%', padding: '1rem', opacity: isCheckingOut ? 0.7 : 1 }}
+                      style={{ flex: 1, padding: '0.85rem', fontSize: '0.9rem', opacity: isCheckingOut ? 0.7 : 1 }}
                     >
-                      {isCheckingOut ? 'Processing...' : '💳 Pay Online (UPI / Card)'}
+                      {isCheckingOut ? '...' : 'Pay Online'}
                     </button>
                     <button
                       disabled={isCheckingOut}
                       onClick={() => onCheckout(address, 'cod')}
-                      style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '0.75rem', fontWeight: 600, fontSize: '0.9rem', background: 'white' }}
+                      style={{ 
+                        flex: 1, 
+                        padding: '0.85rem', 
+                        fontSize: '0.9rem', 
+                        background: '#f8fafc', 
+                        border: '1px solid #e2e8f0', 
+                        borderRadius: '0.75rem', 
+                        fontWeight: 700,
+                        color: '#475569'
+                      }}
                     >
-                      🏠 Cash on Delivery
+                      {isCheckingOut ? '...' : 'Cash on Delivery'}
                     </button>
                   </div>
                 </div>
