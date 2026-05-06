@@ -2655,9 +2655,13 @@ function App() {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
+            console.log("Coupons fetched:", data.data);
             setAvailableCoupons(data.data);
+          } else {
+            alert("API Error: " + (data.message || "Unknown error"));
           }
         })
+        .catch(err => alert("Fetch failed: " + err.message))
         .finally(() => setIsCouponsLoading(false));
     }
   }, [isCartOpen]);
