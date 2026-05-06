@@ -1917,11 +1917,18 @@ const CartDrawer = ({
                   ))}
 
                   {/* Coupon Section */}
-                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Tag size={16} />
-                      Coupons & Offers
-                    </div>
+                    <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Tag size={16} />
+                          Coupons & Offers
+                        </div>
+                        {availableCoupons.length > 0 && (
+                          <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'hsl(var(--primary))', cursor: 'pointer' }}>
+                            VIEW ALL <ChevronRight size={14} style={{ marginBottom: '-3px' }} />
+                          </div>
+                        )}
+                      </div>
                     
                     {appliedCoupon ? (
                       <div style={{ 
@@ -1988,50 +1995,63 @@ const CartDrawer = ({
                       </div>
                     )}
 
-                    {!appliedCoupon && availableCoupons.length > 0 && (
-                      <div style={{ marginTop: '1rem' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Available Offers</div>
-                        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }} className="no-scrollbar">
+                    {isCouponsLoading && (
+                      <div style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="skeleton" style={{ width: '100%', height: '40px', borderRadius: '0.5rem' }} />
+                      </div>
+                    )}
+
+                    {!appliedCoupon && !isCouponsLoading && availableCoupons.length > 0 && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Best Offers for you</div>
+                        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem' }} className="no-scrollbar">
                           {availableCoupons.map(coupon => (
                             <div 
                               key={coupon.code}
                               style={{ 
-                                minWidth: '180px', 
-                                background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)', 
-                                padding: '0.75rem', 
-                                borderRadius: '0.75rem', 
-                                border: '1px dashed #22c55e',
+                                minWidth: '220px', 
+                                background: 'white',
+                                padding: '1rem', 
+                                borderRadius: '1rem', 
+                                border: '1px solid #e2e8f0',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                                 position: 'relative'
                               }}
                             >
-                              <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                <Tag size={12} />
-                                {coupon.code}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <div style={{ fontWeight: 900, fontSize: '0.9rem', color: '#1a1a1a', letterSpacing: '-0.2px' }}>
+                                  {coupon.code}
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    setCouponInput(coupon.code);
+                                    onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0), coupon.code);
+                                  }}
+                                  style={{ 
+                                    background: 'none', 
+                                    border: 'none', 
+                                    color: 'hsl(var(--primary))', 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: 900,
+                                    cursor: 'pointer',
+                                    padding: '0.25rem'
+                                  }}
+                                >
+                                  APPLY
+                                </button>
                               </div>
-                              <div style={{ fontSize: '0.7rem', color: '#444', margin: '0.25rem 0', lineHeight: '1.2', height: '2.4em', overflow: 'hidden' }}>
-                                {coupon.description || `Get ${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : ' off'} on orders above ₹${coupon.min_purchase_amount}`}
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500, lineHeight: '1.4' }}>
+                                {coupon.description || `Save ${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : ''} on this order`}
                               </div>
-                              <button
-                                onClick={() => {
-                                  setCouponInput(coupon.code);
-                                  onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0), coupon.code);
-                                }}
-                                style={{ 
-                                  background: '#22c55e', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '0.25rem 0.75rem', 
-                                  borderRadius: '0.4rem', 
-                                  fontSize: '0.65rem', 
-                                  fontWeight: 800,
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                TAP TO APPLY
-                              </button>
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {!appliedCoupon && !isCouponsLoading && availableCoupons.length === 0 && (
+                      <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.75rem', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>No offers available for this order</div>
                       </div>
                     )}
                   </div>
