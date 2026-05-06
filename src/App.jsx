@@ -1769,7 +1769,9 @@ const CartDrawer = ({
   couponInput,
   setCouponInput,
   couponError,
-  isApplyingCoupon
+  isApplyingCoupon,
+  availableCoupons = [],
+  isCouponsLoading = false
 }) => {
 
   return (
@@ -3831,6 +3833,8 @@ function App() {
         setCouponInput={setCouponInput}
         couponError={couponError}
         isApplyingCoupon={isApplyingCoupon}
+        availableCoupons={availableCoupons}
+        isCouponsLoading={isCouponsLoading}
       />
 
       {selectedProduct && (
