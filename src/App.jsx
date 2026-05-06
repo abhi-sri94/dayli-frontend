@@ -2579,6 +2579,11 @@ function App() {
 
   const handleQuickAdd = async (product) => {
     if (!orderSuccess || forgotTimer <= 0) return;
+    if (!token) {
+      alert("Please login to add items to your order.");
+      setIsAuthModalOpen(true);
+      return;
+    }
     
     setIsAppending(true);
     try {
@@ -2586,21 +2591,25 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           items: [{ product_id: product.id, quantity: 1 }]
         })
       });
+      
       const data = await response.json();
-      if (data.status === 'success') {
+      
+      if (response.ok) {
         Haptics.notification({ type: NotificationType.Success });
         alert(`${product.name} added to your order!`);
       } else {
-        alert(data.message || 'Failed to add item');
+        alert(`Error (${response.status}): ${data.message || 'Failed to add item'}`);
       }
     } catch (err) {
-      alert('Connection error');
+      console.error("QuickAdd Error:", err);
+      alert(`Connection failed: ${err.message}. Please check if the backend is deployed.`);
     } finally {
       setIsAppending(false);
     }
