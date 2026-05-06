@@ -1792,12 +1792,14 @@ const CartDrawer = ({
               top: 0,
               right: 0,
               bottom: 0,
-              width: '400px',
+              width: '100%',
+              maxWidth: '400px',
               background: 'white',
               zIndex: 101,
               boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              overflow: 'hidden'
             }}
           >
             <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1997,68 +1999,68 @@ const CartDrawer = ({
               const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
 
               return (
-                <div style={{ 
-                  padding: '1.25rem', 
-                  borderTop: '1px solid #eee', 
-                  background: 'white',
-                  boxShadow: '0 -10px 20px rgba(0,0,0,0.05)',
-                  position: 'sticky',
-                  bottom: 0,
-                  zIndex: 10
-                }}>
-                  <div style={{ marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#1a1a1a', margin: 0 }}>Bill Summary</h3>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1a1a1a' }}>₹{total}</div>
-                    </div>
-                    
+                <div style={{ padding: '1rem', borderTop: '1px solid #eee', background: 'white' }}>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <h3 style={{ fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.5rem', color: '#1a1a1a' }}>Bill Summary</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
                         <span>Item Total (MRP)</span>
                         <span>₹{itemTotalMRP}</span>
                       </div>
-
-                      {(productSavings > 0 || couponDiscount > 0) && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
-                          <span>Total Savings</span>
-                          <span>-₹{productSavings + couponDiscount}</span>
+                      {productSavings > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--primary))' }}>
+                          <span>Product Discount</span>
+                          <span>-₹{productSavings}</span>
                         </div>
                       )}
-
+                      {couponDiscount > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                            <Tag size={12} />
+                            Coupon Discount ({appliedCoupon.code})
+                          </span>
+                          <span>-₹{couponDiscount}</span>
+                        </div>
+                      )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
                         <span>Delivery Fee</span>
                         <span>{deliveryFee === 0 ? <span style={{ color: '#22c55e', fontWeight: 700 }}>FREE</span> : `₹${deliveryFee}`}</span>
                       </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.2rem', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9', fontWeight: 800, fontSize: '1rem', color: '#1a1a1a' }}>
+                        <span>Grand Total</span>
+                        <span>₹{total}</span>
+                      </div>
                     </div>
                   </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
                     <button
                       disabled={isCheckingOut}
                       onClick={() => onCheckout(address, 'razorpay')}
                       className="btn btn-primary"
-                      style={{ flex: 1, padding: '0.85rem', fontSize: '0.9rem', opacity: isCheckingOut ? 0.7 : 1 }}
+                      style={{ width: '100%', padding: '0.75rem', opacity: isCheckingOut ? 0.7 : 1, fontSize: '0.9rem' }}
                     >
-                      {isCheckingOut ? '...' : 'Pay Online'}
+                      {isCheckingOut ? 'Processing...' : '💳 Pay Online (UPI / Card)'}
                     </button>
                     <button
                       disabled={isCheckingOut}
                       onClick={() => onCheckout(address, 'cod')}
                       style={{ 
-                        flex: 1, 
-                        padding: '0.85rem', 
-                        fontSize: '0.9rem', 
+                        width: '100%', 
+                        padding: '0.75rem', 
                         background: '#f8fafc', 
-                        border: '1px solid #e2e8f0', 
-                        borderRadius: '0.75rem', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '0.75rem',
                         fontWeight: 700,
-                        color: '#475569'
+                        color: '#475569',
+                        fontSize: '0.9rem',
+                        opacity: isCheckingOut ? 0.7 : 1
                       }}
                     >
-                      {isCheckingOut ? '...' : 'Cash on Delivery'}
+                      💵 Cash on Delivery
                     </button>
                   </div>
                 </div>
+
               );
             })()}
           </motion.div>
