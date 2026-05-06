@@ -1985,6 +1985,53 @@ const CartDrawer = ({
                         </button>
                       </div>
                     )}
+
+                    {!appliedCoupon && availableCoupons.length > 0 && (
+                      <div style={{ marginTop: '1rem' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Available Offers</div>
+                        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }} className="no-scrollbar">
+                          {availableCoupons.map(coupon => (
+                            <div 
+                              key={coupon.code}
+                              style={{ 
+                                minWidth: '180px', 
+                                background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)', 
+                                padding: '0.75rem', 
+                                borderRadius: '0.75rem', 
+                                border: '1px dashed #22c55e',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <Tag size={12} />
+                                {coupon.code}
+                              </div>
+                              <div style={{ fontSize: '0.7rem', color: '#444', margin: '0.25rem 0', lineHeight: '1.2', height: '2.4em', overflow: 'hidden' }}>
+                                {coupon.description || `Get ${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : ' off'} on orders above ₹${coupon.min_purchase_amount}`}
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setCouponInput(coupon.code);
+                                  onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0), coupon.code);
+                                }}
+                                style={{ 
+                                  background: '#22c55e', 
+                                  color: 'white', 
+                                  border: 'none', 
+                                  padding: '0.25rem 0.75rem', 
+                                  borderRadius: '0.4rem', 
+                                  fontSize: '0.65rem', 
+                                  fontWeight: 800,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                TAP TO APPLY
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2532,6 +2579,8 @@ function App() {
   const [quickAddProducts, setQuickAddProducts] = useState([]);
   const [quickAddSearch, setQuickAddSearch] = useState('');
   const [isQuickLoading, setIsQuickLoading] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [isCouponsLoading, setIsCouponsLoading] = useState(false);
   const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('orderNumber');
@@ -2576,6 +2625,20 @@ function App() {
         .finally(() => setIsQuickLoading(false));
     }
   }, [orderSuccess, quickAddSearch]);
+
+  useEffect(() => {
+    if (isCartOpen) {
+      setIsCouponsLoading(true);
+      fetch(`${apiBaseUrl}/api/coupons`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setAvailableCoupons(data.data);
+          }
+        })
+        .finally(() => setIsCouponsLoading(false));
+    }
+  }, [isCartOpen]);
 
   const handleQuickAdd = async (product) => {
     if (!orderSuccess || forgotTimer <= 0) return;
@@ -2623,13 +2686,12 @@ function App() {
     localStorage.removeItem('dayli_token');
   };
 
-  const handleApplyCoupon = async (subtotal) => {
+  const handleApplyCoupon = async (subtotal, codeOverride = null) => {
+    const codeToApply = codeOverride || couponInput;
+    if (!codeToApply.trim()) return;
+    
     if (!token) {
       setCouponError('Please login to apply coupon');
-      return;
-    }
-    if (!couponInput.trim()) {
-      setCouponError('Enter a coupon code');
       return;
     }
 
@@ -2643,7 +2705,7 @@ function App() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          code: couponInput.trim(),
+          code: codeToApply.trim(),
           amount: subtotal
         })
       });
