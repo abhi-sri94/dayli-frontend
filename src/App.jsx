@@ -2527,6 +2527,8 @@ function App() {
   const [totalPages, setTotalPages] = useState(1);
   const [showSupport, setShowSupport] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
+  const [forgotTimer, setForgotTimer] = useState(0);
+  const [isAppending, setIsAppending] = useState(false);
   const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('orderNumber');
@@ -2546,6 +2548,45 @@ function App() {
     setToken(accessToken);
     localStorage.setItem('dayli_user', JSON.stringify(userData));
     localStorage.setItem('dayli_token', accessToken);
+  };
+
+  useEffect(() => {
+    let interval;
+    if (forgotTimer > 0) {
+      interval = setInterval(() => {
+        setForgotTimer(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [forgotTimer]);
+
+  const handleQuickAdd = async (product) => {
+    if (!orderSuccess || forgotTimer <= 0) return;
+    
+    setIsAppending(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/orders/${orderSuccess.id}/append`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: [{ product_id: product.id, quantity: 1 }]
+        })
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        Haptics.notification({ type: NotificationType.Success });
+        alert(`${product.name} added to your order!`);
+      } else {
+        alert(data.message || 'Failed to add item');
+      }
+    } catch (err) {
+      alert('Connection error');
+    } finally {
+      setIsAppending(false);
+    }
   };
 
   const handleLogout = () => {
@@ -2803,6 +2844,7 @@ function App() {
       if (paymentMethod === 'cod') {
         Haptics.notification({ type: NotificationType.Success }).catch(() => {});
         setOrderSuccess({ id: orderId, order_number: orderNumber });
+        setForgotTimer(120); // Start 2 minute timer
         setCartItems([]);
         localStorage.removeItem('dayli_cart');
         setIsCartOpen(false);
@@ -2848,6 +2890,7 @@ function App() {
             if (verifyRes.ok) {
               Haptics.notification({ type: NotificationType.Success }).catch(() => {});
               setOrderSuccess({ id: orderId, order_number: orderNumber });
+              setForgotTimer(120);
               setCartItems([]);
               localStorage.removeItem('dayli_cart');
               setIsCartOpen(false);
@@ -3002,6 +3045,66 @@ function App() {
               Your order <strong>#{orderSuccess.order_number}</strong> has been successfully placed and is being prepared.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {forgotTimer > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ 
+                    background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', 
+                    padding: '1.5rem', 
+                    borderRadius: '1.5rem',
+                    border: '1px solid #bbf7d0',
+                    marginTop: '1rem',
+                    marginBottom: '1.5rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      background: 'white', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      color: '#16a34a',
+                      fontSize: '1rem',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
+                    }}>
+                      {Math.floor(forgotTimer / 60)}:{(forgotTimer % 60).toString().padStart(2, '0')}
+                    </div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#166534' }}>Oops! I forgot something</div>
+                      <div style={{ fontSize: '0.75rem', color: '#15803d' }}>Add essentials without extra delivery fee!</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem' }} className="no-scrollbar">
+                    {PRODUCTS.map(product => (
+                      <div 
+                        key={product.id}
+                        onClick={() => handleQuickAdd(product)}
+                        style={{ 
+                          minWidth: '100px', 
+                          background: 'white', 
+                          padding: '0.75rem', 
+                          borderRadius: '1rem', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                          cursor: 'pointer',
+                          position: 'relative'
+                        }}
+                      >
+                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', marginTop: '0.25rem' }}>+ ₹{product.price}</div>
+                        {isAppending && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '1rem' }}>...</div>}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
               <button
                 onClick={() => {
                   setTrackingOrderNumber(orderSuccess.order_number);
