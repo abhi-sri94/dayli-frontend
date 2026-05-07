@@ -2651,11 +2651,11 @@ function App() {
   useEffect(() => {
     if (isCartOpen) {
       setIsCouponsLoading(true);
-      fetch(`${apiBaseUrl}/api/coupons`)
+      fetch(`${apiBaseUrl}/api/coupons?v=${Date.now()}`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            setAvailableCoupons(data.data);
+            setAvailableCoupons(data.data.filter(c => c.is_active));
           }
         })
         .finally(() => setIsCouponsLoading(false));
