@@ -2603,6 +2603,12 @@ function App() {
   const [isQuickLoading, setIsQuickLoading] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [isCouponsLoading, setIsCouponsLoading] = useState(false);
+  
+  // Product Request State
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [requestProductName, setRequestProductName] = useState('');
+  const [requestDescription, setRequestDescription] = useState('');
+  const [isRequesting, setIsRequesting] = useState(false);
   const [trackingOrderNumber, setTrackingOrderNumber] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('orderNumber');
@@ -2697,6 +2703,39 @@ function App() {
       alert(`Connection failed: ${err.message}. Please check if the backend is deployed.`);
     } finally {
       setIsAppending(false);
+    }
+  };
+
+  const handleRequestProduct = async (e) => {
+    if (e) e.preventDefault();
+    if (!requestProductName.trim()) return;
+
+    setIsRequesting(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/product-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({
+          product_name: requestProductName,
+          description: requestDescription
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Request submitted! We'll look for this item.");
+        setIsRequestModalOpen(false);
+        setRequestProductName('');
+        setRequestDescription('');
+      } else {
+        alert(data.message || 'Failed to submit request');
+      }
+    } catch (err) {
+      alert('Connection error. Please try again.');
+    } finally {
+      setIsRequesting(false);
     }
   };
 
@@ -3342,7 +3381,26 @@ function App() {
                       <Search size={28} color="#cbd5e1" />
                     </div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.5rem' }}>No exact matches for "{searchQuery}"</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>Don't worry, we've found some alternatives for you below.</p>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Don't worry, we've found some alternatives for you below.</p>
+                    
+                    <button
+                      onClick={() => {
+                        setRequestProductName(searchQuery);
+                        setIsRequestModalOpen(true);
+                      }}
+                      style={{ 
+                        background: 'white', 
+                        color: 'hsl(var(--primary))', 
+                        border: '1.5px solid hsl(var(--primary))', 
+                        padding: '0.75rem 1.5rem', 
+                        borderRadius: '1rem', 
+                        fontWeight: 800, 
+                        fontSize: '0.9rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Can't find it? Request it here!
+                    </button>
                   </motion.div>
                 )}
 
@@ -3856,6 +3914,56 @@ function App() {
         availableCoupons={availableCoupons}
         isCouponsLoading={isCouponsLoading}
       />
+
+      {isRequestModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ background: 'white', padding: '2rem', borderRadius: '2rem', width: '100%', maxWidth: '400px', position: 'relative' }}
+          >
+            <button 
+              onClick={() => setIsRequestModalOpen(false)}
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#94a3b8' }}
+            >
+              ✕
+            </button>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Request a Product</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Tell us what you're looking for and we'll try to add it to our store.</p>
+            
+            <form onSubmit={handleRequestProduct}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>Product Name</label>
+                <input 
+                  type="text"
+                  required
+                  value={requestProductName}
+                  onChange={(e) => setRequestProductName(e.target.value)}
+                  placeholder="e.g. Organic Almond Milk"
+                  style={{ width: '100%', padding: '1rem', borderRadius: '1rem', border: '1px solid #e2e8f0', fontSize: '1rem' }}
+                />
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>Any specific details? (Optional)</label>
+                <textarea 
+                  value={requestDescription}
+                  onChange={(e) => setRequestDescription(e.target.value)}
+                  placeholder="Brand, size, or any other details..."
+                  style={{ width: '100%', padding: '1rem', borderRadius: '1rem', border: '1px solid #e2e8f0', fontSize: '1rem', minHeight: '100px' }}
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isRequesting}
+                className="btn btn-primary"
+                style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}
+              >
+                {isRequesting ? 'Submitting...' : 'Submit Request'}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {selectedProduct && (
         <ProductDetailModal
