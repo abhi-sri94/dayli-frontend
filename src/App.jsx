@@ -311,7 +311,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                     <User size={24} strokeWidth={2.5} />
                   ) : (
                     <>
-                      Hi, {(user.name && user.name !== 'ADsdfg' && user.name.length < 15) ? user.name.split(' ')[0] : 'User'}
+                      Hi, {user?.name ? user.name.split(' ')[0] : 'User'}
                       <ChevronDown size={16} />
                     </>
                   )}
