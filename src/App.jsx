@@ -2581,6 +2581,7 @@ function App() {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const productsSectionRef = React.useRef(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -2589,6 +2590,12 @@ function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedCategoryId]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
@@ -3541,7 +3548,7 @@ function App() {
             )}
 
             {/* Featured Products Section */}
-            <section>
+            <section ref={productsSectionRef} style={{ scrollMarginTop: '100px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                 {isMobile && selectedCategoryId && (
                   <button 
