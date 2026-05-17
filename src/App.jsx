@@ -3729,7 +3729,7 @@ function App() {
                             disabled={categoryPage === 1}
                             onClick={() => {
                               setCategoryPage(prev => prev - 1);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                              productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             style={{
                               padding: '0.6rem 1.25rem',
@@ -3752,7 +3752,7 @@ function App() {
                                 key={i + 1}
                                 onClick={() => {
                                   setCategoryPage(i + 1);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                                 style={{
                                   width: '40px',
@@ -3777,7 +3777,7 @@ function App() {
                             disabled={categoryPage === totalPages}
                             onClick={() => {
                               setCategoryPage(prev => prev + 1);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                              productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             style={{
                               padding: '0.6rem 1.25rem',
