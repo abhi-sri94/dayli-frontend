@@ -1773,6 +1773,14 @@ const CartDrawer = ({
   availableCoupons = [],
   isCouponsLoading = false
 }) => {
+  const [savedAddresses, setSavedAddresses] = useState(() => {
+    const saved = localStorage.getItem('dayli_saved_addresses');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', tag: 'Home', address: 'Bahraich, Uttar Pradesh' }
+    ];
+  });
+
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   return (
     <AnimatePresence>
@@ -1859,7 +1867,117 @@ const CartDrawer = ({
                 </motion.div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem' }}>
+                  {/* Interactive Free Delivery Progress Bar */}
+                  {subtotal < 100 ? (
+                    <div style={{
+                      background: 'linear-gradient(135deg, #fef9c3 0%, #fef08a 100%)',
+                      border: '1px solid #fde047',
+                      padding: '1rem',
+                      borderRadius: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      boxShadow: '0 4px 12px rgba(254, 240, 138, 0.15)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', fontWeight: 800, color: '#854d0e' }}>
+                        <span>🚚 Free delivery milestone</span>
+                        <span>₹{subtotal} / ₹100</span>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', background: 'rgba(0,0,0,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(subtotal / 100) * 100}%` }}
+                          style={{ height: '100%', background: '#ca8a04', borderRadius: '4px' }}
+                        />
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a16207' }}>
+                        Add ₹{100 - subtotal} more for FREE delivery!
+                      </span>
+                    </div>
+                  ) : (
+                    <motion.div 
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      style={{
+                        background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
+                        border: '1px solid #86efac',
+                        padding: '1rem',
+                        borderRadius: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        boxShadow: '0 4px 12px rgba(187, 247, 208, 0.15)'
+                      }}
+                    >
+                      <div style={{ 
+                        width: '28px', 
+                        height: '28px', 
+                        borderRadius: '50%', 
+                        background: '#22c55e', 
+                        color: 'white', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '0.9rem',
+                        fontWeight: 800
+                      }}>
+                        ✓
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534' }}>You've unlocked FREE delivery!</div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#15803d' }}>No extra delivery fees apply on this order.</div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)' }}>
+                    {/* Saved Addresses Pill Selector */}
+                    <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.6rem', marginBottom: '0.6rem', borderBottom: '1px solid rgba(0,0,0,0.05)' }} className="no-scrollbar">
+                      {savedAddresses.map(sa => {
+                        const isSelected = address.trim() === sa.address.trim();
+                        return (
+                          <div 
+                            key={sa.id}
+                            onClick={() => setAddress(sa.address)}
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              borderRadius: '2rem',
+                              background: isSelected ? 'hsl(var(--primary) / 0.1)' : 'white',
+                              border: isSelected ? '1.5px solid hsl(var(--primary))' : '1.5px solid #e2e8f0',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              whiteSpace: 'nowrap',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              color: isSelected ? 'hsl(var(--primary))' : '#475569',
+                              transition: 'all 0.2s',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                            }}
+                          >
+                            <span>
+                              {sa.tag === 'Home' ? '🏠' : sa.tag === 'Work' ? '💼' : '📍'}
+                            </span>
+                            <span>{sa.tag}</span>
+                            {sa.id !== '1' && (
+                              <span 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const updated = savedAddresses.filter(item => item.id !== sa.id);
+                                  setSavedAddresses(updated);
+                                  localStorage.setItem('dayli_saved_addresses', JSON.stringify(updated));
+                                }}
+                                style={{ marginLeft: '4px', fontSize: '0.8rem', color: '#94a3b8', cursor: 'pointer' }}
+                              >
+                                ✕
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Delivery Address</label>
                       <button 
@@ -1888,6 +2006,47 @@ const CartDrawer = ({
                       style={{ width: '100%', background: 'none', border: 'none', fontSize: '0.9rem', outline: 'none', resize: 'none' }}
                       rows={2}
                     />
+
+                    {/* Save current address inline trigger */}
+                    {(() => {
+                      const isAlreadySaved = savedAddresses.some(sa => sa.address.trim() === address.trim());
+                      if (!isAlreadySaved && address.trim().length > 5) {
+                        return (
+                          <div style={{ marginTop: '0.6rem', pt: '0.4rem', borderTop: '1px dashed rgba(0,0,0,0.05)', fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span>💾 Save as:</span>
+                            {['Home', 'Work', 'Other'].map(tag => (
+                              <button
+                                key={tag}
+                                onClick={() => {
+                                  const newAddressObj = {
+                                    id: Date.now().toString(),
+                                    tag,
+                                    address: address.trim()
+                                  };
+                                  const updated = [...savedAddresses, newAddressObj];
+                                  setSavedAddresses(updated);
+                                  localStorage.setItem('dayli_saved_addresses', JSON.stringify(updated));
+                                }}
+                                style={{
+                                  padding: '0.2rem 0.5rem',
+                                  borderRadius: '0.5rem',
+                                  background: 'white',
+                                  border: '1px solid #e2e8f0',
+                                  fontWeight: 700,
+                                  fontSize: '0.7rem',
+                                  cursor: 'pointer',
+                                  color: 'hsl(var(--primary))',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                }}
+                              >
+                                + {tag}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
 
                   {cartItems.map(item => (
@@ -2143,6 +2302,62 @@ const OrderStatus = ({ orderNumber, onBack }) => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    if (!order || order.order_status !== 'received' || order.delivery_person_id !== null) {
+      setTimeLeft(0);
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const created = new Date(order.created_at).getTime();
+      const now = Date.now();
+      const diff = Math.floor((created + 10 * 60 * 1000 - now) / 1000);
+      return diff > 0 ? diff : 0;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+
+    const timer = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [order]);
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    setCancelLoading(true);
+    try {
+      const token = localStorage.getItem('dayli_token');
+      const response = await fetch(`${apiBaseUrl}/api/orders/${order.id}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Accept': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        alert("Order cancelled successfully!");
+        fetchOrder();
+      } else {
+        alert(data.message || "Failed to cancel order.");
+      }
+    } catch (err) {
+      alert("Network error. Could not cancel order.");
+    } finally {
+      setCancelLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrder();
@@ -2276,6 +2491,86 @@ const OrderStatus = ({ orderNumber, onBack }) => {
             )}
           </div>
         )}
+
+        {timeLeft > 0 && order.order_status === 'received' && (
+          <div style={{
+            marginTop: '2rem',
+            background: 'linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)',
+            border: '1px solid #feb2b2',
+            padding: '1.25rem',
+            borderRadius: '1.25rem',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(254, 215, 215, 0.2)'
+          }}>
+            <p style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 800, marginBottom: '0.75rem' }}>
+              ⏱ Order can be cancelled or modified within: <span style={{ fontFamily: 'monospace', background: 'white', padding: '2px 6px', borderRadius: '4px', border: '1px solid #feb2b2' }}>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+            </p>
+            <button
+              disabled={cancelLoading}
+              onClick={handleCancelOrder}
+              style={{
+                background: '#ef4444',
+                color: 'white',
+                border: 'none',
+                padding: '0.6rem 1.5rem',
+                borderRadius: '2rem',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                opacity: cancelLoading ? 0.7 : 1,
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)',
+                transition: 'transform 0.1s'
+              }}
+            >
+              {cancelLoading ? 'Cancelling...' : 'Cancel Order'}
+            </button>
+            {order.payment_method !== 'cod' && (
+              <p style={{ fontSize: '0.7rem', color: '#991b1b', marginTop: '0.5rem', fontWeight: 700 }}>
+                * Refund will be initiated automatically to your payment source.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* WhatsApp Direct Support Integration */}
+        <div style={{
+          marginTop: '2rem',
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+          border: '1px solid #bbf7d0',
+          padding: '1.25rem',
+          borderRadius: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          boxShadow: '0 4px 12px rgba(220, 252, 231, 0.2)'
+        }}>
+          <div>
+            <h4 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#166534', marginBottom: '0.2rem' }}>Need assistance with this order?</h4>
+            <p style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 600 }}>Chat directly with our support team on WhatsApp.</p>
+          </div>
+          <a
+            href={`https://wa.me/918381831848?text=${encodeURIComponent(`Hi, I need help with my Order *${order.order_number}* (Current Status: ${order.order_status})`)}`}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              background: '#25D366',
+              color: 'white',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '2rem',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 4px 10px rgba(37, 211, 102, 0.25)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            💬 Support Chat
+          </a>
+        </div>
 
         <div style={{ marginTop: '3rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
           <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '1.25rem' }}>Order Summary</h3>
