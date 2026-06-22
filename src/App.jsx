@@ -47,10 +47,10 @@ const CategorySkeleton = () => (
 );
 
 const ProductSkeleton = () => (
-  <div style={{ 
-    padding: '1rem', 
-    background: 'white', 
-    borderRadius: '1rem', 
+  <div style={{
+    padding: '1rem',
+    background: 'white',
+    borderRadius: '1rem',
     border: '1px solid #eee',
     display: 'flex',
     flexDirection: 'column',
@@ -81,16 +81,16 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
       borderBottom: '1px solid hsl(var(--border))',
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
-      <div className="container" style={{ 
-        display: 'flex', 
+      <div className="container" style={{
+        display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
-        alignItems: isMobile ? 'stretch' : 'center', 
+        alignItems: isMobile ? 'stretch' : 'center',
         gap: isMobile ? '0.75rem' : '2rem'
       }}>
         {/* Top Row for Mobile / Single Row for Desktop */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
           flex: isMobile ? 'none' : 1
@@ -116,14 +116,14 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
             </div>
           )}
 
-          <div 
+          <div
             onClick={onDetectLocation}
-            className="location" 
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '0.1rem', 
-              userSelect: 'none', 
+            className="location"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.1rem',
+              userSelect: 'none',
               cursor: 'pointer',
               padding: '4px 0',
               flex: 1
@@ -152,7 +152,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                 border: '1px solid hsl(var(--border))',
                 transition: 'all 0.2s'
               }}
-              className="search-inner"
+                className="search-inner"
               >
                 <Search size={18} strokeWidth={2.5} color="hsl(var(--muted-foreground))" />
                 <input
@@ -237,51 +237,51 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                   >
                     {isSearching ? (
                       <div style={{ padding: '1.5rem', textAlign: 'center', color: '#666' }}>
-                         <div className="shimmer" style={{ width: '40px', height: '40px', borderRadius: '50%', margin: '0 auto 10px' }} />
-                         Searching...
+                        <div className="shimmer" style={{ width: '40px', height: '40px', borderRadius: '50%', margin: '0 auto 10px' }} />
+                        Searching...
                       </div>
                     ) : (
                       searchResults && searchResults.length > 0 ? (
                         <div>
-                           {searchResults.slice(0, 6).map(product => (
-                              <div 
-                                key={product.id} 
-                                onClick={() => onOpenDetail(product)}
-                                style={{ 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  gap: '1rem', 
-                                  padding: '0.75rem', 
-                                  borderRadius: '8px', 
-                                  cursor: 'pointer',
-                                  transition: 'background 0.2s'
-                                }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                              >
-                                 <img 
-                                   src={product.image || 'https://placehold.co/50'} 
-                                   alt={product.name} 
-                                   style={{ width: '45px', height: '45px', objectFit: 'contain', borderRadius: '6px', background: '#fcfcfc' }} 
-                                 />
-                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#111' }}>{product.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{product.unit} • <span style={{ fontWeight: 700, color: 'hsl(var(--primary))' }}>₹{product.selling_price}</span></div>
-                                 </div>
-                                 <ChevronRight size={16} color="#ccc" />
+                          {searchResults.slice(0, 6).map(product => (
+                            <div
+                              key={product.id}
+                              onClick={() => onOpenDetail(product)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <img
+                                src={product.image || 'https://placehold.co/50'}
+                                alt={product.name}
+                                style={{ width: '45px', height: '45px', objectFit: 'contain', borderRadius: '6px', background: '#fcfcfc' }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#111' }}>{product.name}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#666' }}>{product.unit} • <span style={{ fontWeight: 700, color: 'hsl(var(--primary))' }}>₹{product.selling_price}</span></div>
                               </div>
-                           ))}
-                           <div 
-                             onClick={() => setIsSearchFocused(false)}
-                             style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'hsl(var(--primary))', cursor: 'pointer', borderTop: '1px solid #f3f4f6', marginTop: '0.5rem' }}
-                           >
-                              See all results
-                           </div>
+                              <ChevronRight size={16} color="#ccc" />
+                            </div>
+                          ))}
+                          <div
+                            onClick={() => setIsSearchFocused(false)}
+                            style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'hsl(var(--primary))', cursor: 'pointer', borderTop: '1px solid #f3f4f6', marginTop: '0.5rem' }}
+                          >
+                            See all results
+                          </div>
                         </div>
                       ) : (
                         <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
-                           <Search size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
-                           <div style={{ fontSize: '0.9rem' }}>No products found for "{searchQuery}"</div>
+                          <Search size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
+                          <div style={{ fontSize: '0.9rem' }}>No products found for "{searchQuery}"</div>
                         </div>
                       )
                     )}
@@ -292,14 +292,14 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
           )}
 
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1rem' : '1.5rem' }}>
-            
-           <button 
-             onClick={() => setShowSupport(true)}
-             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', color: '#666', marginRight: '1.5rem' }}
-             className="hover:text-primary transition-colors"
-           >
-             <Phone size={18} /> Help
-           </button>
+
+            <button
+              onClick={() => setShowSupport(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', color: '#666', marginRight: '1.5rem' }}
+              className="hover:text-primary transition-colors"
+            >
+              <Phone size={18} /> Help
+            </button>
 
             {user ? (
               <div style={{ position: 'relative' }}>
@@ -375,7 +375,7 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                 {isMobile ? <User size={24} /> : 'Login'}
               </div>
             )}
-            
+
             {!isMobile && (
               <button
                 onClick={onOpenCart}
@@ -487,29 +487,29 @@ const Navbar = ({ cartCount, onOpenCart, user, onLogout, onOpenAuth, onOpenProfi
                   ) : (
                     searchResults && searchResults.length > 0 ? (
                       <div>
-                         {searchResults.slice(0, 5).map(product => (
-                            <div 
-                              key={product.id} 
-                              onClick={() => onOpenDetail(product)}
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '0.75rem', 
-                                padding: '0.6rem', 
-                                borderBottom: '1px solid #f9fafb'
-                              }}
-                            >
-                               <img 
-                                 src={product.image || 'https://placehold.co/40'} 
-                                 alt={product.name} 
-                                 style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px' }} 
-                               />
-                               <div style={{ flex: 1 }}>
-                                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{product.name}</div>
-                                  <div style={{ fontSize: '0.7rem', color: '#666' }}>{product.unit} • ₹{product.selling_price}</div>
-                               </div>
+                        {searchResults.slice(0, 5).map(product => (
+                          <div
+                            key={product.id}
+                            onClick={() => onOpenDetail(product)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.75rem',
+                              padding: '0.6rem',
+                              borderBottom: '1px solid #f9fafb'
+                            }}
+                          >
+                            <img
+                              src={product.image || 'https://placehold.co/40'}
+                              alt={product.name}
+                              style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px' }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{product.name}</div>
+                              <div style={{ fontSize: '0.7rem', color: '#666' }}>{product.unit} • ₹{product.selling_price}</div>
                             </div>
-                         ))}
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div style={{ padding: '1.5rem', textAlign: 'center', color: '#999', fontSize: '0.85rem' }}>No results found</div>
@@ -558,19 +558,19 @@ const MobileCartBar = ({ cartItems, onOpenCart, isMobile }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ position: 'relative', background: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '12px' }}>
             <ShoppingBag size={22} strokeWidth={2.5} />
-            <span style={{ 
-              position: 'absolute', 
-              top: -5, 
-              right: -5, 
-              background: '#ef4444', 
-              color: 'white', 
-              borderRadius: '50%', 
-              width: '20px', 
-              height: '20px', 
-              fontSize: '0.75rem', 
-              fontWeight: 800, 
-              display: 'flex', 
-              alignItems: 'center', 
+            <span style={{
+              position: 'absolute',
+              top: -5,
+              right: -5,
+              background: '#ef4444',
+              color: 'white',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               border: '2px solid hsl(var(--primary))'
             }}>
@@ -916,12 +916,12 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isMobile = false }) => {
         const result = await FirebaseAuthentication.signInWithPhoneNumber({
           phoneNumber: formData.phone_number,
         }) || {};
-        
+
         console.log('Native auth result FULL:', JSON.stringify(result));
-        
+
         // Some versions of the plugin or Firebase might return it differently
         const vId = result.verificationId || result.verification_id || (result.phone && result.phone.verificationId);
-        
+
         if (vId) {
           setVerificationId(vId);
           alert('OTP sent to ' + formData.phone_number);
@@ -1142,25 +1142,25 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isMobile = false }) => {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          style={{ 
-            width: '100%', 
-            padding: '0.75rem', 
-            borderRadius: '0.75rem', 
-            border: '1px solid #ddd', 
-            background: 'white', 
-            fontWeight: 600, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            borderRadius: '0.75rem',
+            border: '1px solid #ddd',
+            background: 'white',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             gap: '0.75rem',
             opacity: loading ? 0.5 : 1,
             cursor: loading ? 'not-allowed' : 'pointer'
           }}>
           <svg width="20" height="20" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
           </svg>
           Continue with Google
         </button>
@@ -1234,13 +1234,13 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
         {isEmoji || imgError ? (
           <span style={{ fontSize: '2.5rem' }}>{icon && icon.length <= 2 ? icon : emojiFallback}</span>
         ) : (
-          <img 
-            src={iconUrl} 
-            alt={name} 
+          <img
+            src={iconUrl}
+            alt={name}
             onError={() => setImgError(true)}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
+            style={{
+              width: '100%',
+              height: '100%',
               objectFit: 'contain',
               padding: '12px',
               transition: 'transform 0.3s'
@@ -1249,9 +1249,9 @@ const CategoryItem = ({ id, name, icon, color, isActive, onClick }) => {
           />
         )}
       </div>
-      <div className="category-text" style={{ 
-        fontSize: '0.75rem', 
-        fontWeight: 700, 
+      <div className="category-text" style={{
+        fontSize: '0.75rem',
+        fontWeight: 700,
         textAlign: 'center',
         color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
         lineHeight: 1.2,
@@ -1325,11 +1325,11 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
           />
         )}
       </div>
-      <div className="category-text" style={{ 
-        fontSize: '0.8rem', 
-        fontWeight: 800, 
-        textAlign: 'center', 
-        maxWidth: '100px', 
+      <div className="category-text" style={{
+        fontSize: '0.8rem',
+        fontWeight: 800,
+        textAlign: 'center',
+        maxWidth: '100px',
         color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
         fontFamily: 'var(--font-heading)',
         lineHeight: 1.1
@@ -1354,7 +1354,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
       .then(data => {
         if (data.status === 'success') setDetail(data.data);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [product?.id]);
 
@@ -1489,7 +1489,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
                           url: `https://dayli.co.in/product/${product.id}`,
                           dialogTitle: 'Share with friends',
                         });
-                      } catch (err) {}
+                      } catch (err) { }
                     }}
                     style={{ padding: '8px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex' }}
                   >
@@ -1504,7 +1504,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
                 )}
 
                 {typeof shortDesc === 'string' && shortDesc.trim() !== '' && (
-                  <div 
+                  <div
                     style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}
                     dangerouslySetInnerHTML={{ __html: shortDesc }}
                   />
@@ -1516,13 +1516,13 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
                   {hasDiscount && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through' }}>₹{mrp}</span>
-                      <span style={{ 
-                        background: 'hsl(var(--primary) / 0.1)', 
-                        color: 'hsl(var(--primary))', 
-                        padding: '2px 8px', 
-                        borderRadius: '6px', 
-                        fontSize: '0.85rem', 
-                        fontWeight: 800 
+                      <span style={{
+                        background: 'hsl(var(--primary) / 0.1)',
+                        color: 'hsl(var(--primary))',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 800
                       }}>
                         {discountPct}% OFF
                       </span>
@@ -1534,7 +1534,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
                 {typeof longDesc === 'string' && longDesc.trim() !== '' && (
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', color: '#1e293b' }}>About this product</h3>
-                    <div 
+                    <div
                       style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.7 }}
                       dangerouslySetInnerHTML={{ __html: longDesc }}
                     />
@@ -1566,8 +1566,8 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
               <div style={{ display: 'flex', alignItems: 'center', background: 'hsl(var(--primary))', color: 'white', borderRadius: '0.75rem', overflow: 'hidden' }}>
                 <button onClick={() => onUpdate(product.id, -1)} style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>-</button>
                 <span style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
-                <button 
-                  onClick={() => onUpdate(product.id, 1)} 
+                <button
+                  onClick={() => onUpdate(product.id, 1)}
                   disabled={quantity >= (detail?.stock_quantity ?? 999)}
                   style={{ padding: '0.6rem 1rem', color: 'white', fontWeight: 800, fontSize: '1.1rem', opacity: quantity >= (detail?.stock_quantity ?? 999) ? 0.5 : 1 }}
                 >+</button>
@@ -1589,7 +1589,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMob
   );
 };
 
-const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
+const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) => (
   <motion.div
     whileHover={{ y: -8, boxShadow: '0 12px 24px rgba(0,0,0,0.08)' }}
     className="product-card"
@@ -1607,11 +1607,11 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       position: 'relative'
     }}
   >
-    <div style={{ 
-      height: '150px', 
-      marginBottom: '0.5rem', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      height: '150px',
+      marginBottom: '0.5rem',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
       position: 'relative',
       background: '#fcfcfc',
@@ -1668,22 +1668,22 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
           {Math.round(((safeNum(product.mrp) - safeNum(product.price)) / safeNum(product.mrp)) * 100)}% OFF
         </div>
       )}
-      <img 
-        src={product.image || 'https://placehold.co/200'} 
-        alt={product.name} 
+      <img
+        src={product.image || 'https://placehold.co/200'}
+        alt={product.name}
         loading="lazy"
-        style={{ maxHeight: '85%', maxWidth: '85%', objectFit: 'contain' }} 
+        style={{ maxHeight: '85%', maxWidth: '85%', objectFit: 'contain' }}
       />
     </div>
-    
+
     <div style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
       {product.unit || product.weight}
     </div>
-    
-    <div style={{ 
-      fontWeight: 800, 
-      fontSize: '0.85rem', 
-      minHeight: '2.2rem', 
+
+    <div style={{
+      fontWeight: 800,
+      fontSize: '0.85rem',
+      minHeight: '2.2rem',
       lineHeight: '1.25',
       fontFamily: 'var(--font-heading)',
       color: 'hsl(var(--foreground))',
@@ -1695,10 +1695,10 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
       {product.name}
     </div>
 
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'space-between', 
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       marginTop: '0.75rem',
       paddingTop: '0.5rem',
       borderTop: '1px solid rgba(0,0,0,0.03)'
@@ -1709,11 +1709,11 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
         </div>
         {safeNum(product.mrp) > safeNum(product.price) && safeNum(product.price) > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ 
-              fontSize: '0.7rem', 
-              color: 'hsl(var(--muted-foreground))', 
+            <span style={{
+              fontSize: '0.7rem',
+              color: 'hsl(var(--muted-foreground))',
               textDecoration: 'line-through',
-              fontWeight: 500 
+              fontWeight: 500
             }}>
               ₹{product.mrp}
             </span>
@@ -1776,16 +1776,16 @@ const ProductCard = ({ product, quantity, onAdd, onUpdate, onOpenDetail }) =>  (
   </motion.div>
 );
 
-const CartDrawer = ({ 
-  isOpen, 
-  onClose, 
-  cartItems, 
-  onUpdateQuantity, 
-  onCheckout, 
-  isCheckingOut, 
-  address, 
-  setAddress, 
-  onDetectLocation, 
+const CartDrawer = ({
+  isOpen,
+  onClose,
+  cartItems,
+  onUpdateQuantity,
+  onCheckout,
+  isCheckingOut,
+  address,
+  setAddress,
+  onDetectLocation,
   isDetectingLocation,
   appliedCoupon,
   onApplyCoupon,
@@ -1918,7 +1918,7 @@ const CartDrawer = ({
                         <span>₹{subtotal} / ₹100</span>
                       </div>
                       <div style={{ width: '100%', height: '8px', background: 'rgba(0,0,0,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
-                        <motion.div 
+                        <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${(subtotal / 100) * 100}%` }}
                           style={{ height: '100%', background: '#ca8a04', borderRadius: '4px' }}
@@ -1929,7 +1929,7 @@ const CartDrawer = ({
                       </span>
                     </div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       style={{
@@ -1943,14 +1943,14 @@ const CartDrawer = ({
                         boxShadow: '0 4px 12px rgba(187, 247, 208, 0.15)'
                       }}
                     >
-                      <div style={{ 
-                        width: '28px', 
-                        height: '28px', 
-                        borderRadius: '50%', 
-                        background: '#22c55e', 
-                        color: 'white', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        background: '#22c55e',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '0.9rem',
                         fontWeight: 800
@@ -1970,7 +1970,7 @@ const CartDrawer = ({
                       {savedAddresses.map(sa => {
                         const isSelected = address.trim() === sa.address.trim();
                         return (
-                          <div 
+                          <div
                             key={sa.id}
                             onClick={() => setAddress(sa.address)}
                             style={{
@@ -1995,7 +1995,7 @@ const CartDrawer = ({
                             </span>
                             <span>{sa.tag}</span>
                             {sa.id !== '1' && (
-                              <span 
+                              <span
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const updated = savedAddresses.filter(item => item.id !== sa.id);
@@ -2014,12 +2014,12 @@ const CartDrawer = ({
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Delivery Address</label>
-                      <button 
+                      <button
                         onClick={onDetectLocation}
                         disabled={isDetectingLocation}
-                        style={{ 
-                          fontSize: '0.75rem', 
-                          color: 'hsl(var(--primary))', 
+                        style={{
+                          fontSize: '0.75rem',
+                          color: 'hsl(var(--primary))',
                           fontWeight: 700,
                           display: 'flex',
                           alignItems: 'center',
@@ -2110,26 +2110,26 @@ const CartDrawer = ({
                   ))}
 
                   {/* Coupon Section */}
-                    <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Tag size={16} />
-                          Coupons & Offers
-                        </div>
-                        {availableCoupons.length > 0 && (
-                          <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'hsl(var(--primary))', cursor: 'pointer' }}>
-                            VIEW ALL <ChevronRight size={14} style={{ marginBottom: '-3px' }} />
-                          </div>
-                        )}
+                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Tag size={16} />
+                        Coupons & Offers
                       </div>
-                    
+                      {availableCoupons.length > 0 && (
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'hsl(var(--primary))', cursor: 'pointer' }}>
+                          VIEW ALL <ChevronRight size={14} style={{ marginBottom: '-3px' }} />
+                        </div>
+                      )}
+                    </div>
+
                     {appliedCoupon ? (
-                      <div style={{ 
-                        background: 'hsl(var(--primary) / 0.08)', 
-                        padding: '1rem', 
-                        borderRadius: '0.75rem', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
+                      <div style={{
+                        background: 'hsl(var(--primary) / 0.08)',
+                        padding: '1rem',
+                        borderRadius: '0.75rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
                         alignItems: 'center',
                         border: '1px dashed hsl(var(--primary) / 0.3)'
                       }}>
@@ -2137,7 +2137,7 @@ const CartDrawer = ({
                           <div style={{ fontWeight: 800, color: 'hsl(var(--primary))', fontSize: '0.9rem' }}>{appliedCoupon.code}</div>
                           <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Saved ₹{appliedCoupon.discount_amount} with this coupon!</div>
                         </div>
-                        <button 
+                        <button
                           onClick={onRemoveCoupon}
                           style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}
                         >
@@ -2147,15 +2147,15 @@ const CartDrawer = ({
                     ) : (
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <div style={{ flex: 1, position: 'relative' }}>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             placeholder="Enter coupon code"
                             value={couponInput}
                             onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                            style={{ 
-                              width: '100%', 
-                              padding: '0.6rem 1rem', 
-                              borderRadius: '0.5rem', 
+                            style={{
+                              width: '100%',
+                              padding: '0.6rem 1rem',
+                              borderRadius: '0.5rem',
                               border: '1px solid #ddd',
                               fontSize: '0.85rem',
                               fontWeight: 600,
@@ -2168,15 +2168,15 @@ const CartDrawer = ({
                             </div>
                           )}
                         </div>
-                        <button 
+                        <button
                           onClick={() => onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0))}
                           disabled={isApplyingCoupon || !couponInput.trim()}
-                          style={{ 
-                            padding: '0 1.25rem', 
-                            borderRadius: '0.5rem', 
-                            background: 'hsl(var(--primary))', 
-                            color: 'white', 
-                            fontWeight: 700, 
+                          style={{
+                            padding: '0 1.25rem',
+                            borderRadius: '0.5rem',
+                            background: 'hsl(var(--primary))',
+                            color: 'white',
+                            fontWeight: 700,
                             fontSize: '0.8rem',
                             height: '2.5rem',
                             opacity: (isApplyingCoupon || !couponInput.trim()) ? 0.6 : 1,
@@ -2199,13 +2199,13 @@ const CartDrawer = ({
                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Best Offers for you</div>
                         <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem' }} className="no-scrollbar">
                           {availableCoupons.map(coupon => (
-                            <div 
+                            <div
                               key={coupon.code}
-                              style={{ 
-                                minWidth: '220px', 
+                              style={{
+                                minWidth: '220px',
                                 background: 'white',
-                                padding: '1rem', 
-                                borderRadius: '1rem', 
+                                padding: '1rem',
+                                borderRadius: '1rem',
                                 border: '1px solid #e2e8f0',
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                                 position: 'relative'
@@ -2220,11 +2220,11 @@ const CartDrawer = ({
                                     setCouponInput(coupon.code);
                                     onApplyCoupon(cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0), coupon.code);
                                   }}
-                                  style={{ 
-                                    background: 'none', 
-                                    border: 'none', 
-                                    color: 'hsl(var(--primary))', 
-                                    fontSize: '0.75rem', 
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'hsl(var(--primary))',
+                                    fontSize: '0.75rem',
                                     fontWeight: 900,
                                     cursor: 'pointer',
                                     padding: '0.25rem'
@@ -2271,7 +2271,7 @@ const CartDrawer = ({
                       </div>
                       {productSavings > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--primary))' }}>
-                          <span>Product Discount</span>
+                          <span>Your Total Savings</span>
                           <span>-₹{productSavings}</span>
                         </div>
                       )}
@@ -2306,10 +2306,10 @@ const CartDrawer = ({
                     <button
                       disabled={isCheckingOut}
                       onClick={() => onCheckout(address, 'cod')}
-                      style={{ 
-                        width: '100%', 
-                        padding: '0.75rem', 
-                        background: '#f8fafc', 
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        background: '#f8fafc',
                         border: '1px solid #e2e8f0',
                         borderRadius: '0.75rem',
                         fontWeight: 700,
@@ -2670,14 +2670,14 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
   };
 
   return (
-    <div style={{ 
-      position: 'relative', 
-      width: '100%', 
+    <div style={{
+      position: 'relative',
+      width: '100%',
       aspectRatio: '16/6',
-      borderRadius: '24px', 
-      overflow: 'hidden', 
-      marginBottom: '2.5rem', 
-      boxShadow: '0 20px 40px rgba(0,0,0,0.06)', 
+      borderRadius: '24px',
+      overflow: 'hidden',
+      marginBottom: '2.5rem',
+      boxShadow: '0 20px 40px rgba(0,0,0,0.06)',
       cursor: currentBanner.link_type !== 'none' ? 'pointer' : 'default',
       background: '#f8fafc'
     }}>
@@ -2700,12 +2700,12 @@ const PromoBanners = ({ banners, loading, onCategoryClick, onProductClick }) => 
       </AnimatePresence>
 
       {banners.length > 1 && (
-        <div style={{ 
-          position: 'absolute', 
-          bottom: '1.25rem', 
-          left: '50%', 
-          transform: 'translateX(-50%)', 
-          display: 'flex', 
+        <div style={{
+          position: 'absolute',
+          bottom: '1.25rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
           gap: '0.6rem',
           background: 'rgba(255,255,255,0.3)',
           backdropFilter: 'blur(8px)',
@@ -2765,9 +2765,9 @@ const SecondaryBanners = ({ onCategoryClick }) => {
             position: 'relative'
           }}
         >
-          <img 
-            src={banner.image} 
-            alt={banner.title} 
+          <img
+            src={banner.image}
+            alt={banner.title}
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             onError={(e) => {
               // Fallback to placeholder if assets aren't moved yet
@@ -2788,7 +2788,7 @@ function App() {
         // Style the status bar (top of the phone)
         await StatusBar.setStyle({ style: Style.Light });
         await StatusBar.setBackgroundColor({ color: '#ffffff' });
-        
+
         // Hide the splash screen once the app is loaded
         await SplashScreen.hide();
       } catch (e) {
@@ -2851,7 +2851,7 @@ function App() {
             headers: { "User-Agent": userAgent }
           });
           const data = await response.json();
-          
+
           if (data && data.address) {
             const addr = data.address;
             const parts = [];
@@ -2859,11 +2859,11 @@ function App() {
             // 1. Specific House/Building
             if (addr.house_number) parts.push(addr.house_number);
             if (addr.building) parts.push(addr.building);
-            
+
             // 2. Road or Locality
             if (addr.road) parts.push(addr.road);
             else if (addr.pedestrian) parts.push(addr.pedestrian);
-            
+
             // 3. Very Local Area (Neighborhood/Suburb)
             const localArea = addr.neighbourhood || addr.suburb || addr.residential || addr.hamlet || addr.village;
             if (localArea) parts.push(localArea);
@@ -2877,7 +2877,7 @@ function App() {
 
             // 6. Postcode (Critical for delivery)
             if (addr.postcode) parts.push(addr.postcode);
-            
+
             const formattedAddress = parts.length > 2 ? parts.join(', ') : (data.display_name.split(',').slice(0, 3).join(','));
             setAddress(formattedAddress);
           } else if (data && data.display_name) {
@@ -2939,7 +2939,7 @@ function App() {
   const [isQuickLoading, setIsQuickLoading] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [isCouponsLoading, setIsCouponsLoading] = useState(false);
-  
+
   // Product Request State
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [requestProductName, setRequestProductName] = useState('');
@@ -3011,7 +3011,7 @@ function App() {
       setIsAuthModalOpen(true);
       return;
     }
-    
+
     setIsAppending(true);
     try {
       const response = await fetch(`${apiBaseUrl}/api/orders/${orderSuccess.id}/append`, {
@@ -3025,9 +3025,9 @@ function App() {
           items: [{ product_id: product.id, quantity: 1 }]
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         Haptics.notification({ type: NotificationType.Success });
         alert(`${product.name} added to your order!`);
@@ -3086,7 +3086,7 @@ function App() {
   const handleApplyCoupon = async (subtotal, codeOverride = null) => {
     const codeToApply = codeOverride || couponInput;
     if (!codeToApply.trim()) return;
-    
+
     if (!token) {
       setCouponError('Please login to apply coupon');
       return;
@@ -3216,10 +3216,10 @@ function App() {
         if (data.status === 'success') {
           const newProducts = data.data.data || [];
           const newTotalPages = data.data.last_page || 1;
-          
+
           setCategoryProducts(newProducts);
           setTotalPages(newTotalPages);
-          
+
           // Update cache
           setProductsCache(prev => ({
             ...prev,
@@ -3245,12 +3245,12 @@ function App() {
   }, [cartItems]);
 
   const addToCart = (product) => {
-    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => { });
 
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       const stock = product.stock_quantity ?? 999;
-      
+
       if (existing) {
         if (existing.quantity >= stock) {
           alert(`Only ${stock} units available in stock.`);
@@ -3258,18 +3258,18 @@ function App() {
         }
         return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      
+
       if (stock <= 0) {
         alert("This item is currently out of stock.");
         return prev;
       }
-      
+
       return [...prev, { ...product, quantity: 1 }];
     });
   };
 
   const updateQuantity = (id, delta) => {
-    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => { });
 
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
@@ -3327,7 +3327,7 @@ function App() {
 
       // Step 2: If COD, we're done
       if (paymentMethod === 'cod') {
-        Haptics.notification({ type: NotificationType.Success }).catch(() => {});
+        Haptics.notification({ type: NotificationType.Success }).catch(() => { });
         setOrderSuccess({ id: orderId, order_number: orderNumber });
         setForgotTimer(120); // Start 2 minute timer
         setCartItems([]);
@@ -3373,7 +3373,7 @@ function App() {
             });
             const verifyData = await verifyRes.json();
             if (verifyRes.ok) {
-              Haptics.notification({ type: NotificationType.Success }).catch(() => {});
+              Haptics.notification({ type: NotificationType.Success }).catch(() => { });
               setOrderSuccess({ id: orderId, order_number: orderNumber });
               setForgotTimer(120);
               setCartItems([]);
@@ -3508,19 +3508,19 @@ function App() {
                   {item.icon}
                 </motion.div>
               ))}
-              <motion.div 
-                initial={{ scale: 0 }} 
-                animate={{ scale: 1 }} 
-                style={{ 
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                style={{
                   position: 'relative',
-                  width: '80px', 
-                  height: '80px', 
-                  borderRadius: '50%', 
-                  background: '#f0fdf4', 
-                  color: '#22c55e', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: '#f0fdf4',
+                  color: '#22c55e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   fontSize: '2.5rem',
                   zIndex: 1,
                   boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2)'
@@ -3538,9 +3538,9 @@ function App() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  style={{ 
-                    background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', 
-                    padding: '1.5rem', 
+                  style={{
+                    background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                    padding: '1.5rem',
                     borderRadius: '1.5rem',
                     border: '1px solid #bbf7d0',
                     marginTop: '1rem',
@@ -3548,13 +3548,13 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                    <div style={{ 
-                      width: '40px', 
-                      height: '40px', 
-                      borderRadius: '50%', 
-                      background: 'white', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
                       color: '#16a34a',
@@ -3571,15 +3571,15 @@ function App() {
 
                   <div style={{ position: 'relative', marginBottom: '1rem' }}>
                     <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#16a34a' }} />
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Search extra items..."
                       value={quickAddSearch}
                       onChange={(e) => setQuickAddSearch(e.target.value)}
-                      style={{ 
-                        width: '100%', 
-                        padding: '0.5rem 1rem 0.5rem 2.25rem', 
-                        borderRadius: '2rem', 
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 1rem 0.5rem 2.25rem',
+                        borderRadius: '2rem',
                         border: '1px solid #bbf7d0',
                         fontSize: '0.8rem',
                         outline: 'none',
@@ -3590,21 +3590,21 @@ function App() {
 
                   <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', paddingLeft: '0.25rem', minHeight: '130px' }} className="no-scrollbar">
                     {isQuickLoading ? (
-                      [1,2,3].map(i => (
+                      [1, 2, 3].map(i => (
                         <div key={i} className="skeleton" style={{ minWidth: '100px', height: '120px', borderRadius: '1rem' }} />
                       ))
                     ) : quickAddProducts.length > 0 ? (
                       quickAddProducts.map(product => {
                         const imgUrl = product.primary_image ? `${apiBaseUrl}/storage/${product.primary_image.image_path}` : product.image;
                         return (
-                          <div 
+                          <div
                             key={product.id}
                             onClick={() => handleQuickAdd(product)}
-                            style={{ 
-                              minWidth: '100px', 
-                              background: 'white', 
-                              padding: '0.75rem', 
-                              borderRadius: '1rem', 
+                            style={{
+                              minWidth: '100px',
+                              background: 'white',
+                              padding: '0.75rem',
+                              borderRadius: '1rem',
                               boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
                               cursor: 'pointer',
                               position: 'relative',
@@ -3613,10 +3613,10 @@ function App() {
                               alignItems: 'center'
                             }}
                           >
-                            <img 
-                              src={imgUrl} 
-                              alt={product.name} 
-                              style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.5rem' }} 
+                            <img
+                              src={imgUrl}
+                              alt={product.name}
+                              style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.5rem' }}
                               onError={(e) => e.target.src = 'https://placehold.co/100x100?text=Product'}
                             />
                             <div style={{ fontSize: '0.7rem', fontWeight: 700, width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>{product.name}</div>
@@ -3665,12 +3665,12 @@ function App() {
               </div>
               <button
                 onClick={() => setSearchQuery('')}
-                style={{ 
-                  color: 'hsl(var(--primary))', 
-                  fontWeight: 800, 
-                  fontSize: '0.85rem', 
-                  background: 'hsl(var(--primary) / 0.1)', 
-                  padding: '0.6rem 1.25rem', 
+                style={{
+                  color: 'hsl(var(--primary))',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  background: 'hsl(var(--primary) / 0.1)',
+                  padding: '0.6rem 1.25rem',
                   borderRadius: '2rem',
                   border: 'none',
                   textTransform: 'uppercase',
@@ -3712,7 +3712,7 @@ function App() {
                     ))}
                   </div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{ background: '#f8fafc', padding: '3rem 2rem', borderRadius: '2rem', marginBottom: '3rem', border: '1px solid #e2e8f0', textAlign: 'center' }}
@@ -3722,19 +3722,19 @@ function App() {
                     </div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.5rem' }}>No exact matches for "{searchQuery}"</h3>
                     <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Don't worry, we've found some alternatives for you below.</p>
-                    
+
                     <button
                       onClick={() => {
                         setRequestProductName(searchQuery);
                         setIsRequestModalOpen(true);
                       }}
-                      style={{ 
-                        background: 'white', 
-                        color: 'hsl(var(--primary))', 
-                        border: '1.5px solid hsl(var(--primary))', 
-                        padding: '0.75rem 1.5rem', 
-                        borderRadius: '1rem', 
-                        fontWeight: 800, 
+                      style={{
+                        background: 'white',
+                        color: 'hsl(var(--primary))',
+                        border: '1.5px solid hsl(var(--primary))',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '1rem',
+                        fontWeight: 800,
                         fontSize: '0.9rem',
                         cursor: 'pointer'
                       }}
@@ -3821,9 +3821,9 @@ function App() {
           <>
             {!isMobile && (
               <>
-                <PromoBanners 
-                  banners={banners} 
-                  loading={bannersLoading} 
+                <PromoBanners
+                  banners={banners}
+                  loading={bannersLoading}
                   onCategoryClick={setSelectedCategoryId}
                   onProductClick={(id) => {
                     const fetchProdDetails = async () => {
@@ -3856,47 +3856,47 @@ function App() {
                   justifyItems: 'center',
                   padding: '1rem 0 3rem',
                 }}>
-                {loading ? (
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: isMobile ? '1rem' : '2rem', 
-                    overflowX: 'auto', 
-                    padding: '0.5rem 0',
-                    scrollbarWidth: 'none'
-                  }}>
-                    {[...Array(8)].map((_, i) => <CategorySkeleton key={i} />)}
-                  </div>
-                ) : categories.map(cat => (
-                  <FastCategoryItem
-                    key={cat.id}
-                    id={cat.id}
-                    name={cat.name}
-                    icon={cat.icon}
-                    isActive={selectedCategoryId === cat.id}
-                    onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
-                  />
-                ))}
-              </div>
-            </section>
+                  {loading ? (
+                    <div style={{
+                      display: 'flex',
+                      gap: isMobile ? '1rem' : '2rem',
+                      overflowX: 'auto',
+                      padding: '0.5rem 0',
+                      scrollbarWidth: 'none'
+                    }}>
+                      {[...Array(8)].map((_, i) => <CategorySkeleton key={i} />)}
+                    </div>
+                  ) : categories.map(cat => (
+                    <FastCategoryItem
+                      key={cat.id}
+                      id={cat.id}
+                      name={cat.name}
+                      icon={cat.icon}
+                      isActive={selectedCategoryId === cat.id}
+                      onClick={(id) => setSelectedCategoryId(prev => prev === id ? null : id)}
+                    />
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* Featured Products Section */}
             <section ref={productsSectionRef} style={{ scrollMarginTop: '100px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                 {isMobile && selectedCategoryId && (
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedCategoryId(null);
                       setSelectedSubCategoryId(null);
                     }}
-                    style={{ 
-                      background: '#f0f0f0', 
-                      border: 'none', 
-                      borderRadius: '50%', 
-                      width: '32px', 
-                      height: '32px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    style={{
+                      background: '#f0f0f0',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer'
                     }}
@@ -3910,11 +3910,11 @@ function App() {
                 {!selectedCategoryId && <a href="#" style={{ color: 'hsl(var(--primary))', fontWeight: 600, fontSize: '0.9rem' }}>View All</a>}
               </div>
               {loading || isCategoryLoading ? (
-                <div className="grid" style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', 
-                  gap: '1.5rem', 
-                  width: '100%' 
+                <div className="grid" style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: '1.5rem',
+                  width: '100%'
                 }}>
                   {[...Array(8)].map((_, i) => <ProductSkeleton key={i} />)}
                 </div>
@@ -4048,17 +4048,17 @@ function App() {
 
                       {/* Pagination Controls */}
                       {selectedCategoryId && totalPages > 1 && (
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'center', 
-                          alignItems: 'center', 
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
                           flexWrap: 'wrap',
-                          gap: '0.75rem', 
+                          gap: '0.75rem',
                           marginTop: '4rem',
                           padding: '1rem',
                           borderTop: '1px solid #eee'
                         }}>
-                          <button 
+                          <button
                             disabled={categoryPage === 1}
                             onClick={() => {
                               setCategoryPage(prev => prev - 1);
@@ -4078,7 +4078,7 @@ function App() {
                           >
                             Previous
                           </button>
-                          
+
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             {[...Array(totalPages)].map((_, i) => (
                               <button
@@ -4106,7 +4106,7 @@ function App() {
                             ))}
                           </div>
 
-                          <button 
+                          <button
                             disabled={categoryPage === totalPages}
                             onClick={() => {
                               setCategoryPage(prev => prev + 1);
@@ -4139,7 +4139,7 @@ function App() {
 
       <AnimatePresence>
         {showSupport && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: '100%' }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
@@ -4153,8 +4153,8 @@ function App() {
           >
             <div className="container" style={{ maxWidth: '600px', padding: '2rem 1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                <button 
-                  onClick={() => setShowSupport(false)} 
+                <button
+                  onClick={() => setShowSupport(false)}
                   style={{ background: 'hsl(var(--muted))', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 >
                   <ArrowLeft size={20} />
@@ -4162,10 +4162,10 @@ function App() {
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.5px' }}>Support Center</h1>
               </div>
 
-              <div style={{ 
-                background: 'linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%)', 
-                padding: '2.5rem 2rem', 
-                borderRadius: '2rem', 
+              <div style={{
+                background: 'linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%)',
+                padding: '2.5rem 2rem',
+                borderRadius: '2rem',
                 textAlign: 'center',
                 marginBottom: '3rem',
                 border: '1px solid hsl(var(--primary) / 0.1)'
@@ -4180,9 +4180,9 @@ function App() {
                 Quick Contact
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '3.5rem' }}>
-                <button 
+                <button
                   onClick={() => window.open('https://wa.me/918381831848', '_blank')}
-                  style={{ 
+                  style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
                     padding: '1.75rem 1rem', borderRadius: '1.5rem', background: '#25D366', color: 'white',
                     border: 'none', fontWeight: 800, fontSize: '0.95rem',
@@ -4192,9 +4192,9 @@ function App() {
                   <Phone size={28} />
                   WhatsApp
                 </button>
-                <button 
+                <button
                   onClick={() => window.location.href = 'tel:+918381831848'}
-                  style={{ 
+                  style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
                     padding: '1.75rem 1rem', borderRadius: '1.5rem', background: 'hsl(var(--primary))', color: 'white',
                     border: 'none', fontWeight: 800, fontSize: '0.95rem',
@@ -4258,12 +4258,12 @@ function App() {
 
       {isRequestModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             style={{ background: 'white', padding: '2rem', borderRadius: '2rem', width: '100%', maxWidth: '400px', position: 'relative' }}
           >
-            <button 
+            <button
               onClick={() => setIsRequestModalOpen(false)}
               style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#94a3b8' }}
             >
@@ -4271,11 +4271,11 @@ function App() {
             </button>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Request a Product</h2>
             <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Tell us what you're looking for and we'll try to add it to our store.</p>
-            
+
             <form onSubmit={handleRequestProduct}>
               <div style={{ marginBottom: '1.25rem' }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>Product Name</label>
-                <input 
+                <input
                   type="text"
                   required
                   value={requestProductName}
@@ -4286,14 +4286,14 @@ function App() {
               </div>
               <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>Any specific details? (Optional)</label>
-                <textarea 
+                <textarea
                   value={requestDescription}
                   onChange={(e) => setRequestDescription(e.target.value)}
                   placeholder="Brand, size, or any other details..."
                   style={{ width: '100%', padding: '1rem', borderRadius: '1rem', border: '1px solid #e2e8f0', fontSize: '1rem', minHeight: '100px' }}
                 />
               </div>
-              <button 
+              <button
                 type="submit"
                 disabled={isRequesting}
                 className="btn btn-primary"
