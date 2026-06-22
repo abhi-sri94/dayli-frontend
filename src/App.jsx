@@ -2085,57 +2085,6 @@ const CartDrawer = ({
                     })()}
                   </div>
 
-                  {/* Delivery Instructions */}
-                  <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid rgba(0,0,0,0.05)', marginTop: '-0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                      <span style={{ fontSize: '0.95rem' }}>🚚</span>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 800 }}>Delivery Instructions</label>
-                    </div>
-                    <textarea
-                      value={orderNotes}
-                      onChange={(e) => setOrderNotes(e.target.value)}
-                      placeholder="Add instructions (e.g. Leave at gate, Don't ring bell)..."
-                      style={{ width: '100%', background: 'none', border: 'none', fontSize: '0.85rem', outline: 'none', resize: 'none', color: 'hsl(var(--foreground))' }}
-                      rows={2}
-                    />
-                    
-                    {/* Quick helper pills */}
-                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed rgba(0,0,0,0.06)' }}>
-                      {[
-                        { label: "🔕 Don't ring", text: "Don't ring the bell" },
-                        { label: "🚪 Leave at door", text: "Leave at door" },
-                        { label: "📞 Call me", text: "Call on arrival" },
-                        { label: "📦 Contactless", text: "Contactless delivery" }
-                      ].map(pill => (
-                        <button
-                          key={pill.label}
-                          type="button"
-                          onClick={() => {
-                            setOrderNotes(prev => {
-                              const trimmed = prev.trim();
-                              if (!trimmed) return pill.text;
-                              if (trimmed.toLowerCase().includes(pill.text.toLowerCase())) return prev;
-                              return `${trimmed}, ${pill.text}`;
-                            });
-                          }}
-                          style={{
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '0.5rem',
-                            background: 'white',
-                            border: '1px solid #e2e8f0',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            color: '#475569',
-                            cursor: 'pointer',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                          }}
-                        >
-                          {pill.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {cartItems.map(item => (
                     <div key={item.id} style={{ display: 'flex', gap: '1rem' }}>
                       <img src={item.image} alt={item.name} loading="lazy" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
@@ -2300,6 +2249,57 @@ const CartDrawer = ({
                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>No offers available for this order</div>
                       </div>
                     )}
+                  </div>
+
+                  {/* Delivery Instructions */}
+                  <div style={{ background: 'hsl(var(--muted))', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid rgba(0,0,0,0.05)', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                      <span style={{ fontSize: '0.95rem' }}>🚚</span>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 800 }}>Delivery Instructions</label>
+                    </div>
+                    <textarea
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                      placeholder="Add instructions (e.g. Leave at gate, Don't ring bell)..."
+                      style={{ width: '100%', background: 'none', border: 'none', fontSize: '0.85rem', outline: 'none', resize: 'none', color: 'hsl(var(--foreground))' }}
+                      rows={2}
+                    />
+                    
+                    {/* Quick helper pills */}
+                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed rgba(0,0,0,0.06)' }}>
+                      {[
+                        { label: "🔕 Don't ring", text: "Don't ring the bell" },
+                        { label: "🚪 Leave at door", text: "Leave at door" },
+                        { label: "📞 Call me", text: "Call on arrival" },
+                        { label: "📦 Contactless", text: "Contactless delivery" }
+                      ].map(pill => (
+                        <button
+                          key={pill.label}
+                          type="button"
+                          onClick={() => {
+                            setOrderNotes(prev => {
+                              const trimmed = prev.trim();
+                              if (!trimmed) return pill.text;
+                              if (trimmed.toLowerCase().includes(pill.text.toLowerCase())) return prev;
+                              return `${trimmed}, ${pill.text}`;
+                            });
+                          }}
+                          style={{
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: '0.5rem',
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            color: '#475569',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                          }}
+                        >
+                          {pill.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
