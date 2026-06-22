@@ -590,7 +590,7 @@ const MobileCartBar = ({ cartItems, onOpenCart, isMobile }) => {
   );
 };
 
-const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder, initialTab = 'profile' }) => {
+const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder, initialTab = 'profile', isMobile = false }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -649,7 +649,7 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
   if (!isOpen) return null;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'stretch', justifyContent: isMobile ? 'center' : 'flex-end' }}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
@@ -658,21 +658,29 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
         style={{ position: 'absolute', inset: 0, background: 'black' }}
       />
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
+        initial={isMobile ? { y: '100%' } : { x: '100%' }}
+        animate={isMobile ? { y: 0 } : { x: 0 }}
+        exit={isMobile ? { y: '100%' } : { x: '100%' }}
+        transition={isMobile ? { type: 'spring', damping: 30, stiffness: 300 } : { type: 'tween', duration: 0.3 }}
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '450px',
-          height: '100%',
+          maxWidth: isMobile ? 'none' : '450px',
+          height: isMobile ? '90vh' : '100%',
           background: 'white',
-          boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+          boxShadow: isMobile ? '0 -10px 30px rgba(0,0,0,0.1)' : '-10px 0 30px rgba(0,0,0,0.1)',
+          borderRadius: isMobile ? '1.5rem 1.5rem 0 0' : 0,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}
       >
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '0.75rem 0.75rem 0' }}>
+            <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#e2e8f0' }} />
+          </div>
+        )}
+        <div style={{ padding: isMobile ? '1rem 1.25rem' : '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Account</h2>
           <button onClick={onClose} style={{ fontSize: '1.5rem' }}>✕</button>
         </div>
@@ -858,7 +866,7 @@ const ProfileModal = ({ isOpen, onClose, user, token, onUpdateUser, onTrackOrder
   );
 };
 
-const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
+const AuthModal = ({ isOpen, onClose, onAuthSuccess, isMobile = false }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [authMethod, setAuthMethod] = useState('email'); // 'email', 'phone'
   const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '', phone_number: '', otp: '' });
@@ -1022,14 +1030,30 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 2500, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? '0' : '1rem' }}>
       <div id="recaptcha-admin"></div>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        style={{ position: 'relative', width: '100%', maxWidth: '400px', background: 'white', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}
+        initial={isMobile ? { y: '100%' } : { scale: 0.9, opacity: 0 }}
+        animate={isMobile ? { y: 0 } : { scale: 1, opacity: 1 }}
+        exit={isMobile ? { y: '100%' } : { scale: 0.9, opacity: 0 }}
+        transition={isMobile ? { type: 'spring', damping: 30, stiffness: 300 } : { type: 'tween', duration: 0.2 }}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '400px',
+          background: 'white',
+          borderRadius: isMobile ? '1.5rem 1.5rem 0 0' : '1.5rem',
+          padding: isMobile ? '1.5rem 1.5rem calc(env(safe-area-inset-bottom) + 1.5rem)' : '2rem',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+          overflow: 'hidden'
+        }}
       >
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '-0.75rem 0 1rem 0' }}>
+            <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#e2e8f0' }} />
+          </div>
+        )}
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
         <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           {authMethod === 'email' ? (isLogin ? 'Log in to your account' : 'Join dayli today') : 'Quick login with Phone'}
@@ -1316,7 +1340,7 @@ const FastCategoryItem = ({ id, name, icon, isActive, onClick }) => {
   );
 };
 
-const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => {
+const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate, isMobile = false }) => {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
@@ -1532,7 +1556,7 @@ const ProductDetailModal = ({ product, onClose, quantity, onAdd, onUpdate }) => 
         </div>
 
         {/* Sticky Add to Cart Footer */}
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #f1f5f9', background: 'white' }}>
+        <div style={{ padding: isMobile ? '1rem 1.5rem calc(env(safe-area-inset-bottom) + 1rem)' : '1rem 1.5rem', borderTop: '1px solid #f1f5f9', background: 'white' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
             <div>
               <span style={{ fontSize: '1.3rem', fontWeight: 900 }}>₹{price}</span>
@@ -1771,7 +1795,8 @@ const CartDrawer = ({
   couponError,
   isApplyingCoupon,
   availableCoupons = [],
-  isCouponsLoading = false
+  isCouponsLoading = false,
+  isMobile = false
 }) => {
   const [savedAddresses, setSavedAddresses] = useState(() => {
     const saved = localStorage.getItem('dayli_saved_addresses');
@@ -1791,33 +1816,42 @@ const CartDrawer = ({
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            style={{ position: 'fixed', inset: 0, background: 'black', zIndex: 100 }}
+            style={{ position: 'fixed', inset: 0, background: 'black', zIndex: 1500 }}
           />
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={isMobile ? { y: '100%' } : { x: '100%' }}
+            animate={isMobile ? { y: 0 } : { x: 0 }}
+            exit={isMobile ? { y: '100%' } : { x: '100%' }}
+            transition={isMobile ? { type: 'spring', damping: 30, stiffness: 300 } : { type: 'tween', duration: 0.3 }}
             style={{
               position: 'fixed',
-              top: 0,
-              right: 0,
+              top: isMobile ? 'auto' : 0,
               bottom: 0,
+              right: 0,
+              left: isMobile ? 0 : 'auto',
               width: '100%',
-              maxWidth: '400px',
+              maxWidth: isMobile ? 'none' : '400px',
+              height: isMobile ? '90vh' : '100%',
               background: 'white',
-              zIndex: 101,
-              boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+              zIndex: 1501,
+              boxShadow: isMobile ? '0 -10px 30px rgba(0,0,0,0.1)' : '-10px 0 30px rgba(0,0,0,0.1)',
+              borderRadius: isMobile ? '1.5rem 1.5rem 0 0' : 0,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden'
             }}
           >
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {isMobile && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '0.75rem 0.75rem 0' }}>
+                <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#e2e8f0' }} />
+              </div>
+            )}
+            <div style={{ padding: isMobile ? '1rem 1.25rem' : '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontSize: '1.25rem' }}>My Cart</h2>
               <button onClick={onClose} style={{ fontSize: '1.5rem' }}>✕</button>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '1rem' : '1.5rem' }}>
               {cartItems.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -2227,7 +2261,7 @@ const CartDrawer = ({
               const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
 
               return (
-                <div style={{ padding: '1rem', borderTop: '1px solid #eee', background: 'white' }}>
+                <div style={{ padding: isMobile ? '1rem 1rem calc(env(safe-area-inset-bottom) + 1rem)' : '1rem', borderTop: '1px solid #eee', background: 'white' }}>
                   <div style={{ marginBottom: '0.75rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.5rem', color: '#1a1a1a' }}>Bill Summary</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -3412,16 +3446,19 @@ function App() {
         isMobile={isMobile}
       />
 
-      <MobileCartBar
-        cartItems={cartItems}
-        onOpenCart={() => setIsCartOpen(true)}
-        isMobile={isMobile}
-      />
+      {!isCartOpen && !isProfileModalOpen && !isAuthModalOpen && !selectedProduct && (
+        <MobileCartBar
+          cartItems={cartItems}
+          onOpenCart={() => setIsCartOpen(true)}
+          isMobile={isMobile}
+        />
+      )}
 
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        isMobile={isMobile}
       />
 
       <ProfileModal
@@ -3439,9 +3476,10 @@ function App() {
           window.history.pushState({}, '', `?orderNumber=${orderNumber}`);
         }}
         initialTab={profileModalTab}
+        isMobile={isMobile}
       />
 
-      <main className="container" style={{ paddingTop: '1rem', paddingBottom: '4rem' }}>
+      <main className="container" style={{ paddingTop: '1rem', paddingBottom: cartItems.length > 0 && isMobile ? '120px' : '4rem' }}>
         {trackingOrderNumber ? (
           <OrderStatus
             orderNumber={trackingOrderNumber}
@@ -3874,7 +3912,7 @@ function App() {
               {loading || isCategoryLoading ? (
                 <div className="grid" style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))', 
+                  gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', 
                   gap: '1.5rem', 
                   width: '100%' 
                 }}>
@@ -3976,7 +4014,7 @@ function App() {
                         className="grid"
                         style={{
                           display: 'grid',
-                          gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(150px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))',
+                          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))',
                           gap: '1.5rem',
                           width: '100%',
                         }}
@@ -4215,6 +4253,7 @@ function App() {
         isApplyingCoupon={isApplyingCoupon}
         availableCoupons={availableCoupons}
         isCouponsLoading={isCouponsLoading}
+        isMobile={isMobile}
       />
 
       {isRequestModalOpen && (
@@ -4274,6 +4313,7 @@ function App() {
           quantity={cartItems.find(item => item.id === selectedProduct.id)?.quantity || 0}
           onAdd={(p) => { addToCart(p); }}
           onUpdate={updateQuantity}
+          isMobile={isMobile}
         />
       )}
 
